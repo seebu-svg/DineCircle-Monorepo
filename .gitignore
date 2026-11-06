@@ -1,0 +1,58 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Build outputs
+build/
+dist/
+*.apk
+*.aab
+*.ipa
+
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary files
+tmp-live/
+.tmp/
+.temp/
+
+# QA and testing artifacts (root level)
+.qa/
+.qa_live/
+
+# Supabase CLI
+.supabase-cli-home/
+supabase/.temp/
+
+# Flutter/Dart common patterns
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+*.g.dart
+*.freezed.dart
+
+# Local config files with secrets
+dart-defines.json
+key.properties
