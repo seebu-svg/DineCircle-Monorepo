@@ -140,8 +140,8 @@ class PayoutRecord {
 
 /// Account-wide performance (`GET /partner/analytics`).
 ///
-/// The endpoint is not venue-scoped — it covers every venue the account
-/// operates — so the screen labels it as such instead of implying it followed
+/// The endpoint is not venue-scoped, it covers every venue the account
+/// operates, so the screen labels it as such instead of implying it followed
 /// the venue switcher.
 class AnalyticsSnapshot {
   const AnalyticsSnapshot({

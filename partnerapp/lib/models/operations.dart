@@ -160,8 +160,8 @@ enum BookingStatus {
 
 /// A sold seat bundle for a dining experience.
 ///
-/// Guest dietary requirements are not part of this payload — the platform does
-/// not expose them to venues yet — so the detail sheet says so rather than
+/// Guest dietary requirements are not part of this payload, the platform does
+/// not expose them to venues yet, so the detail sheet says so rather than
 /// implying the data is missing by accident.
 class PartnerBooking {
   const PartnerBooking({
@@ -217,6 +217,20 @@ class PartnerBooking {
       '$seats seat${seats == 1 ? '' : 's'} · ${totalAmount.toStringAsFixed(2)}';
 }
 
+/// Parses the hourly trend array from the dashboard JSON.
+///
+/// An older server that does not emit `trend` yields an empty list, so the
+/// home timeline simply does not render — it never fabricates bars.
+List<HourlyTrend> _parseTrend(Object? raw) {
+  if (raw is! List) return const [];
+  return raw
+      .whereType<Map<String, dynamic>>()
+      .map(
+        (e) => HourlyTrend(hour: asInt(e['hour']), count: asInt(e['count'])),
+      )
+      .toList();
+}
+
 /// Everything the operational home needs, from one request.
 class DashboardSnapshot {
   const DashboardSnapshot({
@@ -267,6 +281,9 @@ class DashboardSnapshot {
         capacity: asInt(today['capacity']),
         tables: asInt(today['tables']),
         occupancy: asDouble(today['occupancy']),
+        trend: _parseTrend(today['trend']),
+        yesterdayCovers: asInt(today['yesterdayCovers']),
+        nextBookingAt: asDate(today['nextBookingAt']),
       ),
       events: ExperienceSummary(
         upcoming: asInt(events['upcoming']),
@@ -291,7 +308,7 @@ class DashboardSnapshot {
       ),
       unreadNotifications: asInt(asMap(json['notifications'])['unread']),
       // An older server may omit `scans` entirely. That is "not measured",
-      // which must read differently from a real zero — never fabricate 0.
+      // which must read differently from a real zero, never fabricate 0.
       scansAvailable: json['scans'] is Map,
       fetchedAt: DateTime.now(),
     );
@@ -360,7 +377,7 @@ class ReservationCounters {
 
   /// Bookings the venue still expects to serve today: every status except a
   /// cancellation or a no-show. This is what the Home "Reservations" KPI
-  /// shows — [total] would count bookings that never happened.
+  /// shows: [total] would count bookings that never happened.
   int get booked => pending + confirmed + seated + completed;
 }
 
@@ -373,6 +390,9 @@ class TodayService {
     required this.capacity,
     required this.tables,
     required this.occupancy,
+    this.trend = const [],
+    this.yesterdayCovers = 0,
+    this.nextBookingAt,
   });
 
   final String date;
@@ -383,7 +403,27 @@ class TodayService {
   final int tables;
   final double occupancy;
 
+  /// Hourly reservation counts for today, used by the home timeline widget.
+  final List<HourlyTrend> trend;
+
+  /// Yesterday's total covers, so the KPI card can show a trend arrow.
+  final int yesterdayCovers;
+
+  /// The next upcoming confirmed/pending reservation, or null if none.
+  final DateTime? nextBookingAt;
+
   bool get hasCapacityConfigured => capacity > 0;
+
+  /// Whether today is ahead of (or behind) yesterday by at least one cover.
+  int get coversDelta => covers - yesterdayCovers;
+}
+
+/// One bar of the hourly reservation trend chart.
+class HourlyTrend {
+  const HourlyTrend({required this.hour, required this.count});
+
+  final int hour;
+  final int count;
 }
 
 class ExperienceSummary {

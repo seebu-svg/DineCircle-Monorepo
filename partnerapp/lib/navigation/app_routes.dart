@@ -6,6 +6,7 @@ import '../screens/business/business_section_screen.dart';
 import '../screens/home/home_screen.dart';
 import '../screens/experiences/experiences_section_screen.dart';
 import '../screens/inbox/inbox_section_screen.dart';
+import '../screens/onboarding/onboarding_carousel.dart';
 import '../screens/onboarding/registration_wizard.dart';
 import '../screens/onboarding/verification_status_screen.dart';
 import '../screens/service/service_section_screen.dart';
@@ -20,6 +21,7 @@ import '../screens/settings/settings_screen.dart';
 class AppRoute {
   AppRoute._();
 
+  static const String onboarding = '/onboarding';
   static const String login = '/login';
   static const String partnerGate = '/not-a-partner';
   static const String registration = '/register';
@@ -38,8 +40,8 @@ class AppRoute {
   static const String supportNew = '/inbox/support/new';
 
   /// Tab-level entries of the Business section that are promoted to primary
-  /// mobile tabs. They stay *inside* `/business` — one screen, one data
-  /// scope — and only the `?tab=` differs, so shared links keep working.
+  /// mobile tabs. They stay *inside* `/business`, one screen, one data
+  /// scope, and only the `?tab=` differs, so shared links keep working.
   static const String menu = '$business?tab=menu';
   static const String deals = '$business?tab=deals';
   static const String insights = '$business?tab=analytics';
@@ -397,6 +399,7 @@ Map<String, String> routeQuery(BuildContext context) {
 
 /// A single [MaterialApp] route table plus the detail routes that carry ids.
 Map<String, WidgetBuilder> get appRoutes => {
+  AppRoute.onboarding: (_) => const OnboardingCarousel(),
   AppRoute.login: (_) => const LoginScreen(),
   AppRoute.partnerGate: (_) => const PartnerGateScreen(),
   AppRoute.registration: (_) => const RegistrationWizard(),
@@ -414,7 +417,7 @@ Map<String, WidgetBuilder> get appRoutes => {
 ///
 /// The named [appRoutes] table only matches the bare path, so without this the
 /// Navigator throws "could not find a generator" the moment a tab query is
-/// pushed — the whole point of the web build's shareable URLs. The generated
+/// pushed, the whole point of the web build's shareable URLs. The generated
 /// route keeps the *original* [RouteSettings] so each section screen can still
 /// read its active tab back out of the name via [routeQuery].
 Route<dynamic>? generateRoute(RouteSettings settings) {
@@ -432,7 +435,7 @@ Route<dynamic>? generateRoute(RouteSettings settings) {
 
 /// A short fade-through page transition (180ms) shared by every generated
 /// route, so tab switches read as one continuous surface rather than a hard
-/// slide. Honors `MediaQuery.disableAnimations` — users who ask for reduced
+/// slide. Honors `MediaQuery.disableAnimations`, users who ask for reduced
 /// motion get an instant swap, no fades at all.
 class _FadeThroughRoute extends PageRouteBuilder<dynamic> {
   _FadeThroughRoute(WidgetBuilder builder, RouteSettings settings)
@@ -449,7 +452,7 @@ class _FadeThroughRoute extends PageRouteBuilder<dynamic> {
           }
           // Incoming page fades in over the back half of the transition while
           // the outgoing page (whose `secondaryAnimation` drives it) fades out
-          // over the front half — the Material "fade through" pattern.
+          // over the front half, the Material "fade through" pattern.
           final incoming = CurvedAnimation(
             parent: animation,
             curve: const Interval(0.35, 1, curve: Curves.easeOut),

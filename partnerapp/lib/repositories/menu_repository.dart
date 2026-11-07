@@ -4,7 +4,7 @@ import '../models/catalog.dart';
 /// Menu sections/items, the 86-list and priced packages.
 ///
 /// Packages come from the account-wide `/partner/menus` surface (special menus),
-/// which supports create and list only — there is no edit or delete route, so
+/// which supports create and list only, there is no edit or delete route, so
 /// the screen offers neither.
 class MenuRepository {
   MenuRepository(this._api);

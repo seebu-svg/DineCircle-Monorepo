@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
+import '../theme/app_spacing.dart';
 import '../theme/app_text_styles.dart';
 
 /// Brand assets used across the partner app.
@@ -137,13 +138,20 @@ class BrandMark extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        const BrandBadge(height: 28),
-        const SizedBox(width: 8),
-        const BrandWordmark(height: 18),
-      ],
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+        color: AppColors.surface.withValues(alpha: 0.5),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const BrandBadge(height: 30),
+          const SizedBox(width: 8),
+          const BrandWordmark(height: 18),
+        ],
+      ),
     );
   }
 }

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/comms.dart';
 import '../../models/deals.dart';
 import '../../models/experience.dart';
+import '../../models/operations.dart';
 import '../../navigation/app_routes.dart';
 import '../../providers/module_providers.dart';
 import '../../theme/app_colors.dart';
@@ -80,12 +81,144 @@ class SectionLink extends StatelessWidget {
   }
 }
 
+/// ─── Revenue & performance ─────────────────────────────────────────────────
+
+/// Month-to-date financial summary shown between the KPI grid and Quick
+/// Actions.
+///
+/// All amounts are in PKR (the currency the whole partner surface quotes).
+/// Taps through to Business > Earnings for the full breakdown.
+class RevenueStrip extends StatelessWidget {
+  const RevenueStrip({super.key, required this.earnings});
+
+  final MonthEarnings earnings;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SectionLabel(
+          title: 'THIS MONTH',
+          trailing: SectionLink(
+            label: 'View earnings',
+            onPressed: () => Navigator.of(
+              context,
+            ).pushReplacementNamed('${AppRoute.business}?tab=analytics'),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        Container(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                AppColors.gold.withValues(alpha: 0.10),
+                AppColors.surface,
+                AppColors.surfaceElevated,
+              ],
+            ),
+            borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+            border: Border.all(color: AppColors.border),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: _RevenueCell(
+                  label: 'Gross',
+                  value: formatMoney(earnings.gross, currency: 'PKR', decimals: 0),
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              _RevenueDivider(),
+              Expanded(
+                child: _RevenueCell(
+                  label: 'Net',
+                  value: formatMoney(earnings.net, currency: 'PKR', decimals: 0),
+                  color: AppColors.success,
+                ),
+              ),
+              _RevenueDivider(),
+              Expanded(
+                child: _RevenueCell(
+                  label: 'Refunds',
+                  value: formatMoney(
+                    earnings.refunds,
+                    currency: 'PKR',
+                    decimals: 0,
+                  ),
+                  color: AppColors.danger,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _RevenueCell extends StatelessWidget {
+  const _RevenueCell({
+    required this.label,
+    required this.value,
+    required this.color,
+  });
+
+  final String label;
+  final String value;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label.toUpperCase(),
+          style: AppTextStyles.labelSmall.copyWith(
+            color: AppColors.textTertiary,
+            fontSize: 9,
+            letterSpacing: 0.8,
+          ),
+        ),
+        const SizedBox(height: 4),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Text(
+            value,
+            style: AppTextStyles.numericMedium.copyWith(
+              color: color,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _RevenueDivider extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 1,
+      height: 28,
+      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+      color: AppColors.border,
+    );
+  }
+}
+
 /// ─── Active deals ──────────────────────────────────────────────────────────
 
 /// The live promotions a guest can redeem right now.
 ///
-/// Only `isLive` rows are shown — an active-but-not-yet-started or expired deal
-/// is not something the desk can tell a guest about — and the rail caps at
+/// Only `isLive` rows are shown, an active-but-not-yet-started or expired deal
+/// is not something the desk can tell a guest about, and the rail caps at
 /// three so Home stays a dashboard rather than a deal list.
 class ActiveDealsRail extends ConsumerWidget {
   const ActiveDealsRail({super.key, required this.venueId});
@@ -127,7 +260,8 @@ class ActiveDealsRail extends ConsumerWidget {
                 icon: Icons.local_offer_outlined,
                 title: 'No live deal right now',
                 message: 'Publish an offer and it appears here and in the '
-                    'Customer App immediately.',
+                    'Customer App immediately. Guests discover deals by '
+                    'scanning your QR code or browsing nearby.',
                 actionLabel: 'Create a deal',
                 onAction: () => Navigator.of(context).pushReplacementNamed(
                   '${AppRoute.business}?tab=deals&create=1',
@@ -275,7 +409,7 @@ class _DealCard extends StatelessWidget {
 /// The next two dining experiences this venue is hosting.
 ///
 /// The partner event feed is account-wide, so the list is filtered to the
-/// active venue and to events that are still ahead of the clock — a venue that
+/// active venue and to events that are still ahead of the clock, a venue that
 /// hosts nothing gets an honest empty state instead of another venue's dinner.
 class UpcomingExperiencesStrip extends ConsumerWidget {
   const UpcomingExperiencesStrip({super.key, required this.venueId});
@@ -322,8 +456,9 @@ class UpcomingExperiencesStrip extends ConsumerWidget {
               return const SectionEmpty(
                 icon: Icons.auto_awesome_outlined,
                 title: 'No upcoming experience',
-                message: 'Approve a host request or create your own dinner to '
-                    'fill this slot.',
+                message: 'Approve a host request or create your own dining '
+                    'event to fill this slot. Experiences drive evening '
+                    'traffic and build your venue community.',
               );
             }
             final visible = upcoming.take(2).toList();
@@ -453,8 +588,9 @@ class RecentActivitySection extends ConsumerWidget {
               return SectionEmpty(
                 icon: Icons.notifications_none,
                 title: 'No recent activity',
-                message: 'Bookings, deals and guest actions show up here as '
-                    'they happen.',
+                message: 'Bookings, deal redemptions, guest reviews and host '
+                    'requests show up here as they happen. Share your QR code '
+                    'to start receiving reservations.',
                 actionLabel: 'Open inbox',
                 onAction: openInbox,
               );

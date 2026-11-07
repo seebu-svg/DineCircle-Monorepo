@@ -410,7 +410,7 @@ class BarTrendChart extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 /// A tiny inline chart (≈ 80 × 28) suitable for embedding inside a [StatTile]
-/// or [MetricRow]. No axes, no grid — just the line.
+/// or [MetricRow]. No axes, no grid, just the line.
 class Sparkline extends StatelessWidget {
   const Sparkline({
     super.key,

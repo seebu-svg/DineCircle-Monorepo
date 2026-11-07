@@ -20,7 +20,7 @@ Future<void> main() async {
       const venue = Venue(
         id: 'ven_123',
         name:
-            'Sea & Salt — The Restaurant and Café with a Beautifully Long Name',
+            'Sea & Salt: The Restaurant and Café with a Beautifully Long Name',
         cuisines: ['Mediterranean', 'Contemporary'],
       );
       runApp(

@@ -19,10 +19,10 @@ class ApiFieldIssue {
 ///
 /// [statusCode] carries the HTTP status where one exists, and the synthetic
 /// codes the transport failures map to (`0` = no connection, `408` = timeout).
-/// The status is *meaningful* on the partner surface — `403` means the role is
+/// The status is *meaningful* on the partner surface: `403` means the role is
 /// too low or the venue belongs to someone else, `404` means the venue id is
 /// unknown, `409` means the state moved under the operator, `422` means a
-/// referenced row does not belong to this venue — so screens branch on it
+/// referenced row does not belong to this venue, so screens branch on it
 /// instead of printing a generic toast.
 class ApiException implements Exception {
   ApiException({

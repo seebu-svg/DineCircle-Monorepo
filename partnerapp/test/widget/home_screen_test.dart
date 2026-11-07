@@ -317,7 +317,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Bookings that will be served today — cancellations and no-shows are
+      // Bookings that will be served today, cancellations and no-shows are
       // not reservations.
       expect(find.text('10'), findsOneWidget);
       expect(find.text('2 to confirm'), findsOneWidget);
@@ -336,7 +336,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('—'), findsOneWidget);
+      expect(find.text(': '), findsOneWidget);
       expect(find.text('Unavailable'), findsOneWidget);
     });
   });
@@ -370,7 +370,7 @@ void main() {
       expect(find.text('Finished Guest'), findsNothing);
       expect(find.text('No Show Guest'), findsNothing);
 
-      // Two active rows did not fit — the desk is told there are more.
+      // Two active rows did not fit, the desk is told there are more.
       expect(find.text('2 more bookings today'), findsOneWidget);
 
       final early = tester.getTopLeft(find.text('Early Pending')).dy;

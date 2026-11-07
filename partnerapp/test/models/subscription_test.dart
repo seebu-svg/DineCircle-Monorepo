@@ -106,7 +106,7 @@ void main() {
   group('proFeatures', () {
     test('both plans share one identical feature list', () {
       expect(VenueSubscription.proFeatures, hasLength(7));
-      // No duplicates — the same list renders under both plan cards.
+      // No duplicates, the same list renders under both plan cards.
       expect(VenueSubscription.proFeatures.toSet(), hasLength(7));
       for (final f in VenueSubscription.proFeatures) {
         expect(f, isNotEmpty);

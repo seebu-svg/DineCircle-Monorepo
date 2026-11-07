@@ -1,4 +1,4 @@
-/// Guest-facing links — the payloads the venue's printed QR code encodes.
+/// Guest-facing links, the payloads the venue's printed QR code encodes.
 ///
 /// The public web origin is the one the customer app already shares event pages
 /// under (`https://dinecircle.app/events/{id}`), so a venue page follows the

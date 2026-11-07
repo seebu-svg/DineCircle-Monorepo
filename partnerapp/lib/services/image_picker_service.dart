@@ -12,7 +12,7 @@ typedef VenueImagePicker = Future<Uint8List?> Function(
   ImageSourceChoice source,
 );
 
-/// Server ceiling for `POST /partner/restaurants/:id/images` — mirrors
+/// Server ceiling for `POST /partner/restaurants/:id/images`, mirrors
 /// `MAX_VENUE_IMAGE_BYTES` in `server/src/venue_images.ts`.
 const int kMaxVenueImageBytes = 512 * 1024;
 

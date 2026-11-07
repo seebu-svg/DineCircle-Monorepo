@@ -15,7 +15,7 @@ import 'brand.dart';
 ///
 /// Actions are declared as data, not widgets, so the shell can render them
 /// inline when there is room and fold them into an overflow menu on a tight
-/// phone or at large text scale — the action never disappears, only the icon
+/// phone or at large text scale, the action never disappears, only the icon
 /// does.
 class ShellAction {
   const ShellAction({
@@ -115,9 +115,6 @@ class _ShellHeader extends ConsumerWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final selected = ref.watch(venueScopeProvider).valueOrNull?.selected;
-    final overline = selected == null
-        ? null
-        : '${selected.name} · ${selected.myRole.label}';
 
     // A phone at 320dp, or any surface at ~2.0 text scale, cannot fit the
     // switcher plus inline actions without ellipsis-mashing everything; the
@@ -126,61 +123,110 @@ class _ShellHeader extends ConsumerWidget implements PreferredSizeWidget {
     final width = MediaQuery.sizeOf(context).width;
     final textScale = MediaQuery.textScalerOf(context).scale(1);
     final tight = width < 360 || textScale >= 1.8;
+    final showSwitcher = !tight && selected != null;
+
+    // The switcher names the venue on this same row, so the overline carries
+    // only the role rather than printing the venue twice. When the switcher
+    // has yielded (a tight phone) this line is the only place the venue is
+    // named, so it takes the name back.
+    final String? overline;
+    if (selected == null) {
+      overline = null;
+    } else if (showSwitcher) {
+      overline = selected.myRole.label;
+    } else {
+      overline = '${selected.name} · ${selected.myRole.label}';
+    }
+
     // Two lines at 1.5x+ text need more than the one-line 64; the bar grows
     // instead of ellipsis-clipping the title at large scale.
     final headerHeight = textScale >= 1.5 ? 88.0 : 64.0;
 
-    return Material(
-      color: AppColors.bg,
+    return DecoratedBox(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [AppColors.bg, Color(0xFF0F0D12)],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
+      ),
       child: SafeArea(
         bottom: false,
-        child: Container(
-          height: headerHeight,
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-          decoration: const BoxDecoration(
-            border: Border(bottom: BorderSide(color: AppColors.border)),
-          ),
-          child: Row(
-            children: [
-              const BrandMark(),
-              if (!tight) ...[
-                const SizedBox(width: AppSpacing.sm),
-                const Flexible(child: _VenueSwitcher()),
-              ],
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (overline != null)
-                      Text(
-                        overline,
-                        style: AppTextStyles.overline.copyWith(
-                          color: AppColors.textTertiary,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    Text(
-                      title,
-                      style: AppTextStyles.titleMedium,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              height: headerHeight,
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+              child: Row(
+                children: [
+                  const BrandMark(),
+                  if (showSwitcher) ...[
+                    const SizedBox(width: AppSpacing.sm),
+                    const Flexible(child: _VenueSwitcher()),
                   ],
-                ),
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (overline != null)
+                          Text(
+                            overline,
+                            style: AppTextStyles.overline.copyWith(
+                              color: AppColors.textTertiary,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        Text(
+                          title,
+                          style: AppTextStyles.titleMedium.copyWith(
+                            color: AppColors.textPrimary,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (actions.isNotEmpty) ...[
+                    if (tight)
+                      _OverflowActions(actions: actions)
+                    else
+                      for (final action in actions) _ActionButton(action: action),
+                  ],
+                  const _NotificationBell(),
+                  const _AccountMenu(),
+                ],
               ),
-              if (actions.isNotEmpty) ...[
-                if (tight)
-                  _OverflowActions(actions: actions)
-                else
-                  for (final action in actions) _ActionButton(action: action),
-              ],
-              const _NotificationBell(),
-              const _AccountMenu(),
-            ],
-          ),
+            ),
+            // Premium gold gradient accent line.
+            Container(
+              height: 1,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [
+                    Colors.transparent,
+                    AppColors.gold,
+                    AppColors.primary,
+                    AppColors.gold,
+                    Colors.transparent,
+                  ],
+                  stops: [0.0, 0.2, 0.5, 0.8, 1.0],
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.15),
+                    blurRadius: 8,
+                    spreadRadius: 0,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -242,6 +288,9 @@ class _OverflowActions extends StatelessWidget {
 
 /// Venue picker: the account's operated venues plus its role, switching which
 /// rebuilds every venue-scoped provider.
+///
+/// Only a multi-venue account gets a menu. A single venue renders as a plain
+/// label, because a chevron that opens nothing reads as a broken control.
 class _VenueSwitcher extends ConsumerWidget {
   const _VenueSwitcher();
 
@@ -250,10 +299,22 @@ class _VenueSwitcher extends ConsumerWidget {
     final scope = ref.watch(venueScopeProvider).valueOrNull;
     final selected = scope?.selected;
     final venues = scope?.venues ?? const [];
-    if (venues.isEmpty) return const SizedBox.shrink();
+    if (selected == null) return const SizedBox.shrink();
+
+    final label = _VenueLabel(
+      name: selected.name,
+      expandable: venues.length > 1,
+    );
+    if (venues.length < 2) {
+      return KeyedSubtree(
+        key: const ValueKey('shell-venue-label'),
+        child: label,
+      );
+    }
+
     return PopupMenuButton<String>(
+      key: const ValueKey('shell-venue-switcher'),
       tooltip: 'Switch venue',
-      enabled: venues.length > 1,
       offset: const Offset(0, 52),
       onSelected: (id) =>
           ref.read(venueScopeProvider.notifier).select(id),
@@ -261,15 +322,15 @@ class _VenueSwitcher extends ConsumerWidget {
         for (final venue in venues)
           PopupMenuItem<String>(
             value: venue.id,
-            enabled: venue.id != selected?.id,
+            enabled: venue.id != selected.id,
             child: Row(
               children: [
                 Icon(
-                  venue.id == selected?.id
+                  venue.id == selected.id
                       ? Icons.radio_button_checked
                       : Icons.radio_button_unchecked,
                   size: 18,
-                  color: venue.id == selected?.id
+                  color: venue.id == selected.id
                       ? AppColors.primary
                       : AppColors.textTertiary,
                 ),
@@ -290,45 +351,91 @@ class _VenueSwitcher extends ConsumerWidget {
             ),
           ),
       ],
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.storefront, size: 18, color: AppColors.primary),
-            const SizedBox(width: 6),
-            Flexible(
-              child: Text(
-                selected?.name ?? 'Select venue',
-                style: AppTextStyles.titleSmall,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            const Icon(Icons.expand_more, size: 18),
-          ],
+      child: label,
+    );
+  }
+}
+
+/// The name of the venue the desk is currently operating.
+class _VenueLabel extends StatelessWidget {
+  const _VenueLabel({required this.name, required this.expandable});
+
+  final String name;
+
+  /// Whether tapping this opens a venue menu (draws the chevron).
+  final bool expandable;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+        border: Border.all(
+          color: AppColors.primary.withValues(alpha: 0.15),
         ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.storefront_rounded, size: 16, color: AppColors.primary),
+          const SizedBox(width: 6),
+          Flexible(
+            child: Text(
+              name,
+              style: AppTextStyles.titleSmall.copyWith(
+                color: AppColors.textPrimary,
+                fontWeight: FontWeight.w600,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          if (expandable) ...[
+            const SizedBox(width: 4),
+            Icon(
+              Icons.expand_more,
+              size: 16,
+              color: AppColors.textTertiary,
+            ),
+          ],
+        ],
       ),
     );
   }
 }
 
 /// Unread count from the polling badge; taps through to the inbox.
+///
+/// Pushes rather than replaces: the bell is chrome on every screen, so
+/// replacing the current page would leave the operator with nothing to go
+/// back to. Tapping it while the inbox is already open is a no-op instead of
+/// stacking a second inbox.
 class _NotificationBell extends ConsumerWidget {
   const _NotificationBell();
+
+  static const String _inboxRoute = '${AppRoute.inbox}?tab=notifications';
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final unread = ref.watch(notificationBadgeProvider).valueOrNull ?? 0;
     return IconButton(
+      key: const ValueKey('shell-notifications'),
       tooltip: 'Notifications',
-      onPressed: () =>
-          Navigator.of(context).pushReplacementNamed('${AppRoute.inbox}?tab=notifications'),
+      onPressed: () {
+        final current = ModalRoute.of(context)?.settings.name ?? '';
+        if (rootOf(current) == AppRoute.inbox) return;
+        Navigator.of(context).pushNamed(_inboxRoute);
+      },
       icon: Badge(
         isLabelVisible: unread > 0,
-        label: Text(unread > 99 ? '99+' : '$unread'),
+        label: Text(
+          unread > 99 ? '99+' : '$unread',
+          style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700),
+        ),
         backgroundColor: AppColors.danger,
-        child: const Icon(Icons.notifications_none),
+        child: const Icon(Icons.notifications_outlined),
       ),
     );
   }
@@ -346,12 +453,33 @@ class _AccountMenu extends ConsumerWidget {
     return PopupMenuButton<String>(
       tooltip: 'Account',
       offset: const Offset(0, 52),
-      icon: CircleAvatar(
-        radius: 15,
-        backgroundColor: AppColors.surfaceHigh,
-        child: Text(
-          user?.initials ?? '?',
-          style: AppTextStyles.labelMedium,
+      icon: Container(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: const LinearGradient(
+            colors: [AppColors.primary, AppColors.gold],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primary.withValues(alpha: 0.25),
+              blurRadius: 6,
+              spreadRadius: 0,
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.all(2),
+        child: CircleAvatar(
+          radius: 14,
+          backgroundColor: AppColors.surfaceHigh,
+          child: Text(
+            user?.initials ?? '?',
+            style: AppTextStyles.labelMedium.copyWith(
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ),
       ),
       itemBuilder: (context) => [
@@ -414,7 +542,7 @@ class _OfflineStrip extends ConsumerWidget {
           const Icon(Icons.wifi_off, size: 16, color: AppColors.warning),
           const SizedBox(width: AppSpacing.sm),
           Text(
-            'Offline — showing the last data read',
+            'Offline. Showing the last data read',
             style: AppTextStyles.bodySmall.copyWith(color: AppColors.warning),
           ),
         ],

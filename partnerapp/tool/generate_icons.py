@@ -6,7 +6,7 @@
 The source is the official 1254x1254 artwork: one rounded-square badge on a
 light mockup canvas with a soft drop shadow. The badge's bounds are measured
 from the pixels rather than hardcoded, because the shadow band sits right where
-a hardcoded crop would end — leaving it in bakes a pale fringe along the bottom
+a hardcoded crop would end, leaving it in bakes a pale fringe along the bottom
 edge of every icon that ships.
 
 Three masters are derived, all at the badge's own resolution:

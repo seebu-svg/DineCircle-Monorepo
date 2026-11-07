@@ -84,7 +84,7 @@ class ExperienceRepository {
   }
 
   /// Publishes a requested event. The server answers `{ request: { eventId,
-  /// status } }` — a decision receipt, not a re-serialised row — so the inbox
+  /// status } }`,a decision receipt, not a re-serialised row,so the inbox
   /// refetches the list after this instead of splicing a fake object in.
   /// `409` means it was already decided.
   Future<EventDecision> approve(String venueId, String eventId) async {

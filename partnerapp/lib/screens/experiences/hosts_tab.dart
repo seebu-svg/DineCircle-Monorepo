@@ -17,7 +17,7 @@ import '../../widgets/status_chip.dart';
 /// There is no partner "hosts" list on the API; a host is whoever appears on an
 /// event request. Their performance is private to the host relationship, so
 /// `GET /hosts/:id/summary` answers `403` for a venue that only supplied the
-/// space — that is rendered as "numbers not shared", never as an error screen.
+/// space, that is rendered as "numbers not shared", never as an error screen.
 /// Coordination is approve/decline plus notifications; a live chat thread only
 /// exists when this account is itself the event's host.
 class HostsTab extends ConsumerStatefulWidget {

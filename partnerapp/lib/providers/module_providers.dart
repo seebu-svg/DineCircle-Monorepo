@@ -22,7 +22,7 @@ import 'app_providers.dart';
 /// Every list is `autoDispose` + `family` on the arguments that actually change
 /// the payload, so switching venue or date re-reads without a manual refresh and
 /// a stale screen can never show another venue's rows. Mutations go straight to
-/// a repository and then `ref.invalidate` the affected provider — writes are
+/// a repository and then `ref.invalidate` the affected provider, writes are
 /// never optimistic, because the same rows are live in the customer app.
 
 // ── Venue & account ──────────────────────────────────────────────────────────

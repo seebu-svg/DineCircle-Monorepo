@@ -170,7 +170,7 @@ const Map<Capability, PartnerRole> _minimumRole = {
 
 /// Why a control is unavailable, for the tooltip beside a disabled button.
 String capabilityDenial(Capability capability, PartnerRole role) =>
-    '${capability.label} needs the ${_minimumRole[capability]?.label} role — '
+    '${capability.label} needs the ${_minimumRole[capability]?.label} role. '
     'you are ${role.label.toLowerCase()} here.';
 
 extension CapabilityCheck on PartnerRole {
@@ -195,7 +195,7 @@ class RoleGate {
 
   String denial(Capability capability) => capabilityDenial(capability, role);
 
-  /// The venue must be verified before it can sell anything — deals, host
+  /// The venue must be verified before it can sell anything, deals, host
   /// approvals and payouts all hinge on the same server-side flag.
   bool canSell(Venue? venue) => venue?.verified ?? false;
 }

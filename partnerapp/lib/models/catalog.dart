@@ -110,7 +110,7 @@ class MenuSection {
 /// A priced dining package (`special_menus`, created through `/partner/menus`).
 ///
 /// The API supports create and list only, so an existing package is edited by
-/// the platform, not here — the screen says so instead of offering a dead button.
+/// the platform, not here, the screen says so instead of offering a dead button.
 class DiningPackage {
   const DiningPackage({
     required this.id,
@@ -193,7 +193,7 @@ class DiningTable {
   String get zoneLabel => zone.isEmpty ? 'Unzoned' : zone;
 }
 
-/// The public (unauthenticated) menu payload — what guests see after scanning
+/// The public (unauthenticated) menu payload, what guests see after scanning
 /// the QR code. Mirrors `GET /api/public/menu/:id`.
 class PublicMenu {
   const PublicMenu({
@@ -272,7 +272,7 @@ class AvailabilitySlot {
 }
 
 /// The availability response for one day, including whether hours are
-/// configured — an empty day with no hours is a setup problem, not a busy one.
+/// configured, an empty day with no hours is a setup problem, not a busy one.
 class DayAvailability {
   const DayAvailability({
     required this.date,

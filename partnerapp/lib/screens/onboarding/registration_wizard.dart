@@ -539,7 +539,7 @@ class _Review extends StatelessWidget {
             ),
             Expanded(
               child: Text(
-                value.isEmpty ? '—' : value,
+                value.isEmpty ? '-' : value,
                 style: AppTextStyles.bodyMedium,
               ),
             ),

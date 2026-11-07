@@ -6,7 +6,7 @@ import '../theme/app_colors.dart';
 /// Resolves a stored media reference into an absolute URL, or null when it is
 /// not a remote reference at all.
 ///
-/// The server stores uploaded photos as `/public/venue-images/<id>` — relative
+/// The server stores uploaded photos as `/public/venue-images/<id>`, relative
 /// to the API root, so the value survives a host change. `Image.network` needs
 /// an absolute URL, so that prefix is expanded against [AppConfig.apiUrl] here
 /// rather than at each call site.
@@ -21,10 +21,10 @@ String? mediaImageUrl(String? source) {
 /// Image loader for every media value the partner API returns.
 ///
 /// Three shapes arrive in the same string columns:
-///  * `/public/venue-images/<id>` — a photo uploaded through the partner app,
+///  * `/public/venue-images/<id>`, a photo uploaded through the partner app,
 ///    stored relative to the API root and expanded by [mediaImageUrl];
-///  * `http(s)://…` — an external URL;
-///  * anything else — a bundled asset (seeded rows, older records).
+///  * `http(s)://…`, an external URL;
+///  * anything else, a bundled asset (seeded rows, older records).
 ///
 /// Empty and unreadable sources degrade to a branded placeholder instead of
 /// throwing, so a missing photo never blanks a card or a form preview.

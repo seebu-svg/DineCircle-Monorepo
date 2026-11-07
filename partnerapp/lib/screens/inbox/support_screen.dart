@@ -18,7 +18,7 @@ import '../../widgets/status_chip.dart';
 /// Support tickets and moderation cases (`POST /feedback`, `GET /users/me/*`).
 ///
 /// There is no partner-side resolution workflow and no venue refund action, so
-/// the header says plainly that a ticket is the channel — a refund is requested
+/// the header says plainly that a ticket is the channel, a refund is requested
 /// by filing one, not by tapping a button that does not exist. Statuses are
 /// read-only here; support owns the replies.
 class SupportScreen extends ConsumerWidget {
@@ -130,7 +130,7 @@ class _TicketTile extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    t.ticket.isEmpty ? '—' : t.ticket,
+                    t.ticket.isEmpty ? '-' : t.ticket,
                     style: AppTextStyles.labelSmall
                         .copyWith(color: AppColors.textTertiary),
                   ),

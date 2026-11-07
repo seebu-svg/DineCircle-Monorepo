@@ -299,7 +299,7 @@ void main() {
     WidgetsFlutterBinding.ensureInitialized();
   });
 
-  group('Menu tab — rendering', () {
+  group('Menu tab, rendering', () {
     testWidgets('shows sections and items with PKR prices', (tester) async {
       final repo = FakeMenuRepository();
       final sections = [
@@ -389,7 +389,7 @@ void main() {
     });
   });
 
-  group('Menu tab — availability toggle', () {
+  group('Menu tab, availability toggle', () {
     testWidgets('sold-out switch calls setAvailability', (tester) async {
       final repo = FakeMenuRepository();
       final sections = [
@@ -414,7 +414,7 @@ void main() {
     });
   });
 
-  group('Menu tab — section jump chips', () {
+  group('Menu tab, section jump chips', () {
     testWidgets('jump chips render for each section', (tester) async {
       final repo = FakeMenuRepository();
       final sections = [
@@ -433,7 +433,7 @@ void main() {
     });
   });
 
-  group('Menu tab — action buttons', () {
+  group('Menu tab, action buttons', () {
     testWidgets('header shows Preview, Reorder, Section buttons',
         (tester) async {
       final repo = FakeMenuRepository();
@@ -476,7 +476,7 @@ void main() {
     });
   });
 
-  group('Menu tab — position badges', () {
+  group('Menu tab, position badges', () {
     testWidgets('items show numbered position badges', (tester) async {
       final repo = FakeMenuRepository();
       final sections = [

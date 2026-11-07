@@ -102,8 +102,8 @@ enum MenuStyle {
 
 /// An experience the venue operates (`GET /partner/events`).
 ///
-/// The list payload is the only read surface for venue-owned events — there is
-/// no single-event GET — so the detail screen works from this row and the
+/// The list payload is the only read surface for venue-owned events, there is
+/// no single-event GET, so the detail screen works from this row and the
 /// partial `PUT` writes only what the operator changed.
 class PartnerExperience {
   const PartnerExperience({

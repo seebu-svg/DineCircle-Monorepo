@@ -36,7 +36,7 @@ class ReservationQuery {
 /// The payload for a phone-in booking (`POST …/reservations`).
 ///
 /// The desk takes these over the phone, so `status` defaults to `confirmed`
-/// server-side — a guest who has agreed on the phone is not left pending.
+/// server-side, a guest who has agreed on the phone is not left pending.
 class PhoneBookingInput {
   const PhoneBookingInput({
     required this.guestName,
@@ -133,7 +133,7 @@ class OperationsRepository {
     return table;
   }
 
-  /// Deactivates rather than deletes — a table a guest sat at stays on record.
+  /// Deactivates rather than deletes, a table a guest sat at stays on record.
   Future<void> deleteTable(String venueId, String tableId) =>
       _api.deleteJson('${base(venueId)}/tables/$tableId');
 

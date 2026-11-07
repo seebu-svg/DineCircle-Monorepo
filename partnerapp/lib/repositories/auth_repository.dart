@@ -20,7 +20,7 @@ class AuthSession {
 /// The partner app shares the customer backend's auth surface: a desk account is
 /// an ordinary user row with a partner platform role, so there is no separate
 /// partner login. `/auth/signin` is the OTP path and is deliberately not used
-/// here — the desk signs in with a password.
+/// here, the desk signs in with a password.
 class AuthRepository {
   AuthRepository(this._api);
 
@@ -114,7 +114,7 @@ class AuthRepository {
     return PartnerUser.fromJson(asMap(body['user']));
   }
 
-  /// Revokes all sessions including this one — the caller must drop the local
+  /// Revokes all sessions including this one, the caller must drop the local
   /// token whatever the server answers, since the credential it uses is gone.
   Future<void> logOutEveryDevice() => _api.postJson('/auth/logout-all');
 }

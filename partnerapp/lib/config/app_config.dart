@@ -21,7 +21,7 @@ class AppConfig {
     defaultValue: 'http://localhost:4000',
   );
 
-  /// All REST routes live under `/api` — same base as the customer app.
+  /// All REST routes live under `/api`, same base as the customer app.
   static String get apiUrl => '$apiBaseUrl/api';
 
   static const int apiTimeoutMs = int.fromEnvironment(

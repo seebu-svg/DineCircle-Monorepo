@@ -41,7 +41,7 @@ class BusinessRepository {
     return envelope.list('deals', Deal.fromJson);
   }
 
-  /// `403` when the venue is not verified — the create button is disabled for
+  /// `403` when the venue is not verified, the create button is disabled for
   /// that reason, and this message is what the screen shows if it is bypassed.
   Future<Deal> createDeal(String venueId, DealDraftInput input) async {
     final envelope = await _api.envelopePost(

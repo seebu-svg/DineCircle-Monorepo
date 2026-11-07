@@ -51,7 +51,7 @@ class ApiClient {
   String? token;
 
   /// Invoked whenever a request fails with `401` so the session can clear
-  /// itself — a token revoked on another device must not leave the app looking
+  /// itself, a token revoked on another device must not leave the app looking
   /// signed in.
   void Function()? onUnauthorized;
 
@@ -123,7 +123,7 @@ class ApiClient {
   Future<ApiEnvelope> envelopePut(String path, {Object? body}) async =>
       ApiEnvelope.parse(await putJson(path, body: body));
 
-  /// `POST` that answers a bare object (no `data` wrapper worth modelling) —
+  /// `POST` that answers a bare object (no `data` wrapper worth modelling),
   /// still unwrapped defensively so callers can read `envelope.data['token']`.
   Future<Map<String, dynamic>> postMap(
     String path, {

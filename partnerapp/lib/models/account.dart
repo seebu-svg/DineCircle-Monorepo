@@ -4,7 +4,7 @@ import '../api/json.dart';
 ///
 /// Ranks are ordered, so a capability check is a numeric comparison rather than
 /// a list of role names duplicated across screens. The server is still
-/// authoritative — this only decides which controls are enabled before a
+/// authoritative, this only decides which controls are enabled before a
 /// request is made.
 enum PartnerRole {
   staff('staff', 1, 'Staff'),

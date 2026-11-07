@@ -15,7 +15,7 @@ import 'package:partnerapp/utils/links.dart';
 /// The QR screen is the printed artefact of the whole app: if the code does not
 /// render, or the deal codes do not show, a desk has nothing to laminate. Both
 /// reads are overridden so the tests never touch the network, and the last test
-/// lays the screen out at a real 320px at 2.0 text scale — the width a phone
+/// lays the screen out at a real 320px at 2.0 text scale, the width a phone
 /// fixes a card at.
 class _Scope extends VenueScopeController {
   _Scope({this.verified = true});

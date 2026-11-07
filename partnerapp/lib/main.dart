@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'navigation/app_routes.dart';
 import 'providers/app_providers.dart';
 import 'screens/auth/auth_gate.dart';
+import 'screens/onboarding/onboarding_carousel.dart';
 import 'theme/app_theme.dart';
 
 Future<void> main() async {
@@ -14,12 +15,17 @@ Future<void> main() async {
   // ever awaits storage mid-build (see [sharedPreferencesProvider]).
   final prefs = await SharedPreferences.getInstance();
 
+  // The onboarding carousel shows exactly once per device. After the user
+  // finishes or skips it, `dinecircle.onboardingSeen` is persisted so every
+  // subsequent cold start lands straight on AuthGate.
+  final showOnboarding = prefs.getBool('dinecircle.onboardingSeen') != true;
+
   runApp(
     ProviderScope(
       overrides: [
         sharedPreferencesProvider.overrideWith((ref) async => prefs),
       ],
-      child: const PartnerApp(),
+      child: PartnerApp(showOnboarding: showOnboarding),
     ),
   );
 }
@@ -32,7 +38,10 @@ Future<void> main() async {
 /// route table exists so web deep links (`/#/business?tab=menu`) resolve to the
 /// same screens the shell navigates to.
 class PartnerApp extends StatelessWidget {
-  const PartnerApp({super.key});
+  const PartnerApp({super.key, required this.showOnboarding});
+
+  /// Whether the first-launch carousel has not yet been dismissed.
+  final bool showOnboarding;
 
   @override
   Widget build(BuildContext context) {
@@ -40,8 +49,10 @@ class PartnerApp extends StatelessWidget {
       title: 'DineCircle Partner',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.dark,
-      home: const AuthGate(),
-      // Every named route — bare or query-bearing — resolves through
+      home: showOnboarding
+          ? const OnboardingCarousel()
+          : const AuthGate(),
+      // Every named route,bare or query-bearing,resolves through
       // [generateRoute] so all screens share the same fade-through transition
       // and sub-tab deep links (`/service?tab=checkin`) keep working.
       onGenerateRoute: generateRoute,

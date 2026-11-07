@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -24,6 +25,34 @@ const FlutterSecureStorage _storage = FlutterSecureStorage(
 final secureStorageProvider = Provider<FlutterSecureStorage>(
   (ref) => _storage,
 );
+
+/// Web-compatible token storage using SharedPreferences.
+/// FlutterSecureStorage doesn't work reliably on web, so we use plain localStorage.
+Future<String?> readToken() async {
+  if (kIsWeb) {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(kTokenKey);
+  }
+  return await _storage.read(key: kTokenKey);
+}
+
+Future<void> writeToken(String token) async {
+  if (kIsWeb) {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(kTokenKey, token);
+  } else {
+    await _storage.write(key: kTokenKey, value: token);
+  }
+}
+
+Future<void> deleteToken() async {
+  if (kIsWeb) {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(kTokenKey);
+  } else {
+    await _storage.delete(key: kTokenKey);
+  }
+}
 
 /// The one HTTP client for the whole app.
 ///
@@ -98,8 +127,7 @@ class SessionState {
 class SessionController extends AsyncNotifier<SessionState> {
   @override
   Future<SessionState> build() async {
-    final storage = ref.watch(secureStorageProvider);
-    final token = await storage.read(key: kTokenKey);
+    final token = await readToken();
     if (token == null || token.isEmpty) {
       return const SessionState.signedOut();
     }
@@ -117,7 +145,7 @@ class SessionController extends AsyncNotifier<SessionState> {
         token: token,
       );
     } catch (_) {
-      await storage.delete(key: kTokenKey);
+      await deleteToken();
       client.token = null;
       return const SessionState.signedOut();
     }
@@ -140,9 +168,7 @@ class SessionController extends AsyncNotifier<SessionState> {
       final session = await ref
           .read(authRepositoryProvider)
           .signIn(email: email, password: password);
-      await ref
-          .read(secureStorageProvider)
-          .write(key: kTokenKey, value: session.token);
+      await writeToken(session.token);
       ref.read(apiClientProvider).token = session.token;
       return SessionState(
         status: partnerRoles.contains(session.user.role)
@@ -184,12 +210,12 @@ class SessionController extends AsyncNotifier<SessionState> {
     );
   }
 
-  /// Clears local credentials. The server already dropped the token — this is
+  /// Clears local credentials. The server already dropped the token, this is
   /// the half of signing out that happens on the device.
   Future<void> signOut() async {
     ref.read(apiClientProvider).token = null;
     try {
-      await ref.read(secureStorageProvider).delete(key: kTokenKey);
+      await deleteToken();
     } catch (_) {
       // A storage failure must not keep a signed-in shell on screen.
     }

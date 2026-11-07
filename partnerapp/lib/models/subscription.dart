@@ -67,7 +67,7 @@ class VenueSubscription {
   /// The saving of yearly over monthly, in PKR.
   static const int yearlySavingPkr = 10000;
 
-  /// The features both plans unlock — identical across tiers.
+  /// The features both plans unlock, identical across tiers.
   static const List<String> proFeatures = [
     'Unlimited menu sections and items',
     'Unlimited deals and promotions',

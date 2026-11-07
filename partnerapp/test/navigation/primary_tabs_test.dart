@@ -3,8 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:partnerapp/navigation/app_routes.dart';
 
-/// The mobile bar is exactly five tabs — Home, Menu, Deals, Insights,
-/// Business — and Menu/Deals/Insights are query tabs of /business. That means
+/// The mobile bar is exactly five tabs: Home, Menu, Deals, Insights,
+/// Business, and Menu/Deals/Insights are query tabs of /business. That means
 /// several destinations share one route root, so the active-tab index must be
 /// read from the FULL route name, not just the path. These tests lock that
 /// contract and prove no folded-in module (service, experiences, inbox) lost

@@ -71,7 +71,7 @@ class VenueRepository {
 
   // ── Verification ───────────────────────────────────────────────────────────
 
-  /// (Re)opens a verification request — the path out of a rejection.
+  /// (Re)opens a verification request, the path out of a rejection.
   Future<void> requestVerification(String venueId) =>
       _api.postJson('${base(venueId)}/verification');
 
@@ -112,7 +112,7 @@ class VenueRepository {
     return envelope.list('staff', StaffMember.fromJson);
   }
 
-  /// Invite by email or phone. `owner` only — the server enforces the rank.
+  /// Invite by email or phone. `owner` only, the server enforces the rank.
   Future<StaffMember> inviteStaff(
     String venueId, {
     String email = '',
@@ -201,7 +201,7 @@ class VenueRepository {
 
   /// Replaces the whole week. The route takes the hours map as the body (not a
   /// wrapper), writes it to the branch, and mirrors it onto the venue when the
-  /// branch is the primary one — so the response's branch is the fresh truth.
+  /// branch is the primary one, so the response's branch is the fresh truth.
   Future<Branch> saveBranchHours(
     String venueId,
     String branchId,

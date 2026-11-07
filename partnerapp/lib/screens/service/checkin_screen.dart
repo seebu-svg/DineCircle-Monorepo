@@ -20,7 +20,7 @@ import '../../widgets/status_chip.dart';
 /// The scan endpoint keys on the booking id, but the guest presents a reference
 /// string from a QR code, so the scan result (or a pasted reference) is resolved
 /// against the bookings already loaded for the chosen experience. Camera capture
-/// is mobile-only; on web, manual reference entry is the path — the one honest
+/// is mobile-only; on web, manual reference entry is the path, the one honest
 /// route the API supports without a scanner.
 class CheckinScreen extends ConsumerStatefulWidget {
   const CheckinScreen({super.key});

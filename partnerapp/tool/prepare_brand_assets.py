@@ -4,16 +4,16 @@
     usage: python3 tool/prepare_brand_assets.py
 
 Reads:
-    dineCircle Dining Logo.png   — the horizontal wordmark on a white canvas
-    DC Partner App Badge.png     — the rounded-square partner badge on a
+    dineCircle Dining Logo.png  , the horizontal wordmark on a white canvas
+    DC Partner App Badge.png    , the rounded-square partner badge on a
                                    mockup canvas with a soft drop shadow
 
 Writes into assets/branding/ (committed, not generated at build time):
-    wordmark_light.png  — transparent bg, dark text recolored to the dark-theme
+    wordmark_light.png , transparent bg, dark text recolored to the dark-theme
                           surface colour (#F5F3F0), orange kept as-is
-    wordmark_dark.png   — the original wordmark for light surfaces (login card,
+    wordmark_dark.png  , the original wordmark for light surfaces (login card,
                           print, splash)
-    partner_badge.png   — silhouette-masked transparent crop of the badge at
+    partner_badge.png  , silhouette-masked transparent crop of the badge at
                           512px, ready to drop into any dark surface
 
 The script is idempotent and self-contained: it does not import from

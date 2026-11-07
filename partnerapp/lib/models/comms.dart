@@ -117,7 +117,7 @@ class PartnerReview {
 /// (`GET /hosts/:id/summary`).
 ///
 /// The route asserts a host-relationship, so a venue that only supplied the
-/// space receives `403` — the collaboration screen renders [HostProfile.name]
+/// space receives `403`, the collaboration screen renders [HostProfile.name]
 /// from the request row and states that the host's numbers are private.
 class HostProfile {
   const HostProfile({

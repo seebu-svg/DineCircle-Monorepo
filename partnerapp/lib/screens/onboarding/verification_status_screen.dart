@@ -15,7 +15,7 @@ import '../../widgets/status_chip.dart';
 ///
 /// There is no per-field verification read on the API, so the timeline is built
 /// from the venue's own `partnershipStatus` / `verified` / `profileCompletion`
-/// — the same three flags every selling gate on the server depends on. A
+///, the same three flags every selling gate on the server depends on. A
 /// rejected venue re-opens a request through the owner-only verification route.
 class VerificationStatusScreen extends ConsumerWidget {
   const VerificationStatusScreen({super.key});

@@ -4,7 +4,7 @@ import 'app_colors.dart';
 import 'app_spacing.dart';
 import 'app_text_styles.dart';
 
-/// DineCircle Partner — single dark theme for both targets.
+/// DineCircle Partner, single dark theme for both targets.
 ///
 /// Mobile and web run the same brand theme; layout density is handled by
 /// [AppLayout] rather than a second theme, so a widget looks identical in the

@@ -2,7 +2,7 @@ import '../models/venue.dart';
 
 /// Whether a venue is trading right now, derived only from its *configured*
 /// weekly hours. There is no live-status column on the server, so this is a
-/// pure read of `opening_hours` — it never invents an "open" state the desk has
+/// pure read of `opening_hours`, it never invents an "open" state the desk has
 /// not actually configured.
 enum VenueOpenStatus { open, closed, notConfigured }
 

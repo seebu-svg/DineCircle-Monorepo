@@ -13,8 +13,8 @@ import '../../widgets/role_gate_builder.dart';
 /// Takes a booking over the phone and writes it as a confirmed reservation.
 ///
 /// The server defaults a partner-created reservation to `confirmed`, so the desk
-/// does not have to confirm its own entry. Table selection is optional — leaving
-/// it unset lets the availability engine assign one — and the start is collected
+/// does not have to confirm its own entry. Table selection is optional, leaving
+/// it unset lets the availability engine assign one, and the start is collected
 /// as a venue-local instant converted to UTC on the way out.
 class PhoneBookingSheet extends ConsumerStatefulWidget {
   const PhoneBookingSheet({super.key, required this.venueId});

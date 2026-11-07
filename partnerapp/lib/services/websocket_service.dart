@@ -125,13 +125,13 @@ class WebSocketService {
   /// Subscribes to real-time events for the given venue.
   ///
   /// Emits `join_restaurant` so the server adds this socket to the room
-  /// `restaurant_<venueId>`. Any prior venue subscription is released first —
+  /// `restaurant_<venueId>`. Any prior venue subscription is released first,
   /// a desk operator can only watch one venue's live feed at a time.
   ///
   /// No-op if the socket is not connected or the venue is already current.
   void joinVenue(String venueId) {
     if (!isConnected) {
-      debugPrint('🔌 WebSocket: cannot join venue — not connected');
+      debugPrint('🔌 WebSocket: cannot join venue, not connected');
       return;
     }
     if (_currentVenueId == venueId) {
@@ -182,7 +182,7 @@ class WebSocketService {
   /// (including the sender, for local echo). Requires prior [joinEvent].
   void sendChatMessage(String eventId, String text) {
     if (!isConnected) {
-      debugPrint('🔌 WebSocket: cannot send message — not connected');
+      debugPrint('🔌 WebSocket: cannot send message, not connected');
       return;
     }
     _socket!.emit('chat_message', {
@@ -199,11 +199,11 @@ class WebSocketService {
   /// order. Returns a disposer function that removes this specific listener.
   ///
   /// Common events:
-  ///  * `new_booking` — a reservation was created on a watched venue
-  ///  * `booking_updated` — status changed (confirmed → seated → completed)
-  ///  * `event_updated` — an event's status or details changed
-  ///  * `new_message` — a chat message in a subscribed event room
-  ///  * `notification` — a platform or venue notification
+  ///  * `new_booking`, a reservation was created on a watched venue
+  ///  * `booking_updated`, status changed (confirmed → seated → completed)
+  ///  * `event_updated`, an event's status or details changed
+  ///  * `new_message`, a chat message in a subscribed event room
+  ///  * `notification`, a platform or venue notification
   void on(String event, Function(dynamic data) callback) {
     _listeners.putIfAbsent(event, () => []);
     _listeners[event]!.add(callback);
@@ -233,12 +233,12 @@ class WebSocketService {
     });
 
     socket.onConnectError((data) {
-      debugPrint('🔌 WebSocket: connect error — $data');
+      debugPrint('🔌 WebSocket: connect error: $data');
       _setStatus(WebSocketStatus.error);
     });
 
     socket.onError((data) {
-      debugPrint('🔌 WebSocket: error — $data');
+      debugPrint('🔌 WebSocket: error: $data');
       _setStatus(WebSocketStatus.error);
     });
 

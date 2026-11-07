@@ -195,7 +195,7 @@ class SectionTitle extends StatelessWidget {
 
 /// A single stat tile: label, large value, optional caption and icon.
 ///
-/// Lighter than a [KpiCard] — no tone, no tap target — intended for dense
+/// Lighter than a [KpiCard],no tone, no tap target,intended for dense
 /// summary rows inside a [PremiumCard].
 class StatTile extends StatelessWidget {
   const StatTile({
@@ -319,7 +319,7 @@ class ProgressMeter extends StatelessWidget {
           Row(
             children: [
               // The label carries the meaning; it may ellipsis, the percent
-              // never may — so only the label flexes.
+              // never may, so only the label flexes.
               Expanded(child: Text(label!, style: AppTextStyles.bodySmall)),
               const SizedBox(width: AppSpacing.sm),
               Text(

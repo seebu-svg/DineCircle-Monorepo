@@ -6,16 +6,68 @@ import '../../navigation/app_routes.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_text_styles.dart';
+import '../../widgets/image_background_card.dart';
 import '../../widgets/status_chip.dart';
 import '../service/reservation_detail_sheet.dart';
 import 'home_sections.dart';
 
 /// ─── Today's Overview ──────────────────────────────────────────────────────
 
+/// A small animated green dot that pulses to indicate live auto-refresh.
+///
+/// Rendered beside section labels so the desk knows the numbers are keeping
+/// themselves up to date without a manual pull.
+class LivePulseIndicator extends StatefulWidget {
+  const LivePulseIndicator({super.key});
+
+  @override
+  State<LivePulseIndicator> createState() => _LivePulseIndicatorState();
+}
+
+class _LivePulseIndicatorState extends State<LivePulseIndicator>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1500),
+  )..repeat(reverse: true);
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, _) => Container(
+        width: 8,
+        height: 8,
+        decoration: BoxDecoration(
+          color: AppColors.success.withValues(
+            alpha: 0.4 + (_controller.value * 0.6),
+          ),
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.success.withValues(
+                alpha: 0.3 * _controller.value,
+              ),
+              blurRadius: 4 * _controller.value,
+              spreadRadius: 1 * _controller.value,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 /// The four numbers the desk checks first.
 ///
 /// Every value is a live dashboard counter. A metric the server did not
-/// measure is rendered as "—" with an *Unavailable* caption, so it can never
+/// measure is rendered as ": " with an *Unavailable* caption, so it can never
 /// be mistaken for a real zero. Each tile taps through to the surface that
 /// explains it.
 class TodaysOverview extends StatelessWidget {
@@ -37,15 +89,20 @@ class TodaysOverview extends StatelessWidget {
         color: AppColors.primary,
         subtitle: pending > 0 ? '$pending to confirm' : 'All confirmed',
         subtitleColor: pending > 0 ? AppColors.warning : AppColors.success,
+        trend: snapshot.today.yesterdayCovers > 0 || snapshot.today.covers > 0
+            ? snapshot.today.coversDelta
+            : null,
+        imageAsset: CardImageAssets.reservations,
         onTap: () => _go(context, '${AppRoute.service}?tab=reservations'),
       ),
       _KpiCard(
-        value: scansAvailable ? '${snapshot.scans.today}' : '—',
+        value: scansAvailable ? '${snapshot.scans.today}' : '-',
         label: 'QR Scans',
         icon: Icons.qr_code_2,
         color: AppColors.info,
         subtitle: scansAvailable ? 'Today' : 'Unavailable',
         unavailable: !scansAvailable,
+        imageAsset: CardImageAssets.qrScans,
         onTap: () => _go(context, '${AppRoute.business}?tab=qr'),
       ),
       _KpiCard(
@@ -54,6 +111,7 @@ class TodaysOverview extends StatelessWidget {
         icon: Icons.local_offer,
         color: AppColors.gold,
         subtitle: 'Live now',
+        imageAsset: CardImageAssets.activeDeals,
         onTap: () => _go(context, '${AppRoute.business}?tab=deals'),
       ),
       _KpiCard(
@@ -62,6 +120,7 @@ class TodaysOverview extends StatelessWidget {
         icon: Icons.auto_awesome,
         color: AppColors.success,
         subtitle: 'Upcoming',
+        imageAsset: CardImageAssets.experiences,
         onTap: () => _go(context, '${AppRoute.experiences}?tab=experiences'),
       ),
     ];
@@ -69,7 +128,13 @@ class TodaysOverview extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SectionLabel(title: "TODAY'S OVERVIEW"),
+        Row(
+          children: [
+            const Expanded(child: SectionLabel(title: "TODAY'S OVERVIEW")),
+            const SizedBox(width: AppSpacing.sm),
+            const LivePulseIndicator(),
+          ],
+        ),
         const SizedBox(height: AppSpacing.sm),
         _KpiGrid(cards: cards),
       ],
@@ -81,7 +146,7 @@ class TodaysOverview extends StatelessWidget {
 }
 
 /// Two columns of KPI cards, dropping to one column on a very narrow screen or
-/// at a large text scale — where a card can no longer hold its own label.
+/// at a large text scale, where a card can no longer hold its own label.
 class _KpiGrid extends StatelessWidget {
   const _KpiGrid({required this.cards});
 
@@ -136,6 +201,8 @@ class _KpiCard extends StatelessWidget {
     this.subtitle,
     this.subtitleColor,
     this.unavailable = false,
+    this.trend,
+    this.imageAsset,
   });
 
   final String value;
@@ -146,8 +213,17 @@ class _KpiCard extends StatelessWidget {
   final Color? subtitleColor;
   final VoidCallback? onTap;
 
-  /// The metric was not measured. The value reads as "—" instead of `0`.
+  /// The metric was not measured. The value reads as ": " instead of `0`.
   final bool unavailable;
+
+  /// Positive = up vs yesterday, negative = down, zero = flat.
+  /// When non-null a small arrow is rendered beside the subtitle.
+  final int? trend;
+
+  /// Optional photographic background. When provided, the card renders with a
+  /// dark scrim overlay for readability. When null, falls back to a plain
+  /// gradient surface.
+  final String? imageAsset;
 
   @override
   Widget build(BuildContext context) {
@@ -158,91 +234,132 @@ class _KpiCard extends StatelessWidget {
       borderRadius: radius,
       clipBehavior: Clip.antiAlias,
       child: Ink(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [AppColors.surface, AppColors.surfaceElevated],
-          ),
-          borderRadius: radius,
-          border: Border.all(color: AppColors.border),
-        ),
+        decoration: imageAsset != null
+            ? null
+            : BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [AppColors.surface, AppColors.surfaceElevated],
+                ),
+                borderRadius: radius,
+                border: Border.all(color: AppColors.border),
+              ),
         child: InkWell(
           onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      width: 30,
-                      height: 30,
-                      decoration: BoxDecoration(
-                        color: tone.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(
-                          AppSpacing.radiusSm,
-                        ),
-                        border: Border.all(
-                          color: tone.withValues(alpha: 0.22),
-                        ),
-                      ),
-                      child: Icon(icon, color: tone, size: 16),
-                    ),
-                    const Spacer(),
-                    if (onTap != null)
-                      const Icon(
-                        Icons.chevron_right,
-                        size: 16,
-                        color: AppColors.textTertiary,
-                      ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    value,
-                    style: AppTextStyles.metricValue.copyWith(
-                      fontSize: 28,
-                      color: unavailable
-                          ? AppColors.textTertiary
-                          : AppColors.textPrimary,
-                    ),
+          child: imageAsset != null
+              ? ImageBackgroundCard(
+                  imageAsset: imageAsset,
+                  overlayOpacity: 0.70,
+                  borderRadius: radius,
+                  border: Border.all(color: AppColors.border),
+                  child: Padding(
+                    padding: const EdgeInsets.all(AppSpacing.md),
+                    child: _buildContent(tone),
                   ),
+                )
+              : Padding(
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  child: _buildContent(tone),
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  label,
-                  style: AppTextStyles.labelSmall.copyWith(
-                    color: AppColors.textSecondary,
-                    fontWeight: FontWeight.w500,
-                    letterSpacing: 0.2,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                if (subtitle != null) ...[
-                  const SizedBox(height: 2),
-                  Text(
-                    subtitle!,
-                    style: AppTextStyles.labelSmall.copyWith(
-                      color: subtitleColor ?? AppColors.textTertiary,
-                      fontSize: 10,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ],
-            ),
-          ),
         ),
       ),
     );
+  }
+
+  Widget _buildContent(Color tone) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
+          children: [
+            Container(
+              width: 30,
+              height: 30,
+              decoration: BoxDecoration(
+                color: tone.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(
+                  AppSpacing.radiusSm,
+                ),
+                border: Border.all(
+                  color: tone.withValues(alpha: 0.22),
+                ),
+              ),
+              child: Icon(icon, color: tone, size: 16),
+            ),
+            const Spacer(),
+            if (onTap != null)
+              const Icon(
+                Icons.chevron_right,
+                size: 16,
+                color: AppColors.textTertiary,
+              ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Text(
+            value,
+            style: AppTextStyles.metricValue.copyWith(
+              fontSize: 28,
+              color: unavailable
+                  ? AppColors.textTertiary
+                  : AppColors.textPrimary,
+            ),
+          ),
+        ),
+        const SizedBox(height: 2),
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                label,
+                style: AppTextStyles.labelSmall.copyWith(
+                  color: AppColors.textSecondary,
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: 0.2,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            if (trend != null) _TrendArrow(delta: trend!),
+          ],
+        ),
+        if (subtitle != null) ...[
+          const SizedBox(height: 2),
+          Text(
+            subtitle!,
+            style: AppTextStyles.labelSmall.copyWith(
+              color: subtitleColor ?? AppColors.textTertiary,
+              fontSize: 10,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+/// A small coloured arrow beside a KPI label showing up/down vs yesterday.
+class _TrendArrow extends StatelessWidget {
+  const _TrendArrow({required this.delta});
+
+  final int delta;
+
+  @override
+  Widget build(BuildContext context) {
+    final (icon, color) = switch (delta.sign) {
+      1 => (Icons.trending_up, AppColors.success),
+      -1 => (Icons.trending_down, AppColors.danger),
+      _ => (Icons.trending_flat, AppColors.textTertiary),
+    };
+    return Icon(icon, size: 14, color: color);
   }
 }
 
@@ -252,7 +369,7 @@ class _KpiCard extends StatelessWidget {
 ///
 /// Every tile lands on a registered route: the two Business tiles on a `?tab=`
 /// of the Business section, the reservations tile on the day board. *Add Deal*
-/// asks the Deals tab to open its creation form straight away — the tab still
+/// asks the Deals tab to open its creation form straight away, the tab still
 /// owns the venue-verification and role rules, so an unverified venue simply
 /// sees why the button is disabled.
 class QuickActionsSection extends StatelessWidget {
@@ -267,6 +384,7 @@ class QuickActionsSection extends StatelessWidget {
         label: 'Edit Menu',
         caption: 'Dishes & prices',
         color: AppColors.primary,
+        imageAsset: CardImageAssets.editMenu,
         onTap: () => Navigator.of(
           context,
         ).pushReplacementNamed('${AppRoute.business}?tab=menu'),
@@ -277,6 +395,7 @@ class QuickActionsSection extends StatelessWidget {
         label: 'Create Deal',
         caption: 'Publish an offer',
         color: AppColors.gold,
+        imageAsset: CardImageAssets.createDeal,
         onTap: () => Navigator.of(
           context,
         ).pushReplacementNamed('${AppRoute.business}?tab=deals&create=1'),
@@ -287,6 +406,7 @@ class QuickActionsSection extends StatelessWidget {
         label: 'QR Code',
         caption: 'Share the menu',
         color: AppColors.info,
+        imageAsset: CardImageAssets.qrCode,
         onTap: () => Navigator.of(
           context,
         ).pushReplacementNamed('${AppRoute.business}?tab=qr'),
@@ -297,6 +417,7 @@ class QuickActionsSection extends StatelessWidget {
         label: 'Reservations',
         caption: "Today's board",
         color: AppColors.success,
+        imageAsset: CardImageAssets.reservationsBoard,
         onTap: () => Navigator.of(
           context,
         ).pushReplacementNamed('${AppRoute.service}?tab=reservations'),
@@ -315,7 +436,7 @@ class QuickActionsSection extends StatelessWidget {
 }
 
 /// Four tiles across on a roomy phone, two by two once the labels would not
-/// fit — at 320dp or at a large text scale.
+/// fit, at 320dp or at a large text scale.
 class _QuickActionGrid extends StatelessWidget {
   const _QuickActionGrid({required this.tiles});
 
@@ -359,6 +480,7 @@ class _QuickActionTile extends StatelessWidget {
     required this.caption,
     required this.color,
     required this.onTap,
+    this.imageAsset,
   });
 
   final Key tileKey;
@@ -367,6 +489,7 @@ class _QuickActionTile extends StatelessWidget {
   final String caption;
   final Color color;
   final VoidCallback onTap;
+  final String? imageAsset;
 
   @override
   Widget build(BuildContext context) {
@@ -376,68 +499,88 @@ class _QuickActionTile extends StatelessWidget {
       borderRadius: radius,
       clipBehavior: Clip.antiAlias,
       child: Ink(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              color.withValues(alpha: 0.10),
-              AppColors.surface,
-              AppColors.surfaceElevated,
-            ],
-          ),
-          borderRadius: radius,
-          border: Border.all(color: AppColors.border),
-        ),
+        decoration: imageAsset != null
+            ? null
+            : BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    color.withValues(alpha: 0.10),
+                    AppColors.surface,
+                    AppColors.surfaceElevated,
+                  ],
+                ),
+                borderRadius: radius,
+                border: Border.all(color: AppColors.border),
+              ),
         child: InkWell(
           key: tileKey,
           onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              vertical: AppSpacing.md,
-              horizontal: AppSpacing.xs,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 38,
-                  height: 38,
-                  decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.14),
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-                    border: Border.all(color: color.withValues(alpha: 0.28)),
+          child: imageAsset != null
+              ? ImageBackgroundCard(
+                  imageAsset: imageAsset,
+                  overlayOpacity: 0.72,
+                  borderRadius: radius,
+                  border: Border.all(color: AppColors.border),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppSpacing.md,
+                      horizontal: AppSpacing.xs,
+                    ),
+                    child: _buildContent(),
                   ),
-                  child: Icon(icon, color: color, size: 19),
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                Text(
-                  label,
-                  style: AppTextStyles.labelSmall.copyWith(
-                    color: AppColors.textPrimary,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 11,
+                )
+              : Padding(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: AppSpacing.md,
+                    horizontal: AppSpacing.xs,
                   ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
+                  child: _buildContent(),
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  caption,
-                  style: AppTextStyles.caption.copyWith(
-                    color: AppColors.textTertiary,
-                    fontSize: 9,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          ),
         ),
       ),
+    );
+  }
+
+  Widget _buildContent() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 38,
+          height: 38,
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.14),
+            borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+            border: Border.all(color: color.withValues(alpha: 0.28)),
+          ),
+          child: Icon(icon, color: color, size: 19),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        Text(
+          label,
+          style: AppTextStyles.labelSmall.copyWith(
+            color: AppColors.textPrimary,
+            fontWeight: FontWeight.w600,
+            fontSize: 11,
+          ),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 2),
+        Text(
+          caption,
+          style: AppTextStyles.caption.copyWith(
+            color: AppColors.textTertiary,
+            fontSize: 9,
+          ),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.center,
+        ),
+      ],
     );
   }
 }
@@ -447,7 +590,7 @@ class _QuickActionTile extends StatelessWidget {
 /// The bookings that still hold a table: pending, confirmed or seated.
 ///
 /// Cancelled, completed and no-show rows are history, not upcoming, so they are
-/// dropped. A *pending* booking is kept — it still needs a confirmation — and
+/// dropped. A *pending* booking is kept,it still needs a confirmation,and
 /// leads the list because it is the one row the desk has to act on. The rest
 /// follow in start-time order and the list is capped at [limit].
 List<Reservation> upcomingReservations(
@@ -472,6 +615,7 @@ class TodaysReservationsSection extends StatelessWidget {
     required this.reservations,
     required this.venueId,
     required this.onRetry,
+    this.trend = const [],
   });
 
   final AsyncValue<List<Reservation>> reservations;
@@ -479,6 +623,9 @@ class TodaysReservationsSection extends StatelessWidget {
 
   /// Re-reads the day list without touching the rest of the screen.
   final VoidCallback onRetry;
+
+  /// Hourly reservation counts for the day, used to draw the compact timeline.
+  final List<HourlyTrend> trend;
 
   @override
   Widget build(BuildContext context) {
@@ -494,6 +641,10 @@ class TodaysReservationsSection extends StatelessWidget {
             ).pushReplacementNamed('${AppRoute.service}?tab=reservations'),
           ),
         ),
+        if (trend.isNotEmpty) ...[
+          const SizedBox(height: AppSpacing.sm),
+          _HourlyTimeline(trend: trend),
+        ],
         const SizedBox(height: AppSpacing.sm),
         reservations.when(
           loading: () => const _ReservationsLoading(),
@@ -537,7 +688,7 @@ class TodaysReservationsSection extends StatelessWidget {
   }
 }
 
-/// The rows that did not fit in the preview — one tap to the day board.
+/// The rows that did not fit in the preview, one tap to the day board.
 class _MoreReservationsRow extends StatelessWidget {
   const _MoreReservationsRow({required this.count});
 
@@ -678,7 +829,9 @@ class _EmptyReservations extends StatelessWidget {
           ),
           const SizedBox(height: 2),
           Text(
-            'New bookings appear here as soon as they are made.',
+            'New bookings appear here as soon as guests reserve through '
+            'the Customer App or you take a phone booking. Share your QR '
+            'code to start receiving reservations.',
             style: AppTextStyles.caption,
             textAlign: TextAlign.center,
           ),
@@ -770,7 +923,7 @@ class _ReservationTile extends StatelessWidget {
 ///
 /// The order *is* the priority: a booking waiting for a confirmation holds a
 /// table, a host request waits for a decision, an unverified venue cannot sell
-/// anything, and unread notifications are informational — so they come last.
+/// anything, and unread notifications are informational, so they come last.
 class NeedsAttentionSection extends StatelessWidget {
   const NeedsAttentionSection({super.key, required this.snapshot});
 
@@ -880,7 +1033,7 @@ class NeedsAttentionSection extends StatelessWidget {
     }
 
     // Verification blocks every selling surface, so it outranks a half-filled
-    // profile — and both outrank a notification nobody is waiting on.
+    // profile, and both outrank a notification nobody is waiting on.
     if (!venue.verified) {
       items.add(
         _NeedsAttentionItem(
@@ -1004,6 +1157,138 @@ class _NeedsAttentionTile extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// ─── Hourly timeline ───────────────────────────────────────────────────────
+
+/// A compact horizontal bar chart showing reservation density by hour.
+///
+/// The current hour is highlighted with a dot. Hours with no data are shown
+/// as empty slots so the desk can see gaps at a glance. Only the next 6 hours
+/// from the current time are displayed to keep the strip compact.
+class _HourlyTimeline extends StatelessWidget {
+  const _HourlyTimeline({required this.trend});
+
+  final List<HourlyTrend> trend;
+
+  @override
+  Widget build(BuildContext context) {
+    final now = DateTime.now();
+    final currentHour = now.hour;
+
+    // Show the next 6 hours starting from the current hour (or the earliest
+    // data hour if it is earlier than now).
+    final earliestHour = trend.isEmpty
+        ? currentHour
+        : trend.map((e) => e.hour).reduce((a, b) => a < b ? a : b);
+    final startHour = earliestHour < currentHour ? earliestHour : currentHour;
+    final hours = List.generate(6, (i) => startHour + i);
+
+    final maxCount = trend.isEmpty
+        ? 1
+        : trend.map((e) => e.count).reduce((a, b) => a > b ? a : b).clamp(1, 99);
+
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        children: [
+          for (final hour in hours) ...[
+            Expanded(
+              child: _TimelineSlot(
+                hour: hour,
+                count: _countForHour(hour),
+                maxCount: maxCount,
+                isCurrent: hour == currentHour,
+              ),
+            ),
+            if (hour != hours.last) const SizedBox(width: 4),
+          ],
+        ],
+      ),
+    );
+  }
+
+  int _countForHour(int hour) {
+    final match = trend.where((e) => e.hour == hour);
+    return match.isEmpty ? 0 : match.first.count;
+  }
+}
+
+class _TimelineSlot extends StatelessWidget {
+  const _TimelineSlot({
+    required this.hour,
+    required this.count,
+    required this.maxCount,
+    required this.isCurrent,
+  });
+
+  final int hour;
+  final int count;
+  final int maxCount;
+  final bool isCurrent;
+
+  @override
+  Widget build(BuildContext context) {
+    final barHeight = count > 0 ? (count / maxCount) * 24.0 : 2.0;
+    final barColor = count > 0 ? AppColors.primary : AppColors.border;
+    final label = '${hour.toString().padLeft(2, '0')}:00';
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (count > 0)
+          Text(
+            '$count',
+            style: AppTextStyles.labelSmall.copyWith(
+              color: AppColors.primary,
+              fontSize: 9,
+              fontWeight: FontWeight.w700,
+            ),
+          )
+        else
+          const SizedBox(height: 10),
+        const SizedBox(height: 2),
+        Container(
+          height: barHeight,
+          decoration: BoxDecoration(
+            color: barColor,
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Stack(
+          alignment: Alignment.center,
+          children: [
+            Text(
+              label,
+              style: AppTextStyles.labelSmall.copyWith(
+                color: isCurrent ? AppColors.primary : AppColors.textTertiary,
+                fontSize: 8,
+                fontWeight: isCurrent ? FontWeight.w700 : FontWeight.w500,
+              ),
+            ),
+            if (isCurrent)
+              Positioned(
+                bottom: -4,
+                child: Container(
+                  width: 4,
+                  height: 4,
+                  decoration: const BoxDecoration(
+                    color: AppColors.primary,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ],
     );
   }
 }

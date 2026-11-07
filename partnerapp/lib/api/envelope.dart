@@ -23,7 +23,7 @@ class ApiMeta {
   final int total;
   final bool hasMore;
 
-  /// Unread notification count — present only on `GET /partner/notifications`.
+  /// Unread notification count, present only on `GET /partner/notifications`.
   final int unread;
 
   /// False when the response carried no `meta` object at all (single resources
@@ -67,7 +67,7 @@ class ApiEnvelope {
     );
   }
 
-  /// Raw value under [key] inside `data` — for scalars and nested maps.
+  /// Raw value under [key] inside `data`, for scalars and nested maps.
   Object? raw(String key) => data[key];
 
   Map<String, dynamic>? resourceMap(String key) {

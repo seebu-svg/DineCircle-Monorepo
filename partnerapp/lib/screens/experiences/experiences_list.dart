@@ -20,7 +20,7 @@ import '../../widgets/status_chip.dart';
 /// Experiences this account operates (`GET /partner/events`).
 ///
 /// Account-wide, so the list spans every venue and labels itself as such. The
-/// lifecycle is driven by `status` — there is no delete route — and editing is a
+/// lifecycle is driven by `status`,there is no delete route,and editing is a
 /// partial write, so only the keys the operator touched are sent (an empty body
 /// is a `400`). Seat counters stay read-only: they move when guests book.
 class ExperiencesScreen extends ConsumerStatefulWidget {

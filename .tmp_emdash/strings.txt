@@ -1,0 +1,856 @@
+[13] "Kolachi Restaurant — Sea-facing Pakistani dining at Do Darya"
+[12] "Kababjees — Charcoal kebabs and family grills"
+[12] "Bar B Q Tonight — Clifton grill house, open late"
+[10] '—'
+[7] "Food Creator — Food creator &amp; grill-table host"
+[7] "Lifestyle Creator — Lifestyle creator &amp; brunch host"
+[7] "Community Host — Community host &amp; dinner organiser"
+[7] "Coffee Enthusiast — Coffee host &amp; tasting guide"
+[7] "Social Dining Host — Social dining host &amp; group organiser"
+[7] 'That photo is too large — keep it under 512 KB.'
+[6] "Cafe Aylanto — Courtyard dining in Clifton"
+[3] "Xander&#x27;s — All-day café in Clifton"
+[3] "Café Zouk — Wood-fired pizza and pasta on Zamzama"
+[2] "Discover Karachi&#x27;s restaurants, cafés, menus, deals and hosted dining experiences. Free for diners — pay the restaurant directly."
+[2] "Okra — Mediterranean plates in DHA"
+[2] "Espresso Shahbaz DHA — Neighbourhood espresso bar in DHA Phase 6"
+[2] "Cafe Flo — French-leaning café in Clifton"
+[2] "Butlers Chocolate Café — Chocolate café on Zamzama"
+[2] "Esquires Coffee — Coffee house on Zamzama"
+[2] 'This account has no password yet — sign up with email first.'
+[2] "—"
+[1] "Hosts dinners designed for meeting new people — one table, a set menu and a host who keeps the conversation moving. No small talk required."
+[1] "Hosts coffee meetups for people who care where the beans come from. No prior knowledge needed — just curiosity and a willingness to try something new."
+[1] "A hosted BBQ dinner at Do Darya for people who plan their week around food. A shared grill table, plenty of introductions, then dinner. Come alone or bring a friend — the table does the rest."
+[1] '''<footer class="site-footer">
+      <div class="container footer-grid">
+        <div class="footer-brand">
+          <a class="brand brand--light" href="{base}index.html" aria-label="DineCircle home">
+            {brand_mark(base, light=True)}
+            <span class="brand-word">Dine<span>Circle</span></span>
+          </a>
+          <p class="footer-tagline">Great food. Shared moments.</p>
+          <p>Restaurants, cafés, real menus, deals and hosted dining experiences in Karachi. Free for diners — you always pay the restaurant directly.</p>
+          <div class="socials" aria-label="Social channels">
+            <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" aria-label="DineCircle on Instagram">{icon("instagram")}</a>
+            <a href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer" aria-label="DineCircle on Facebook">{icon("facebook")}</a>
+            <a href="https://www.tiktok.com/" target="_blank" rel="noopener noreferrer" aria-label="DineCircle on TikTok">{icon("tiktok")}</a>
+            <a href="https://www.linkedin.com/" target="_blank" rel="noopener noreferrer" aria-label="DineCircle on LinkedIn">{icon("linkedin")}</a>
+          </div>
+        </div>
+        {cols}
+        <div class="footer-col footer-contact">
+          <h3>Contact</h3>
+          <ul>
+            <li><a href="mailto:{EMAIL}">{EMAIL}</a></li>
+            <li><a href="mailto:{PARTNER_EMAIL}">{PARTNER_EMAIL}</a></li>
+            <li>Karachi, Pakistan</li>
+            <li>Support: Mon–Sat, 10 AM–7 PM</li>
+          </ul>
+          <button class="btn btn--light btn--sm" type="button" data-app-cta>Get the app</button>
+        </div>
+      </div>
+      <div class="container footer-bottom">
+        <p>© 2026 DineCircle. Free for diners, always.</p>
+        <p class="footer-fine">Karachi pilot · Prices in PKR · Preview content for venue menus and offers.</p>
+      </div>
+    </footer>'''
+[1] '''<dialog class="modal" id="appDialog" aria-labelledby="appDialogTitle">
+      <div class="modal-card">
+        <button class="modal-close" type="button" data-close-dialog aria-label="Close">{icon("close")}</button>
+        <span class="modal-icon">{icon("verified")}</span>
+        <h2 id="appDialogTitle">DineCircle is free for diners</h2>
+        <p>Book a table, join a hosted experience or redeem a deal in the app. No booking fee and no card details — you pay the restaurant directly.</p>
+        <ul class="check-list">
+          <li>{icon("check")} Free to browse, book and join</li>
+          <li>{icon("check")} 0% booking commission</li>
+          <li>{icon("check")} Prices in PKR, settled at the venue</li>
+        </ul>
+        <div class="modal-actions">
+          <a class="btn btn--primary" href="mailto:{EMAIL}?subject=DineCircle%20launch%20access">Get launch access</a>
+          <a class="btn btn--outline" href="{base}about.html#contact">Contact us</a>
+        </div>
+        <p class="modal-note">Android and iOS apps are rolling out across Karachi.</p>
+      </div>
+    </dialog>'''
+[1] '''<article class="venue-card" data-venue-card data-cuisines="{" ".join(cuisines_for_filter(v))}" data-price="{len(v["price"])}" data-name="{esc(v["name"].lower())}" data-search="{esc(venue_search_blob(v))}">
+          <a class="venue-card__media" href="{base}restaurants/{v["slug"]}.html" aria-label="View {esc(v["name"])}">
+            {img(base, v["cover"], f'{v["name"]} — {v["tagline"]}')}
+            <div class="badge-row">{badges}</div>
+          </a>
+          <div class="venue-card__body">
+            <div class="venue-card__title">
+              <h3><a href="{base}restaurants/{v["slug"]}.html">{esc(v["name"])}</a></h3>
+              <span class="price-tier" aria-label="Price range">{v["price"]}</span>
+            </div>
+            <p class="meta-line">{icon("pin")} {esc(v["area"])}</p>
+            <p class="cuisine-line">{" · ".join(v["cuisines"])}</p>
+            <ul class="menu-preview">{preview}</ul>
+            <div class="venue-card__foot">
+              <a class="text-link" href="{base}restaurants/{v["slug"]}.html">View Menu {icon("arrow", "icon icon--sm")}</a>
+              <span class="open-pill" data-hours data-open="{v["open"]}" data-close="{v["close"]}" data-closed="{",".join(v["closed"])}">See hours</span>
+            </div>
+          </div>
+        </article>'''
+[1] '''<article class="host-card">
+          <a class="host-card__media" href="{base}hosts/{h["slug"]}.html" aria-label="{esc(h["name"])}">
+            {img(base, h["portrait"], f'{h["name"]} — {h["role"]}')}
+          </a>
+          <div class="host-card__body">
+            <h3><a href="{base}hosts/{h["slug"]}.html">{esc(h["name"])}</a></h3>
+            <p class="handle">@{esc(h["handle"])}</p>
+            <p class="host-specialty">{esc(h["specialty"])}</p>
+            <div class="host-card__foot">
+              <span>{label}</span>
+              <a class="round-arrow" href="{base}hosts/{h["slug"]}.html" aria-label="View {esc(h["name"])}">{icon("arrow", "icon icon--sm")}</a>
+            </div>
+          </div>
+        </article>'''
+[1] '''<section class="hero">
+      <div class="container hero-grid">
+        <div class="hero-copy">
+          <p class="eyebrow pill-eyebrow"><span class="pulse" aria-hidden="true"></span> Now live in Karachi</p>
+          <h1>Find your next <span class="accent">favourite table</span> in Karachi.</h1>
+          <p class="lede">Browse restaurants and cafés, read the real menu, unlock a deal and join hosted dining experiences. Free for diners, always — you pay the restaurant directly.</p>
+          <form class="hero-search" action="restaurants.html" method="get" role="search" data-search-form>
+            <label class="sr-only" for="heroQuery">Search restaurants, dishes or cuisines</label>
+            {icon("search")}
+            <input id="heroQuery" name="q" type="search" placeholder="Search restaurants, dishes or cuisines" autocomplete="off">
+            <button class="btn btn--primary" type="submit">Search</button>
+          </form>
+          <div class="quick-tags">
+            <span>Popular:</span>
+            <a href="restaurants.html?q=BBQ">BBQ</a>
+            <a href="restaurants.html?q=Brunch">Brunch</a>
+            <a href="restaurants.html?q=Coffee">Coffee</a>
+            <a href="restaurants.html?q=Karahi">Karahi</a>
+          </div>
+          <dl class="hero-stats">
+            <div><dt>Places</dt><dd>11</dd></div>
+            <div><dt>Dishes</dt><dd>100+</dd></div>
+            <div><dt>Hosts</dt><dd>5</dd></div>
+            <div><dt>To join</dt><dd>Rs. 0</dd></div>
+          </dl>
+        </div>
+        <div class="hero-visual">
+          <figure class="hero-photo hero-photo--main">
+            {img("", "hero_tasting", "A candlelit table set for a hosted dinner", eager=True)}
+          </figure>
+          <figure class="hero-photo hero-photo--small">
+            {img("", "venue_rooftop", "A rooftop restaurant terrace under string lights")}
+          </figure>
+          <div class="float-card float-card--deal">
+            <span class="float-icon" aria-hidden="true">%</span>
+            <span><strong>15% off</strong><small>family dinner · Kolachi</small></span>
+          </div>
+          <div class="float-card float-card--free">
+            <span class="float-icon">{icon("check")}</span>
+            <span><strong>Free to join</strong><small>no booking fee, ever</small></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="trust-strip" aria-label="DineCircle at a glance">
+      <div class="container trust-grid">
+        <div><strong>8</strong><span>verified partners</span></div>
+        <div><strong>22</strong><span>live offers</span></div>
+        <div><strong>5</strong><span>hosted experiences</span></div>
+        <div><strong>0%</strong><span>booking commission</span></div>
+      </div>
+    </section>
+
+    <section class="section" id="featured">
+      <div class="container">
+        {section_head("Featured places", "Restaurants and cafés worth the drive",
+                      "From Do Darya seafood to Zamzama coffee. Menus, areas and price ranges come straight from each venue.",
+                      '<a class="btn btn--outline" href="restaurants.html">Explore Restaurants</a>')}
+        <div class="venue-grid">{featured_cards}</div>
+        <div class="cuisine-rail">
+          <span class="cuisine-rail__label">Browse by craving</span>
+          <div class="chips">{cuisine_chips}</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--cream" id="deals">
+      <div class="container">
+        {section_head("Deals", "A better bill, without the coupon hunting",
+                      "Show the offer at the table and the venue applies it. No vouchers, no online payment, no extra fee from DineCircle.",
+                      '<a class="btn btn--outline" href="deals.html">Discover Deals</a>')}
+        <div class="deal-grid deal-grid--three">{deal_cards}</div>
+      </div>
+    </section>
+
+    <section class="section" id="experiences">
+      <div class="container">
+        {section_head("Dining experiences", "Pull up a chair with people who love food",
+                      "Hosted dinners, brunches and meetups around Karachi. Joining is free — you pay the venue for your meal.",
+                      '<a class="btn btn--outline" href="experiences.html">Explore Experiences</a>')}
+        <div class="exp-grid">{exp_cards}</div>
+      </div>
+    </section>
+
+    <section class="section section--cream" id="hosts">
+      <div class="container">
+        {section_head("Hosts", "Meet the people behind the table",
+                      "Food creators, community hosts and coffee people who plan the evening so you only have to show up.",
+                      '<a class="btn btn--outline" href="hosts.html">Discover Hosts</a>')}
+        <div class="host-grid">{host_cards}</div>
+      </div>
+    </section>
+
+    <section class="section" id="how-it-works">
+      <div class="container">
+        {section_head("How it works", "Discover. Choose. Visit.",
+                      "Three steps, no checkout, no commission. DineCircle stays free for diners.")}
+        <ol class="steps">
+          <li class="step">
+            <span class="step-num">01</span>
+            <span class="step-icon">{icon("search")}</span>
+            <h3>Discover</h3>
+            <p>Search restaurants, cafés and dishes across Karachi. Filter by cuisine, area or price and read the full menu before you go.</p>
+          </li>
+          <li class="step">
+            <span class="step-num">02</span>
+            <span class="step-icon">{icon("calendar")}</span>
+            <h3>Choose</h3>
+            <p>Pick a deal, book a table or join a hosted experience. Reservations and experience seats cost nothing to book.</p>
+          </li>
+          <li class="step">
+            <span class="step-num">03</span>
+            <span class="step-icon">{icon("check")}</span>
+            <h3>Visit</h3>
+            <p>Show your booking or deal at the venue and pay the restaurant directly for your meal. No in-app payment, no hidden fee.</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="cta-band">
+      <div class="container cta-band__inner">
+        <div>
+          <p class="eyebrow">Your table is waiting</p>
+          <h2>Good food, better company.</h2>
+          <p>Join DineCircle free, or list your restaurant and put your full menu on the map.</p>
+        </div>
+        <div class="cta-band__actions">
+          <button class="btn btn--light" type="button" data-app-cta>Get the app</button>
+          <a class="btn btn--ghost-light" href="about.html#partners">Partner with us</a>
+        </div>
+      </div>
+    </section>'''
+[1] "Discover Karachi's restaurants, cafés, menus, deals and hosted dining experiences. Free for diners — pay the restaurant directly."
+[1] '''<div class="container detail-top">
+      {crumbs("../", [("Home", "index.html"), ("Restaurants", "restaurants.html"), (v["name"], None)])}
+    </div>
+    <section class="venue-gallery">
+      <div class="container gallery-grid">
+        <figure class="gallery-main">{img("../", v["cover"], f'{v["name"]} — {v["tagline"]}', eager=True)}</figure>
+        <figure class="gallery-side">{img("../", v["gallery"][0], f"Dish at {v['name']}")}</figure>
+        <figure class="gallery-side">{img("../", v["gallery"][1] if len(v["gallery"]) > 1 else v["cover"], f"Interior at {v['name']}")}</figure>
+      </div>
+    </section>
+
+    <section class="venue-head">
+      <div class="container venue-head__inner">
+        <div>
+          <div class="badge-row badge-row--static">
+            {verified_pill() if v["verified"] else '<span class="pill">Listed venue</span>'}
+            <span class="pill pill--soft">{v["price"]} price range</span>
+          </div>
+          <h1>{esc(v["name"])}</h1>
+          <p class="venue-tagline">{esc(v["tagline"])}</p>
+          <p class="meta-line meta-line--lg">{icon("pin")} {esc(v["address"])} · {esc(v["area"])}</p>
+          <p class="cuisine-line">{" · ".join(v["cuisines"])}</p>
+        </div>
+        <div class="venue-head__actions">
+          <span class="open-pill open-pill--lg" data-hours data-open="{v["open"]}" data-close="{v["close"]}" data-closed="{",".join(v["closed"])}">See hours</span>
+          <button class="btn btn--primary" type="button" data-app-cta>Book a table</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--flush detail-body">
+      <div class="container detail-grid">
+        <div class="detail-main">
+          <section class="detail-block" id="menu">
+            <div class="detail-block__head"><h2>The menu</h2><p>Prices are in PKR and set by the venue.</p></div>
+            {venue_menu(v, "../")}
+          </section>
+
+          <section class="detail-block" id="deals">
+            <div class="detail-block__head"><h2>Deals at {esc(v["name"])}</h2><p>Show the offer at the table. No code means just ask.</p></div>
+            <div class="venue-deal-list">{deals_html}</div>
+          </section>
+
+          <section class="detail-block" id="about">
+            <div class="detail-block__head"><h2>About this place</h2></div>
+            <p class="detail-lede">{esc(v["about"])}</p>
+            <h3 class="small-heading">Amenities</h3>
+            <ul class="amenity-list">{amenities}</ul>
+          </section>
+
+          <section class="detail-block" id="hours">
+            <div class="detail-block__head"><h2>Opening hours</h2><p>Local time in Karachi.</p></div>
+            {hours_table(v)}
+          </section>
+
+          <section class="detail-block" id="location">
+            <div class="detail-block__head"><h2>Location</h2></div>
+            <div class="location-card">
+              <div>
+                <p class="location-address">{icon("pin")} {esc(v["address"])}</p>
+                <p class="muted">Inside {esc(v["area"])}, Karachi.</p>
+              </div>
+              <a class="btn btn--outline btn--sm" href="{map_url}" target="_blank" rel="noopener noreferrer">Open in Maps {icon("arrow", "icon icon--sm")}</a>
+            </div>
+          </section>
+        </div>
+
+        <aside class="detail-aside">
+          <div class="aside-card aside-card--booking">
+            <p class="eyebrow eyebrow--sm">Book with DineCircle</p>
+            <p class="aside-price">{v["price"]} <span>per person, typical</span></p>
+            <ul class="check-list check-list--sm">
+              <li>{icon("check")} Free to book — 0% commission</li>
+              <li>{icon("check")} Pay the restaurant directly</li>
+              <li>{icon("check")} Deals applied at the table</li>
+            </ul>
+            <button class="btn btn--primary btn--block" type="button" data-app-cta>Reserve a table</button>
+            <a class="btn btn--outline btn--block" href="#deals">Discover Deals</a>
+            <p class="aside-fine">Table bookings and experience seats are confirmed in the DineCircle app.</p>
+          </div>
+          {exp_teaser}
+          <div class="aside-card">
+            <p class="eyebrow eyebrow--sm">Contact the venue</p>
+            <p class="aside-note">For large groups, dietary questions or accessibility requests, contact DineCircle and we will connect you with the venue.</p>
+            <a class="text-link" href="../about.html#contact">Contact us {icon("arrow", "icon icon--sm")}</a>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section section--cream">
+      <div class="container">
+        {section_head("Keep exploring", "More places nearby", "", '<a class="btn btn--outline" href="../restaurants.html">Explore Restaurants</a>')}
+        <div class="venue-grid">{related_cards}</div>
+      </div>
+    </section>'''
+[1] '{v["name"]} — menu, deals and hours'
+[1] '''{page_hero(
+        "Deals",
+        "Offers worth ordering",
+        "Twenty-two launch offers across eleven Karachi venues. Every deal lists its terms up front and is applied by the venue at the table — never through an online checkout.",
+        crumbs_html=crumbs("", [("Home", "index.html"), ("Deals", None)]),
+    )}
+    <section class="section section--flush">
+      <div class="container">
+        <div class="filter-panel">
+          <div class="filter-search">
+            {icon("search")}
+            <label class="sr-only" for="dealSearch">Search deals by venue or dish</label>
+            <input id="dealSearch" type="search" placeholder="Search a venue, offer or dish" autocomplete="off" data-deal-search>
+            <button class="filter-clear" type="button" data-clear-search aria-label="Clear search" hidden>{icon("close")}</button>
+          </div>
+          <div class="filter-row">
+            <div class="chips" role="group" aria-label="Filter deals by cuisine">{chips}</div>
+            <p class="result-count" data-deal-count role="status" aria-live="polite">22 offers</p>
+          </div>
+        </div>
+        <div class="deal-grid" id="dealGrid">{cards}</div>
+        {empty_state("No offers match that search.", "Try another venue, cuisine or dish.")}
+        <div class="notice-card">
+          <span class="notice-icon">{icon("spark")}</span>
+          <div>
+            <h3>How deals work</h3>
+            <p>Find an offer, show it to your server before ordering, and the venue applies it to the bill. Some offers need a code; others just need you to ask. Deals cannot be combined unless the terms say so.</p>
+          </div>
+        </div>
+      </div>
+    </section>'''
+[1] '''{page_hero(
+        "Dining experiences",
+        "Pull up a chair with people who love food",
+        "Hosted dinners, brunches and coffee meetups around Karachi. Joining is always free — you pay the venue for your meal at the end of the evening.",
+        crumbs_html=crumbs("", [("Home", "index.html"), ("Experiences", None)]),
+    )}
+    <section class="section section--flush">
+      <div class="container">
+        <div class="filter-row filter-row--bar">
+          <div class="chips" role="group" aria-label="Filter experiences">
+            <button class="chip is-active" type="button" data-exp-filter="all" aria-pressed="true">All experiences</button>
+            <button class="chip" type="button" data-exp-filter="dinner" aria-pressed="false">Dinners</button>
+            <button class="chip" type="button" data-exp-filter="brunch" aria-pressed="false">Brunches</button>
+            <button class="chip" type="button" data-exp-filter="workshop" aria-pressed="false">Workshops</button>
+          </div>
+          <p class="result-count" data-exp-count role="status" aria-live="polite">5 upcoming</p>
+        </div>
+        <div class="exp-grid exp-grid--list" id="expGrid">{cards}</div>
+        <div class="empty-state" data-exp-empty hidden>
+          <span class="empty-icon">{icon("search")}</span>
+          <p class="empty-title">No experiences in this category yet.</p>
+          <p>Try another category or check back soon.</p>
+          <button class="btn btn--primary btn--sm" type="button" data-clear-exp>Show all experiences</button>
+        </div>
+        <div class="notice-card">
+          <span class="notice-icon">{icon("users")}</span>
+          <div>
+            <h3>How joining works</h3>
+            <p>Every experience is hosted by a creator or community host and capped at a small table. Joining is free and reserves your seat; the estimated dining cost shown is paid directly to the venue on the day. No online payment, no booking fee.</p>
+          </div>
+        </div>
+      </div>
+    </section>'''
+[1] '''<section class="exp-hero">
+      <div class="exp-hero__media">{img("../", e["cover"], e["title"], eager=True)}</div>
+      <div class="exp-hero__shade"></div>
+      <div class="container exp-hero__content">
+        {crumbs("../", [("Home", "index.html"), ("Experiences", "experiences.html"), (e["title"], None)], light=True)}
+        <span class="type-badge type-badge--light">{e["type"].title()}</span>
+        <h1>{esc(e["title"])}</h1>
+        <p class="exp-hero__tagline">{esc(e["tagline"])}</p>
+        <div class="exp-hero__meta">
+          <span>{icon("calendar")} <time data-date data-format="long" data-offset="{e["offset"]}" data-hour="{e["hour"]}" data-minute="{e["minute"]}">Upcoming</time></span>
+          <span>{icon("pin")} <a href="../restaurants/{v["slug"]}.html">{esc(v["name"])}</a></span>
+          <span>{icon("users")} Hosted by <a href="../hosts/{h["slug"]}.html">{esc(h["name"])}</a></span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--flush">
+      <div class="container detail-grid exp-detail-grid">
+        <div class="detail-main">
+          <section class="detail-block">
+            <div class="detail-block__head"><h2>About this experience</h2></div>
+            <p class="detail-lede">{esc(e["desc"])}</p>
+            <div class="tag-row">{tags}</div>
+          </section>
+
+          <section class="detail-block">
+            <div class="detail-block__head"><h2>What's included</h2><p>Arranged by the host with {esc(v["name"])}.</p></div>
+            <ul class="included-grid">{included}</ul>
+          </section>
+
+          <section class="detail-block">
+            <div class="detail-block__head"><h2>The table</h2></div>
+            <dl class="fact-list">
+              <div><dt>Menu style</dt><dd>{esc(e["menu_style"])}</dd></div>
+              <div><dt>Group size</dt><dd>{e["seats"]} seats</dd></div>
+              <div><dt>Duration</dt><dd>{e["duration"]} minutes</dd></div>
+              <div><dt>Dining cost</dt><dd>{money(e["price"])} per person, paid to the venue</dd></div>
+            </dl>
+            <div class="host-note">
+              <span class="host-note__icon">{icon("spark")}</span>
+              <div><strong>A note from {esc(h["name"])}</strong><p>{esc(e["note"])}</p></div>
+            </div>
+          </section>
+
+          <section class="detail-block">
+            <div class="detail-block__head"><h2>Your host</h2></div>
+            <a class="person-strip" href="../hosts/{h["slug"]}.html">
+              {img("../", h["portrait"], h["name"], "person-strip__avatar")}
+              <span class="person-strip__body">
+                <strong>{esc(h["name"])}</strong>
+                <span>@{esc(h["handle"])} · {esc(h["specialty"])}</span>
+                <span class="muted">{esc(h["bio"])}</span>
+              </span>
+              {icon("arrow", "icon icon--sm")}
+            </a>
+          </section>
+
+          <section class="detail-block">
+            <div class="detail-block__head"><h2>The venue</h2></div>
+            <a class="place-strip" href="../restaurants/{v["slug"]}.html">
+              {img("../", v["cover"], v["name"], "place-strip__photo")}
+              <span class="place-strip__body">
+                <strong>{esc(v["name"])}</strong>
+                <span>{esc(v["area"])} · {" · ".join(v["cuisines"])}</span>
+                <span class="muted">{esc(v["tagline"])}</span>
+              </span>
+              {icon("arrow", "icon icon--sm")}
+            </a>
+          </section>
+
+          <section class="detail-block">
+            <div class="detail-block__head"><h2>Good to know</h2></div>
+            <ul class="bullet-list">
+              <li>Joining is free. The estimated dining cost is paid to {esc(v["name"])} on the day.</li>
+              <li>Seats are limited to {e["seats"]} and are reserved when you join in the app.</li>
+              <li>Come alone or bring a friend — the host seats the table and handles introductions.</li>
+              <li>Tell the host about allergies or dietary needs when you join so the venue can prepare.</li>
+            </ul>
+          </section>
+        </div>
+
+        <aside class="detail-aside">
+          <div class="aside-card aside-card--booking">
+            <p class="eyebrow eyebrow--sm">Join this experience</p>
+            <p class="aside-date"><time data-date data-format="long" data-offset="{e["offset"]}" data-hour="{e["hour"]}" data-minute="{e["minute"]}">Upcoming</time></p>
+            <p class="aside-time">{icon("clock")} <time data-date data-format="range" data-offset="{e["offset"]}" data-hour="{e["hour"]}" data-minute="{e["minute"]}" data-duration="{e["duration"]}">Time</time> PKT</p>
+            {seat_meter(e)}
+            <div class="aside-price-row">
+              <span><strong>{money(e["price"])}</strong><small>est. dining per person</small></span>
+              <span class="pill pill--soft">Paid at venue</span>
+            </div>
+            <button class="btn btn--primary btn--block" type="button" data-app-cta>Join Experience</button>
+            <p class="free-note">{icon("check", "icon icon--xs")} Joining is free · no booking fee</p>
+            <ul class="check-list check-list--sm">
+              <li>{icon("check")} Seats reserved in the app</li>
+              <li>{icon("check")} Pay the venue directly on the day</li>
+              <li>{icon("check")} Host handles introductions</li>
+            </ul>
+          </div>
+          <div class="aside-card">
+            <p class="eyebrow eyebrow--sm">Need help?</p>
+            <p class="aside-note">Questions about the table, dietary needs or the venue? We answer within one working day.</p>
+            <a class="text-link" href="../about.html#contact">Contact DineCircle {icon("arrow", "icon icon--sm")}</a>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section section--cream">
+      <div class="container">
+        {section_head("More to join", "Other upcoming tables", "", '<a class="btn btn--outline" href="../experiences.html">Explore Experiences</a>')}
+        <div class="exp-grid">{related_cards}</div>
+      </div>
+    </section>'''
+[1] '''<div class="container detail-top">
+      {crumbs("../", [("Home", "index.html"), ("Hosts", "hosts.html"), (h["name"], None)])}
+    </div>
+    <section class="host-head">
+      <div class="container host-head__inner">
+        <figure class="host-head__photo">{img("../", h["portrait"], f'{h["name"]} — {h["role"]}', eager=True)}</figure>
+        <div class="host-head__body">
+          <p class="eyebrow">Host profile</p>
+          <h1>{esc(h["name"])}</h1>
+          <p class="handle">@{esc(h["handle"])}</p>
+          <p class="host-role">{esc(h["role"])} · {esc(h["city"])}</p>
+          <p class="host-bio">{esc(h["bio"])}</p>
+          <div class="tag-row">{interests}</div>
+          <dl class="host-stats">
+            <div><dt>Upcoming</dt><dd>{len(h["experiences"])}</dd></div>
+            <div><dt>Hosting since</dt><dd>{h["since"]}</dd></div>
+            <div><dt>Based in</dt><dd>{esc(h["city"])}</dd></div>
+          </dl>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--flush">
+      <div class="container">
+        {section_head("Upcoming tables", f"Experiences hosted by {h['name']}", h["specialty"] + " around Karachi.")}
+        <div class="exp-grid exp-grid--list">{exp_cards}</div>
+      </div>
+    </section>
+
+    <section class="section section--cream">
+      <div class="container">
+        {section_head("Hosting style", "What to expect at the table", "", "")}
+        <div class="style-grid">
+          <div class="style-card"><span class="style-icon">{icon("users")}</span><h3>Small tables</h3><p>Seats are capped so everyone can hear the conversation, whether you arrive alone or with a friend.</p></div>
+          <div class="style-card"><span class="style-icon">{icon("clock")}</span><h3>On time</h3><p>The table is held for a short window after the start time. The host meets guests at the venue entrance.</p></div>
+          <div class="style-card"><span class="style-icon">{icon("check")}</span><h3>No payment at the table</h3><p>Joining is free. You settle your own food and drinks with the venue at the end of the meal.</p></div>
+        </div>
+        <div class="inline-cta">
+          <div><h3>Host with DineCircle</h3><p>Plan a table with a Karachi restaurant and we will help with the format and listing.</p></div>
+          <a class="btn btn--outline" href="../about.html#contact">Get in touch</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        {section_head("More hosts", "Other people to follow", "", '<a class="btn btn--outline" href="../hosts.html">Discover Hosts</a>')}
+        <div class="host-grid">{other_cards}</div>
+      </div>
+    </section>'''
+[1] '{h["name"]} — host profile'
+[1] "Table bookings and experience seats are confirmed in the DineCircle app. This website is for discovery — menus, deals, venue details and host profiles. Download links are opening in phases across Karachi."
+[1] "Menus, prices and opening hours are supplied by each venue and can change with the season. This site shows preview content for the Karachi pilot — confirm details with the restaurant before you order."
+[1] '''{page_hero(
+        "About DineCircle",
+        "Great food. Shared moments.",
+        "DineCircle is a Karachi-first discovery platform for restaurants, cafés and the people who bring tables together. Free for diners, honest about menus, and built around paying the venue directly.",
+        crumbs_html=crumbs("", [("Home", "index.html"), ("About & contact", None)]),
+    )}
+    <section class="section section--flush">
+      <div class="container about-split">
+        <div>
+          <p class="eyebrow">Our story</p>
+          <h2>A simpler way to decide where to eat</h2>
+          <p class="detail-lede">Restaurant discovery in Karachi usually means scrolling through photos, guessing at prices and calling three numbers to find a table. DineCircle puts the useful parts in one place: the full menu with PKR prices, current deals with their terms, real opening hours and a way to join a table with other people.</p>
+          <p>We are not a delivery app, a payment gateway or a social network. We do not take a cut of your bill. Restaurants list their menus and offers; hosts plan experiences; diners show up and pay the venue. That is the whole loop.</p>
+          <div class="about-actions">
+            <a class="btn btn--primary" href="restaurants.html">Explore Restaurants</a>
+            <a class="btn btn--outline" href="#partners">For restaurants</a>
+          </div>
+        </div>
+        <figure class="about-photo">{img("", "venue_interior", "Dining room at a Karachi restaurant", eager=True)}</figure>
+      </div>
+    </section>
+
+    <section class="stats-band">
+      <div class="container stats-grid">
+        <div><strong>11</strong><span>Karachi venues</span></div>
+        <div><strong>100+</strong><span>menu items</span></div>
+        <div><strong>22</strong><span>launch offers</span></div>
+        <div><strong>5</strong><span>hosted experiences</span></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        {section_head("What we stand for", "Three rules we do not bend")}
+        <div class="value-grid">
+          <article class="value-card"><span class="style-icon">{icon("check")}</span><h3>Free for diners</h3><p>No booking fee, no subscription and no commission on your bill. If a venue charges for food, that is the only charge you see.</p></article>
+          <article class="value-card"><span class="style-icon">{icon("book")}</span><h3>Real menus, real prices</h3><p>Every dish is listed by the venue in PKR. No bait pricing, no vague market price and no DineCircle markup.</p></article>
+          <article class="value-card"><span class="style-icon">{icon("users")}</span><h3>Local tables</h3><p>Karachi restaurants, Karachi hosts. Experiences are small, hosted and designed for people who actually want to talk.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--cream" id="how-it-works">
+      <div class="container">
+        {section_head("How it works", "Discover. Choose. Visit.", "No checkout, no wallet, no card details stored on DineCircle.")}
+        <ol class="steps">
+          <li class="step"><span class="step-num">01</span><span class="step-icon">{icon("search")}</span><h3>Discover</h3><p>Search restaurants, cafés and dishes. Filter by cuisine, price or area and read the full menu before you leave the house.</p></li>
+          <li class="step"><span class="step-num">02</span><span class="step-icon">{icon("calendar")}</span><h3>Choose</h3><p>Pick a deal, reserve a table or join a hosted experience. Booking and joining are free.</p></li>
+          <li class="step"><span class="step-num">03</span><span class="step-icon">{icon("check")}</span><h3>Visit</h3><p>Show your booking or offer at the venue, eat, and pay the restaurant directly for what you ordered.</p></li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="section" id="partners">
+      <div class="container partner-panel">
+        <div class="partner-copy">
+          <p class="eyebrow">For restaurants &amp; cafés</p>
+          <h2>Put your full menu on the map</h2>
+          <p>List your venue, publish a QR-ready menu, add deals and host experiences. DineCircle charges a flat subscription — never a commission on your bookings.</p>
+          <ul class="check-list">
+            <li>{icon("check")} PKR 5,000 per month or PKR 50,000 per year</li>
+            <li>{icon("check")} 0% booking commission</li>
+            <li>{icon("check")} No payment gateway or payout setup</li>
+            <li>{icon("check")} Activation after a simple bank transfer, JazzCash or Easypaisa payment</li>
+          </ul>
+          <div class="about-actions">
+            <a class="btn btn--primary" href="mailto:{PARTNER_EMAIL}?subject=DineCircle%20partner%20enquiry">Talk to the partner team</a>
+            <a class="btn btn--outline" href="restaurants.html">See how listings look</a>
+          </div>
+        </div>
+        <aside class="price-card">
+          <p class="eyebrow eyebrow--sm">Partner plan</p>
+          <p class="price-card__amount">Rs. 5,000<span>/ month</span></p>
+          <p class="price-card__alt">or Rs. 50,000 per year</p>
+          <hr>
+          <ul class="check-list check-list--sm">
+            <li>{icon("check")} Full menu and QR menu</li>
+            <li>{icon("check")} Deals and redemption terms</li>
+            <li>{icon("check")} Table reservations</li>
+            <li>{icon("check")} Hosted experiences</li>
+            <li>{icon("check")} Reviews and replies</li>
+          </ul>
+          <a class="btn btn--primary btn--block" href="mailto:{PARTNER_EMAIL}?subject=DineCircle%20partner%20enquiry">Request activation</a>
+          <p class="aside-fine">Manual activation after payment verification. No commission on any booking.</p>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section section--cream" id="faq">
+      <div class="container faq-layout">
+        <div>
+          <p class="eyebrow">FAQs</p>
+          <h2>Questions, answered</h2>
+          <p class="section-note">Still stuck? Email <a href="mailto:{EMAIL}">{EMAIL}</a> and we will reply within one working day.</p>
+        </div>
+        <div class="faq-list">{faq_html}</div>
+      </div>
+    </section>
+
+    <section class="section" id="contact">
+      <div class="container contact-layout">
+        <div class="contact-copy">
+          <p class="eyebrow">Contact</p>
+          <h2>Talk to DineCircle</h2>
+          <p>Questions about a venue, a deal, an experience or partnering with us? Send a note and the right person will reply.</p>
+          <ul class="contact-list">
+            <li><span class="contact-icon">{icon("mail")}</span><div><strong>General</strong><a href="mailto:{EMAIL}">{EMAIL}</a></div></li>
+            <li><span class="contact-icon">{icon("verified")}</span><div><strong>Partners</strong><a href="mailto:{PARTNER_EMAIL}">{PARTNER_EMAIL}</a></div></li>
+            <li><span class="contact-icon">{icon("pin")}</span><div><strong>Office</strong><span>Karachi, Pakistan</span></div></li>
+            <li><span class="contact-icon">{icon("clock")}</span><div><strong>Support hours</strong><span>Monday–Saturday, 10 AM–7 PM PKT</span></div></li>
+          </ul>
+        </div>
+        <form class="contact-form" data-contact-form>
+          <div class="field-row">
+            <label class="field"><span>Name</span><input type="text" name="name" required placeholder="Your name"></label>
+            <label class="field"><span>Email</span><input type="email" name="email" required placeholder="you@example.com"></label>
+          </div>
+          <label class="field"><span>What is this about?</span>
+            <select name="topic">
+              <option>A restaurant or menu</option>
+              <option>A deal</option>
+              <option>An experience or host</option>
+              <option>Partnering with DineCircle</option>
+              <option>Privacy or my account</option>
+              <option>Something else</option>
+            </select>
+          </label>
+          <label class="field"><span>Message</span><textarea name="message" rows="6" required placeholder="Tell us what you need."></textarea></label>
+          <button class="btn btn--primary" type="submit">Send message</button>
+          <p class="form-note">This opens your email app with the message ready to send. We never store form data on this website.</p>
+        </form>
+      </div>
+    </section>'''
+[1] "What DineCircle is — and is not"
+[1] "Copy failed — the code is "
+[1] " — "
+[1] "— Sent from the DineCircle website"
+[1] "Kolachi Restaurant — menu, deals and hours · DineCircle"
+[1] "Kababjees — menu, deals and hours · DineCircle"
+[1] "Bar B Q Tonight — menu, deals and hours · DineCircle"
+[1] "Cafe Aylanto — menu, deals and hours · DineCircle"
+[1] "Okra — menu, deals and hours · DineCircle"
+[1] "Xander&#x27;s — menu, deals and hours · DineCircle"
+[1] "Espresso Shahbaz DHA — menu, deals and hours · DineCircle"
+[1] "Cafe Flo — menu, deals and hours · DineCircle"
+[1] "Butlers Chocolate Café — menu, deals and hours · DineCircle"
+[1] "Esquires Coffee — menu, deals and hours · DineCircle"
+[1] "Café Zouk — menu, deals and hours · DineCircle"
+[1] "Food Creator — host profile · DineCircle"
+[1] "Lifestyle Creator — host profile · DineCircle"
+[1] "Community Host — host profile · DineCircle"
+[1] "Coffee Enthusiast — host profile · DineCircle"
+[1] "Social Dining Host — host profile · DineCircle"
+[1] 'A family-style harvest celebration at Le Petit Bistro — roasted vegetables, slow-braised mains and a cider toast.'
+[1] 'Celebrating our anniversary — would love to join!'
+[1] 'Vegetarian — is a veg menu possible?'
+[1] 'Two of us — first crawl, can\u2019t wait!'
+[1] 'Hi Alex, our head chef loved your last tasting night. We would like to invite you to co-host a 4-night omakase collaboration series at Nobu this season — chef\u2019s counter, full creative control on the menu.'
+[1] 'Welcome back! The rooftop sunset series is confirmed for monthly editions. Your September edition sold out in 48 hours — the October slot is yours whenever you are ready.'
+[1] '${booking.promoCode} — ${booking.formattedDiscount}'
+[1] 'Payment failed — the hold was released and no charge was made.'
+[1] 'No card required — settle when you arrive'
+[1] 'Continue — Guest Info'
+[1] 'Continue — Review'
+[1] 'Location is off — showing $city venues.'
+[1] 'confirm — your ticket appears under My Bookings.'
+[1] 'Cancellation policies vary by event — check the event details before '
+[1] 'updates its status — pending, under review, resolved or dismissed. '
+[1] '${guest.user.name} approved — ${guest.seats} seat(s) confirmed'
+[1] 'Total capacity — ${_dinner.bookedSeats} already sold'
+[1] 'Announcement sent to $recipientCount guest(s) — $audience'
+[1] 'Attendance saved — $present of ${_confirmedGuests.length} present'
+[1] 'Event cancelled — guests notified & refunds issued'
+[1] 'Permission denied — pick a city below.'
+[1] 'Could not get a fix — try again outdoors.'
+[1] "Couldn't determine your city — pick one below."
+[1] '$selectedCity — Explore across the city'
+[1] 'Your identity stays private — the reported account is never told who filed this.'
+[1] 'You have full control — review or undo any block.'
+[1] 'These settings apply across devices — they are stored on your '
+[1] 'Who you have blocked — unblock any time'
+[1] 'use — it just adds a public host profile and Host Studio.'
+[1] 'No Host Studio — your profile is not listed publicly'
+[1] 'Help & Feedback — we keep every ticket under this reference.'
+[1] 'Too long — keep it under 2000 characters.'
+[1] 'Table requested — reference ${reservation.reference}'
+[1] 'availability — DineCircle does not process orders or payments.'
+[1] 'new offers all the time — check back soon.'
+[1] 'Exclusive offers from your favourite restaurants — redeem '
+[1] 'Try a different search term or filter — or reset to see '
+[1] 'The restaurant applies the deal to your bill — you '
+[1] 'settled at the venue — there is no in-app payment.'
+[1] 'Try a different spelling or a broader keyword — a cuisine, a '
+[1] 'Search a venue, a dish, a deal, an experience or a host — '
+[1] 'Checked in — enjoy the event!'
+[1] 'Receipt PDFs are not available yet — '
+[1] 'Too many requests — please try again later'
+[1] 'Too many authentication attempts — please wait'
+[1] 'Too many reports — please slow down'
+[1] 'Too many feedback submissions — please try again later'
+[1] 'Long table, warm hosts, and the seekh kebab sold out early — already asking for a second edition.'
+[1] 'Loved the crowd — half the table were followers, and everyone got along.'
+[1] 'Solid test run — a couple of plates arrived late, but the host comped round.'
+[1] 'Nihari at eleven in the morning with sheermal — the table talked for two hours.'
+[1] 'Saved my seat for the meetup — see you there!'
+[1] 'This listing is flagged unverified — awaiting venue contact.'
+[1] 'Seaside BBQ — candidate collab'
+[1] 'Mock invite for a counter-side tasting pilot. Pending venue verification — treat as a test record.'
+[1] 'I approve each seat personally — ping me if unsure.'
+[1] 'The sunset series is confirmed for monthly editions. Your September edition sold out in 48 hours — the October slot is yours whenever you are ready.'
+[1] 'Our head chef loved your last tasting night. We would like to co-host a 4-night omakase series this season — chef\u2019s counter, full creative control on the menu.'
+[1] 'Nora is a magician — best table I have sat at all year.'
+[1] 'Could not connect to the database — exiting.'
+[1] 'GET subscription — no row returns synthetic default'
+[1] 'PATCH subscription — owner sets monthly plan, status stays none (partner cannot self-activate)'
+[1] 'PATCH subscription — owner switches to yearly'
+[1] 'PATCH subscription — status field is ignored (partner cannot self-activate)'
+[1] 'PATCH subscription — staff role gets 403'
+[1] 'PATCH subscription — unknown plan gets 400'
+[1] 'Admin POST activate — sets status to active'
+[1] 'Admin POST activate — cancel sets cancelled_at'
+[1] 'Admin POST activate — non-admin gets 403'
+[1] 'GET subscription — reads back what was set'
+[1] '${capability.label} needs the ${_minimumRole[capability]?.label} role — '
+[1] 'Payout settings are managed by the platform — open a support ticket '
+[1] 'Menu updated — live in the Customer App'
+[1] 'Showing saved menu — live preview unavailable'
+[1] '🔌 WebSocket: cannot join venue — not connected'
+[1] '🔌 WebSocket: cannot send message — not connected'
+[1] '🔌 WebSocket: connect error — $data'
+[1] '🔌 WebSocket: error — $data'
+[1] 'Offline — showing the last data read'
+[1] 'Photos guests see on your profile — up to ${widget.maxImages}.'
+[1] """Regenerate every launcher, adaptive and splash asset from the Partner badge.
+
+    usage: python3 tool/generate_icons.py [path/to/partner_icon_source.png]
+
+The source is the official 1254x1254 artwork: one rounded-square badge on a
+light mockup canvas with a soft drop shadow. The badge's bounds are measured
+from the pixels rather than hardcoded, because the shadow band sits right where
+a hardcoded crop would end — leaving it in bakes a pale fringe along the bottom
+edge of every icon that ships.
+
+Three masters are derived, all at the badge's own resolution:
+
+  full   - full-bleed square: the badge with the area outside its rounded shape
+           filled with the brand navy. Used where the platform applies its own
+           mask (iOS AppIcon, Android legacy ic_launcher, PWA icons), so the
+           rounding must not be baked in.
+  badge  - the badge with its original rounded corners, everything outside made
+           transparent. Used for splash branding and as the adaptive-icon
+           foreground, where the shape itself is the design.
+  field  - flat brand navy. The adaptive-icon background layer and the
+           maskable backdrop, so whatever a launcher masks away is only ever
+           brand colour, never artwork.
+
+The adaptive foreground places the badge at 0.52 of the 108dp viewport. The
+safe zone is a 66dp circle, and the widest element in the design is the PARTNER
+pill (~0.43 of the side from centre at ~0.38 below centre), which solves to a
+side of 0.57; 0.52 keeps the whole badge inside every launcher shape with margin.
+
+This script writes bitmaps only. The adaptive-icon XML, the splash drawables and
+the iOS launch storyboard are checked into the project and are not touched here.
+"""
+[1] """Derive Flutter-ready brand assets from the two source PNGs at the repo root.
+
+    usage: python3 tool/prepare_brand_assets.py
+
+Reads:
+    dineCircle Dining Logo.png   — the horizontal wordmark on a white canvas
+    DC Partner App Badge.png     — the rounded-square partner badge on a
+                                   mockup canvas with a soft drop shadow
+
+Writes into assets/branding/ (committed, not generated at build time):
+    wordmark_light.png  — transparent bg, dark text recolored to the dark-theme
+                          surface colour (#F5F3F0), orange kept as-is
+    wordmark_dark.png   — the original wordmark for light surfaces (login card,
+                          print, splash)
+    partner_badge.png   — silhouette-masked transparent crop of the badge at
+                          512px, ready to drop into any dark surface
+
+The script is idempotent and self-contained: it does not import from
+generate_icons.py so the two derivation pipelines can evolve independently.
+"""
+[1] 'Sea & Salt — The Restaurant and Café with a Beautifully Long Name'

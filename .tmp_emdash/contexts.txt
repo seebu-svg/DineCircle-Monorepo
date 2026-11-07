@@ -1,0 +1,773 @@
+[30] enus, deals and hosted dining experiences in Karachi. Free for diners — you always pay the restaurant directly.</p>\n          <div class="soc
+[30] ience or redeem a deal in the app. No booking fee and no card details — you pay the restaurant directly.</p>\n        <ul class="check-list">\n
+[11] " stroke-linecap="round" stroke-linejoin="round"/></svg> Free to book — 0% commission</li>\n              <li><svg class="icon" viewBox="0 0 2
+[10]   <img class="" src="../assets/images/dish_steak.webp" alt="Kababjees — Charcoal kebabs and family grills" loading="lazy" decoding="async">\n 
+[10] g class="" src="../assets/images/venue_bar.webp" alt="Bar B Q Tonight — Clifton grill house, open late" loading="lazy" decoding="async">\n    
+[10] ="" src="../assets/images/venue_rooftop.webp" alt="Kolachi Restaurant — Sea-facing Pakistani dining at Do Darya" loading="lazy" decoding="asy
+[6]  join in the app.</li>\n              <li>Come alone or bring a friend — the host seats the table and handles introductions.</li>\n            
+[4] lass="" src="../assets/images/portrait_2.webp" alt="Lifestyle Creator — Lifestyle creator &amp; brunch host" loading="lazy" decoding="async">
+[4] g class="" src="../assets/images/portrait_3.webp" alt="Community Host — Community host &amp; dinner organiser" loading="lazy" decoding="async
+[4] lass="" src="../assets/images/portrait_4.webp" alt="Coffee Enthusiast — Coffee host &amp; tasting guide" loading="lazy" decoding="async">\n   
+[4] ass="" src="../assets/images/portrait_5.webp" alt="Social Dining Host — Social dining host &amp; group organiser" loading="lazy" decoding="as
+[4] img class="" src="../assets/images/portrait_1.webp" alt="Food Creator — Food creator &amp; grill-table host" loading="lazy" decoding="async">
+[3] <img class="" src="../assets/images/venue_bar.webp" alt="Cafe Aylanto — Courtyard dining in Clifton" loading="lazy" decoding="async">\n       
+[2] ck a deal and join hosted dining experiences. Free for diners, always — you pay the restaurant directly.</p>\n          <form class="hero-sear
+[2] ts are confirmed in the DineCircle app. This website is for discovery — menus, deals, venue details and host profiles. Download links are ope
+[2] dd deals and host experiences. DineCircle charges a flat subscription — never a commission on your bookings.</p>\n          <ul class="check-l
+[2] ass="" src="assets/images/venue_rooftop.webp" alt="Kolachi Restaurant — Sea-facing Pakistani dining at Do Darya" loading="lazy" decoding="asy
+[2]    <img class="" src="assets/images/venue_bar.webp" alt="Cafe Aylanto — Courtyard dining in Clifton" loading="lazy" decoding="async">\n       
+[2] <img class="" src="assets/images/dish_brunch.webp" alt="Xander&#x27;s — All-day café in Clifton" loading="lazy" decoding="async">\n           
+[2]      <img class="" src="assets/images/dish_pasta.webp" alt="Café Zouk — Wood-fired pizza and pasta on Zamzama" loading="lazy" decoding="async
+[2]   <img class="" src="assets/images/portrait_1.webp" alt="Food Creator — Food creator &amp; grill-table host" loading="lazy" decoding="async">
+[2] g class="" src="assets/images/portrait_2.webp" alt="Lifestyle Creator — Lifestyle creator &amp; brunch host" loading="lazy" decoding="async">
+[2] <img class="" src="assets/images/portrait_3.webp" alt="Community Host — Community host &amp; dinner organiser" loading="lazy" decoding="async
+[2] g class="" src="assets/images/portrait_4.webp" alt="Coffee Enthusiast — Coffee host &amp; tasting guide" loading="lazy" decoding="async">\n   
+[2]  class="" src="assets/images/portrait_5.webp" alt="Social Dining Host — Social dining host &amp; group organiser" loading="lazy" decoding="as
+[2]  // The server stores an empty label while a gateway owns the payment —\n      // the settlement webhook writes the real brand/last4. Inventin
+[1] "2026",\n        "bio": "Hosts dinners designed for meeting new people — one table, a set menu and a host who keeps the conversation moving. N
+[1]  people who care where the beans come from. No prior knowledge needed — just curiosity and a willingness to try something new.",\n        "int
+[1] e, plenty of introductions, then dinner. Come alone or bring a friend — the table does the rest.",\n        "venue": "kolachi", "host": "food-
+[1] w {esc(v["name"])}">\n            {img(base, v["cover"], f'{v["name"]} — {v["tagline"]}')}\n            <div class="badge-row">{badges}</div>\n 
+[1] esc(h["name"])}">\n            {img(base, h["portrait"], f'{h["name"]} — {h["role"]}')}\n          </a>\n          <div class="host-card__body">
+[1] "Hosted dinners, brunches and meetups around Karachi. Joining is free — you pay the venue for your meal.",\n                      '<a class="b
+[1] s, cafés, menus, deals and hosted dining experiences. Free for diners — pay the restaurant directly.",\n        "", "", body,\n    )\n\n\n# ------
+[1]    <figure class="gallery-main">{img("../", v["cover"], f'{v["name"]} — {v["tagline"]}', eager=True)}</figure>\n        <figure class="gallery
+[1] -list check-list--sm">\n              <li>{icon("check")} Free to book — 0% commission</li>\n              <li>{icon("check")} Pay the restaura
+[1]      </div>\n    </section>'''\n\n    return page(\n        f'{v["name"]} — menu, deals and hours',\n        f'{v["name"]} in {v["area"]}, Karachi
+[1] eal lists its terms up front and is applied by the venue at the table — never through an online checkout.",\n        crumbs_html=crumbs("", [(
+[1] s, brunches and coffee meetups around Karachi. Joining is always free — you pay the venue for your meal at the end of the evening.",\n        
+[1] ure class="host-head__photo">{img("../", h["portrait"], f'{h["name"]} — {h["role"]}', eager=True)}</figure>\n        <div class="host-head__bo
+[1]      </div>\n    </section>'''\n\n    return page(\n        f'{h["name"]} — host profile',\n        f'{h["name"]} hosts {h["specialty"].lower()} i
+[1] ith the season. This site shows preview content for the Karachi pilot — confirm details with the restaurant before you order."),\n        ("Wh
+[1] use the service.</p>'''),\n        ("what-we-are", "What DineCircle is — and is not", '''<p>DineCircle is a discovery platform. We publish ven
+[1] s, cafés, menus, deals and hosted dining experiences. Free for diners — pay the restaurant directly.">\n  <meta name="theme-color" content="#F
+[1] s, cafés, menus, deals and hosted dining experiences. Free for diners — pay the restaurant directly.">\n  <meta property="og:image" content="a
+[1] >Hosted dinners, brunches and meetups around Karachi. Joining is free — you pay the venue for your meal.</p>\n        </div>\n        <div clas
+[1]      <img class="" src="assets/images/dish_steak.webp" alt="Kababjees — Charcoal kebabs and family grills" loading="lazy" decoding="async">\n 
+[1] <img class="" src="assets/images/venue_bar.webp" alt="Bar B Q Tonight — Clifton grill house, open late" loading="lazy" decoding="async">\n    
+[1]         <img class="" src="assets/images/hero_tasting.webp" alt="Okra — Mediterranean plates in DHA" loading="lazy" decoding="async">\n       
+[1] ss="" src="assets/images/dish_dessert.webp" alt="Espresso Shahbaz DHA — Neighbourhood espresso bar in DHA Phase 6" loading="lazy" decoding="a
+[1]   <img class="" src="assets/images/venue_interior.webp" alt="Cafe Flo — French-leaning café in Clifton" loading="lazy" decoding="async">\n    
+[1] ="" src="assets/images/dish_dessert.webp" alt="Butlers Chocolate Café — Chocolate café on Zamzama" loading="lazy" decoding="async">\n         
+[1] <img class="" src="assets/images/venue_bar.webp" alt="Esquires Coffee — Coffee house on Zamzama" loading="lazy" decoding="async">\n           
+[1] eal lists its terms up front and is applied by the venue at the table — never through an online checkout.</p>\n        \n      </div>\n    </sec
+[1] s, brunches and coffee meetups around Karachi. Joining is always free — you pay the venue for your meal at the end of the evening.</p>\n      
+[1] ith the season. This site shows preview content for the Karachi pilot — confirm details with the restaurant before you order.</p>\n          <
+[1] about">About these terms</a><a href="#what-we-are">What DineCircle is — and is not</a><a href="#using-the-site">Using the site</a><a href="#a
+[1] section class="legal-section" id="what-we-are"><h2>What DineCircle is — and is not</h2><p>DineCircle is a discovery platform. We publish venu
+[1] =======================================================\n   DineCircle — base layer\n   Tokens, reset, typography, layout, header, footer, butt
+[1] =======================================================\n   DineCircle — components layer\n   Section headers, filters, cards, lists, forms, FA
+[1] =======================================================\n   DineCircle — page layouts\n   Home hero, directory headers, venue detail, experienc
+[1] =======================================================\n   DineCircle — site behaviour\n   Sticky header, mobile nav, city picker, app dialog,
+[1] n(function (ok) {\n          if (!ok) {\n            toast("Copy failed — the code is " + code);\n            return;\n          }\n          butt
+[1]  || "").trim();\n\n      var subject = "[Website] " + topic + (name ? " — " + name : "");\n      var body = [\n        "Name: " + name,\n        "
+[1]  "Topic: " + topic,\n        "",\n        message,\n        "",\n        "— Sent from the DineCircle website"\n      ].join("\n");\n\n      window.l
+[1] nt="width=device-width, initial-scale=1">\n  <title>Kolachi Restaurant — menu, deals and hours · DineCircle</title>\n  <meta name="description"
+[1] "DineCircle">\n  <meta property="og:title" content="Kolachi Restaurant — menu, deals and hours · DineCircle">\n  <meta property="og:description
+[1] ="" src="../assets/images/venue_rooftop.webp" alt="Kolachi Restaurant — Sea-facing Pakistani dining at Do Darya" fetchpriority="high" decodin
+[1] rt" content="width=device-width, initial-scale=1">\n  <title>Kababjees — menu, deals and hours · DineCircle</title>\n  <meta name="description"
+[1]  content="DineCircle">\n  <meta property="og:title" content="Kababjees — menu, deals and hours · DineCircle">\n  <meta property="og:description
+[1] "><img class="" src="../assets/images/dish_steak.webp" alt="Kababjees — Charcoal kebabs and family grills" fetchpriority="high" decoding="asy
+[1] ntent="width=device-width, initial-scale=1">\n  <title>Bar B Q Tonight — menu, deals and hours · DineCircle</title>\n  <meta name="description"
+[1] nt="DineCircle">\n  <meta property="og:title" content="Bar B Q Tonight — menu, deals and hours · DineCircle">\n  <meta property="og:description
+[1] g class="" src="../assets/images/venue_bar.webp" alt="Bar B Q Tonight — Clifton grill house, open late" fetchpriority="high" decoding="async"
+[1]  content="width=device-width, initial-scale=1">\n  <title>Cafe Aylanto — menu, deals and hours · DineCircle</title>\n  <meta name="description"
+[1] ntent="DineCircle">\n  <meta property="og:title" content="Cafe Aylanto — menu, deals and hours · DineCircle">\n  <meta property="og:description
+[1] <img class="" src="../assets/images/venue_bar.webp" alt="Cafe Aylanto — Courtyard dining in Clifton" fetchpriority="high" decoding="async"></
+[1] iewport" content="width=device-width, initial-scale=1">\n  <title>Okra — menu, deals and hours · DineCircle</title>\n  <meta name="description"
+[1] name" content="DineCircle">\n  <meta property="og:title" content="Okra — menu, deals and hours · DineCircle">\n  <meta property="og:description
+[1] ain"><img class="" src="../assets/images/hero_tasting.webp" alt="Okra — Mediterranean plates in DHA" fetchpriority="high" decoding="async"></
+[1] content="width=device-width, initial-scale=1">\n  <title>Xander&#x27;s — menu, deals and hours · DineCircle</title>\n  <meta name="description"
+[1] tent="DineCircle">\n  <meta property="og:title" content="Xander&#x27;s — menu, deals and hours · DineCircle">\n  <meta property="og:description
+[1] g class="" src="../assets/images/dish_brunch.webp" alt="Xander&#x27;s — All-day café in Clifton" fetchpriority="high" decoding="async"></figu
+[1] ="width=device-width, initial-scale=1">\n  <title>Espresso Shahbaz DHA — menu, deals and hours · DineCircle</title>\n  <meta name="description"
+[1] ineCircle">\n  <meta property="og:title" content="Espresso Shahbaz DHA — menu, deals and hours · DineCircle">\n  <meta property="og:description
+[1] "" src="../assets/images/dish_dessert.webp" alt="Espresso Shahbaz DHA — Neighbourhood espresso bar in DHA Phase 6" fetchpriority="high" decod
+[1] ort" content="width=device-width, initial-scale=1">\n  <title>Cafe Flo — menu, deals and hours · DineCircle</title>\n  <meta name="description"
+[1] " content="DineCircle">\n  <meta property="og:title" content="Cafe Flo — menu, deals and hours · DineCircle">\n  <meta property="og:description
+[1] img class="" src="../assets/images/venue_interior.webp" alt="Cafe Flo — French-leaning café in Clifton" fetchpriority="high" decoding="async"
+[1] width=device-width, initial-scale=1">\n  <title>Butlers Chocolate Café — menu, deals and hours · DineCircle</title>\n  <meta name="description"
+[1] eCircle">\n  <meta property="og:title" content="Butlers Chocolate Café — menu, deals and hours · DineCircle">\n  <meta property="og:description
+[1]  src="../assets/images/dish_dessert.webp" alt="Butlers Chocolate Café — Chocolate café on Zamzama" fetchpriority="high" decoding="async"></fi
+[1] ntent="width=device-width, initial-scale=1">\n  <title>Esquires Coffee — menu, deals and hours · DineCircle</title>\n  <meta name="description"
+[1] nt="DineCircle">\n  <meta property="og:title" content="Esquires Coffee — menu, deals and hours · DineCircle">\n  <meta property="og:description
+[1] g class="" src="../assets/images/venue_bar.webp" alt="Esquires Coffee — Coffee house on Zamzama" fetchpriority="high" decoding="async"></figu
+[1] rt" content="width=device-width, initial-scale=1">\n  <title>Café Zouk — menu, deals and hours · DineCircle</title>\n  <meta name="description"
+[1]  content="DineCircle">\n  <meta property="og:title" content="Café Zouk — menu, deals and hours · DineCircle">\n  <meta property="og:description
+[1] "><img class="" src="../assets/images/dish_pasta.webp" alt="Café Zouk — Wood-fired pizza and pasta on Zamzama" fetchpriority="high" decoding=
+[1] e, plenty of introductions, then dinner. Come alone or bring a friend — the table does the rest.</p>\n            <div class="tag-row"><span c
+[1]     <span class="muted">Hosts dinners designed for meeting new people — one table, a set menu and a host who keeps the conversation moving. N
+[1]  people who care where the beans come from. No prior knowledge needed — just curiosity and a willingness to try something new.</span>\n       
+[1]  content="width=device-width, initial-scale=1">\n  <title>Food Creator — host profile · DineCircle</title>\n  <meta name="description" content=
+[1] ntent="DineCircle">\n  <meta property="og:title" content="Food Creator — host profile · DineCircle">\n  <meta property="og:description" content
+[1] img class="" src="../assets/images/portrait_1.webp" alt="Food Creator — Food creator &amp; grill-table host" fetchpriority="high" decoding="a
+[1] ent="width=device-width, initial-scale=1">\n  <title>Lifestyle Creator — host profile · DineCircle</title>\n  <meta name="description" content=
+[1] ="DineCircle">\n  <meta property="og:title" content="Lifestyle Creator — host profile · DineCircle">\n  <meta property="og:description" content
+[1] lass="" src="../assets/images/portrait_2.webp" alt="Lifestyle Creator — Lifestyle creator &amp; brunch host" fetchpriority="high" decoding="a
+[1] ontent="width=device-width, initial-scale=1">\n  <title>Community Host — host profile · DineCircle</title>\n  <meta name="description" content=
+[1] ent="DineCircle">\n  <meta property="og:title" content="Community Host — host profile · DineCircle">\n  <meta property="og:description" content
+[1] g class="" src="../assets/images/portrait_3.webp" alt="Community Host — Community host &amp; dinner organiser" fetchpriority="high" decoding=
+[1]     <p class="host-bio">Hosts dinners designed for meeting new people — one table, a set menu and a host who keeps the conversation moving. N
+[1] ent="width=device-width, initial-scale=1">\n  <title>Coffee Enthusiast — host profile · DineCircle</title>\n  <meta name="description" content=
+[1] ="DineCircle">\n  <meta property="og:title" content="Coffee Enthusiast — host profile · DineCircle">\n  <meta property="og:description" content
+[1] lass="" src="../assets/images/portrait_4.webp" alt="Coffee Enthusiast — Coffee host &amp; tasting guide" fetchpriority="high" decoding="async
+[1]  people who care where the beans come from. No prior knowledge needed — just curiosity and a willingness to try something new.</p>\n          
+[1] nt="width=device-width, initial-scale=1">\n  <title>Social Dining Host — host profile · DineCircle</title>\n  <meta name="description" content=
+[1] "DineCircle">\n  <meta property="og:title" content="Social Dining Host — host profile · DineCircle">\n  <meta property="og:description" content
+[1] ass="" src="../assets/images/portrait_5.webp" alt="Social Dining Host — Social dining host &amp; group organiser" fetchpriority="high" decodi
+[1] e, 1 Explore, 2 Deals, 3 Profile. Scan QR is not a\n/// persistent tab — it opens the camera full-screen (and keeps the hardware\n/// camera al
+[1]        );\n                            // Bookings left the bottom bar — open it as a page.\n                            Navigator.push(\n      
+[1] id _onCreateTap() => _handleCreate();\n\n  /// Centre navigation action — opens the branded QR scanner full-screen.\n  void _onScanTap() {\n    N
+[1] ),\n                  ),\n                ),\n                // Scan QR — prominent branded centre action.\n                _ScanCenterAction(on
+[1] ormant and checkout keeps the historical\n  /// simulated confirmation — so keyless dev builds/CI are unaffected.\n  static const String stripe
+[1] back;\n}\n\n/// Parses a nullable numeric field (coordinates, distances) — absent or\n/// unparseable values stay null rather than collapsing to 
+[1] led'.\n  final String paymentStatus;\n\n  /// PaymentSheet client secret — only present on the deferred checkout\n  /// response for a booking st
+[1] Contact fields the server surfaces on the venue payload. All optional —\n  /// partners may publish only a subset (e.g. just a phone number).\n
+[1] // True only for a host whose metrics meet every influencer threshold —\n  /// drives the "Claim influencer status" button on the Profile tier
+[1] import '../json.dart';\n\n/// Envelope of `GET /api/search` — five categorised lists plus the unpaged\n/// totals and the per-catego
+[1] rings). The detail endpoints supply the full\n/// venue/menu/attendees — including real lat/lng — which these same functions\n/// consume when 
+[1] nts supply the full\n/// venue/menu/attendees — including real lat/lng — which these same functions\n/// consume when present.\nclass Mappers {\n
+[1] alSince,\n    joinedYear: d.joinedYear,\n    // Account & Settings (P1) — ride the `/auth/me` payload so the Settings\n    // screens hydrate st
+[1] / host UIs).\n  /// Demo-only card label. Real bookings never use this — the gateway's\n  /// webhook writes the true brand/last4 once a charge
+[1]   description: 'A family-style harvest celebration at Le Petit Bistro — roasted vegetables, slow-braised mains and a cider toast.',\n      res
+[1] uration(hours: 5)),\n            message: 'Celebrating our anniversary — would love to join!',\n          ),\n          GuestEntry(\n            
+[1] .subtract(const Duration(hours: 3)),\n            message: 'Vegetarian — is a veg menu possible?',\n          ),\n          GuestEntry(\n        
+[1] w.subtract(const Duration(hours: 8)),\n            message: 'Two of us — first crawl, can\u2019t wait!',\n          ),\n        ];\n      case 'm
+[1] to co-host a 4-night omakase collaboration series at Nobu this season — chef\u2019s counter, full creative control on the menu.',\n      recei
+[1] med for monthly editions. Your September edition sold out in 48 hours — the October slot is yours whenever you are ready.',\n      receivedAt:
+[1] king.\n///\n/// Derived from the server's [Booking.paymentStatus] first — that is the\n/// authoritative gateway signal — and only falls back to
+[1] g.paymentStatus] first — that is the\n/// authoritative gateway signal — and only falls back to the booking\n/// [Booking.status] for legacy ro
+[1] an explicit method.\n  ///\n  /// DineCircle collects no payment in-app — the guest pays the venue directly\n  /// — so the only honest default 
+[1]  collects no payment in-app — the guest pays the venue directly\n  /// — so the only honest default names that arrangement rather than a card\n
+[1]   /// Whether [userId] is this dinner's host. Use the live session id — the old\n  /// `isHostedByCurrentUser` getter was a hardcoded stub wit
+[1] ategory-aware Explore view.\n///\n/// This is a UI-facing taxonomy only — each value maps onto existing server\n/// query axes in [ExploreScreen
+[1]   return '${diff.inDays}d ago';\n  }\n}\n\n/// A collaboration invitation — bidirectional (host ↔ restaurant).\nclass CollaborationInvite {\n  fina
+[1]  is lifetime\n/// net earnings minus every withdrawal recorded to date — no external gateway.\nclass Wallet {\n  final double available;\n  final
+[1] GET /hosts/:id/analytics?period=`.\n/// All values are server-computed — no hardcoded factors or mock data.\nclass HostAnalytics {\n  final int 
+[1] e.dart';\nimport 'dinner.dart';\n\n/// The source kind of a notification — drives the leading icon.\nenum NotificationItemKind { activity, remind
+[1] `\n/// coercion), so a partially-unknown status never crashes a screen — unknown\n/// wire values fall back to the safest open state rather tha
+[1]  final String id;\n  final SavedLocationKind kind;\n\n  /// Display name — "Home", "Work", "Clifton", …\n  final String name;\n\n  /// Resolved cit
+[1] de != null && longitude != null;\n\n  /// Short subtitle for list tiles — "DHA, Karachi" or just "Karachi".\n  String get subtitle {\n    final p
+[1] lt) or `professional`\n  /// (public host profile + Host Studio). This — not [role] — decides whether\n  /// Host Studio is available, so switc
+[1] ssional`\n  /// (public host profile + Host Studio). This — not [role] — decides whether\n  /// Host Studio is available, so switching back to 
+[1] ncer/admin).\n  /// Necessary but no longer sufficient for Host Studio — see [isProfessional].\n  bool get hasHostingRole => role != 'user';\n\n 
+[1] /// Table reservation model — mirrors the server's `table_reservations` row\n/// plus the joined ven
+[1] nt get hashCode => id.hashCode;\n}\n\n/// Reservation lifecycle statuses — mirrors the server's CHECK constraint.\nenum ReservationStatus {\n  pen
+[1] /// Public venue menu — the unauthenticated payload served to diners who scan\n/// a QR code o
+[1] List<String> dietaryTags;\n  final String? photoUrl;\n\n  /// `Rs 2,450` — menu prices are PKR and always shown with the symbol.\n  String get fo
+[1] import 'user_profile.dart';\n\n/// Conversation kind — maps to the server-side CHECK constraint.\nenum ConversationKind { eve
+[1] tCity;\n  final String? restaurantCoverImage;\n\n  /// `Section · Venue` — what the diner needs to place the dish.\n  String get subtitle => [\n  
+[1] atch (_) {\n        // Storage unavailable (e.g. unsupported platform) — keep defaults.\n        return;\n      }\n      if (alive) state = loade
+[1] stId, inviteId, accept);\n    // Invalidate the family provider itself — invalidating only the derived\n    // [myHostInvitesProvider] would re
+[1] follows the user as they move. Every provider\n/// degrades gracefully — permission denied or GPS off simply falls back to the\n/// profile cit
+[1] ity that was used before this layer existed.\n\n/// Karachi city centre — the neutral camera target when neither a GPS fix nor\n/// venue coordi
+[1] a/neighbourhood within their city. Empty string\n/// means "all areas" — feeds that accept an area filter treat it as no filter.\nfinal userAre
+[1] current fix. Reloaded whenever the position changes;\n/// never throws — a failed lookup just means "keep the profile city".\nfinal liveCityPro
+[1]     return null;\n  }\n  return null;\n});\n\n/// Haversine distance in km — used for "1.2 km away" labels when the feed is\n/// city-scoped (no se
+[1] t _writeLocal(remote);\n    } catch (_) {\n      // Network unavailable — keep local cache.\n    }\n  }\n\n  /// Save a new or updated location (se
+[1] _writeLocal(updated);\n  }\n\n  /// Look up a specific kind (Home, Work) — null when not set.\n  SavedLocation? ofKind(SavedLocationKind kind) {\n
+[1] sKey, value: encoded);\n    } catch (_) {\n      // Storage unavailable — state is already updated in memory.\n    }\n  }\n}\n\n// ── Last-selected 
+[1] s.userFromDto(me));\n    } catch (_) {\n      // Token rejected/expired — clear it and drop to signed-out.\n      await storage.delete(key: _tok
+[1] hen upcoming hosted\n  /// experiences block a switch back to Personal — the caller surfaces it.\n  Future<void> switchAccountType(String accou
+[1] / Partial settings write (`PATCH /users/me`) for the Settings screens —\n  /// privacy toggles, food preferences, home locale. Republishes the
+[1] // `POST /auth/logout-all`, then clears the local token. Every device —\n  /// including this one — lands back on the sign-in screen.\n  Future
+[1]  then clears the local token. Every device —\n  /// including this one — lands back on the sign-in screen.\n  Future<void> logoutAllDevices() a
+[1] rowth-ladder status for the Profile tier card. Only fetched for hosts —\n/// diners see the Become-a-host prompt instead, and influencers/part
+[1] ompt instead, and influencers/partners have\n/// nothing left to claim — so every other rung short-circuits to null.\nfinal tierProvider = Futu
+[1] otifications) feed, newest first.\n/// Kept for backward compatibility — new code should use [notificationsProvider].\nfinal activityProvider =
+[1] icationFromActivityRow).toList();\n});\n\n/// Unified notifications feed — unions activity, reminders and offers\n/// (`GET /users/me/notificatio
+[1] tionFromUnifiedRow).toList();\n});\n\n/// Count of unread activity items — drives the Home bell badge.\nfinal unreadActivityCountProvider = Futur
+[1] ad providers so the UI\n/// re-renders from the authoritative response — no optimistic fakes.\nclass SocialController {\n  SocialController(this
+[1] returns true once settled, false when the\n  /// hold failed/was swept — and also false on timeout, which is the honest\n  /// "we'll notify yo
+[1] ngs`). The server recomputes the\n  /// total (and any promo discount) — the returned [Booking] carries that\n  /// authoritative amount. [paym
+[1] ent secret for the caller's own still\n  /// `pending_payment` booking — the `Complete payment` retry path after an\n  /// abandoned checkout. 
+[1]  approves a pending seat request (`POST /bookings/:id/approve`)\n  /// — the booking is confirmed and the hold is captured.\n  Future<Booking> 
+[1]  declines a pending seat request (`POST /bookings/:id/decline`)\n  /// — it is cancelled/refunded and the held seat is released.\n  Future<Book
+[1] someone else's dashboard. Money is a server-side simulated\n/// ledger — a withdrawal is a recorded row that reduces [Wallet.available].\nabstr
+[1]   .cast<String>()\n        .toList(),\n  );\n}\n\n/// Location data access — supported cities and the user's saved locations.\nabstract class Locat
+[1] // Every method hits a real endpoint from Phase 2 of the backend work —\n/// blocking rules, report duplicate guards and feedback tickets are 
+[1] ─────────────────────────────────\n\n  /// `POST /auth/change-password` — verifies the current password server-side\n  /// and revokes every OTH
+[1]   required String newPassword,\n  });\n\n  /// `POST /auth/change-email` — password-confirmed START of a verified\n  /// email change. Does not t
+[1] uired String password,\n  });\n\n  /// `POST /auth/change-email/confirm` — validates the 6-digit code, applies\n  /// the new address and revokes
+[1] rmEmailChange({required String code});\n\n  /// `POST /auth/logout-all` — revokes EVERY session, including this device.\n  Future<void> logoutAl
+[1] ng this device.\n  Future<void> logoutAll();\n\n  /// `DELETE /users/me` — password-confirmed account deletion. The server\n  /// anonymises the 
+[1] aurantId/scan', body: {});\n    } catch (_) {\n      // Fire-and-forget — scan recording is best-effort for analytics.\n    }\n  }\n\n  static Publ
+[1] i/api_client.dart';\nimport '../api/json.dart';\n\n/// Conversations API — covers the full messaging surface: listing, DM creation,\n/// message 
+[1] /api_client.dart';\nimport '../api/json.dart';\n\n/// Restaurant reviews — read and write.\nabstract class RestaurantReviewsRepository {\n  /// Fe
+[1] ite to `PATCH /users/me` carrying only the keys the\n  /// caller owns — home area, dietary/allergy lists, privacy toggles. The\n  /// endpoint
+[1] s,\n  });\n\n  /// Removes the profile photo (`DELETE /users/me/avatar`) — back to initials.\n  Future<UserProfile> removeAvatar();\n\n  /// Curren
+[1] t { signIn, signUp }\n\n/// Email + password sign-in / account creation — the simple first-launch path.\n///\n/// On success the [SessionControll
+[1]  Column(\n            children: [\n              // Status filter chips — only for Upcoming and Past tabs.\n              // The Tables tab uses
+[1] 4),\n                  Text(\n                    '${booking.promoCode} — ${booking.formattedDiscount}',\n                    style: AppTextStyl
+[1] --------------------------------------------\n\n/// Dark map style JSON — matches DineCircle's dark theme with orange accents.\nconst String _kD
+[1] velMode: travelMode,\n      );\n    }\n\n    // Null-safe address helpers — restaurant.city is String?.\n    final city = restaurant.city;\n    fin
+[1] nst SizedBox(height: AppSpacing.md),\n            // Transport options — Wrap allows 3+2 layout on narrow screens.\n            Wrap(\n         
+[1]                child: Text(\n                          'Payment failed — the hold was released and no charge was made.',\n                     
+[1] t with the booking.\n  ///\n  /// This screen offers exactly one method — pay at the venue — and collects no\n  /// card data, so the label must
+[1] \n  ///\n  /// This screen offers exactly one method — pay at the venue — and collects no\n  /// card data, so the label must name that method r
+[1]   const SizedBox(height: AppSpacing.lg),\n\n          // Payment method — pay at the venue (no card collected in-app).\n          Text('Payment 
+[1]        title: 'Pay at venue',\n            subtitle: 'No card required — settle when you arrive',\n            isSelected: true,\n          ),\n 
+[1] rentStep) {\n          0 => PrimaryButton(\n            text: 'Continue — Guest Info',\n            onPressed: () => setState(() => _currentStep
+[1]          ),\n          1 => PrimaryButton(\n            text: 'Continue — Review',\n            onPressed: () => setState(() => _currentStep = 2
+[1] .dart';\nimport '../../data/mock_data.dart';\n\n/// Create Dinner screen — 6-step wizard (spec section 10).\n///\n/// Steps: Experience Details → 
+[1] by field name.\n  final Map<String, String> _errors = {};\n\n  // Step 1 — Experience Details\n  final _nameCtrl = TextEditingController(text: 'O
+[1] ro_tasting.png';\n  String _category = 'Food Experience';\n\n  // Step 2 — Restaurant & Venue\n  Restaurant? _selectedRestaurant;\n\n  // Step 3 — 
+[1]  — Restaurant & Venue\n  Restaurant? _selectedRestaurant;\n\n  // Step 3 — Date & Schedule\n  DateTime _eventDate = DateTime.now().add(const Dura
+[1]  = 4;\n  int _maxAttendees = 12;\n  bool _isPublic = true;\n\n  // Step 4 — Guests & Dining\n  String _guestAccess = 'Open to Everyone';\n  bool _a
+[1]  {'Punctuality required'};\n  bool _isSpecialMenu = true;\n\n  // Step 5 — Menu & Pricing\n  bool _isPaid = true;\n  double _pricePerPerson = 185.
+[1] ============================================\n// Tappable progress bar — shows step dots with labels, allows backward taps\n// ================
+[1] ===========================================================\n// Step 1 — Experience Details\n// ===============================================
+[1] ===========================================================\n// Step 2 — Restaurant & Venue\n// ===============================================
+[1] ===========================================================\n// Step 3 — Date & Schedule\n// ==================================================
+[1] ===========================================================\n// Step 4 — Guests & Dining\n// ==================================================
+[1] ===========================================================\n// Step 5 — Menu & Pricing\n// ===================================================
+[1] ===========================================================\n// Step 6 — Review & Submit\n// ==================================================
+[1] rt';\nimport '../../api/api_exception.dart';\n\n/// Dinner detail screen — premium event details page.\n///\n/// Answers five questions:\n/// 1. Wh
+[1]         Navigator.pop(ctx);\n                  // Real `POST /reports` — the sheet shows the RP reference.\n                  ReportSheet.show(
+[1]    value: dinner.cancellationPolicy,\n      ),\n    );\n    // RSVP rule — no rsvp_deadline column exists, so the honest rule:\n    items.add(\n  
+[1] ish_sushi.png',\n    venueTag: 'premium',\n  ),\n];\n\n/// Discover screen — premium dining discovery interface.\n///\n/// Four tabs (All / Places /
+[1] nded(\n                child: Text(\n                  'Location is off — showing $city venues.',\n                  style: AppTextStyles.bodySm
+[1]  the user's font-size setting, so their\n    // heights must scale too — fixed pixels overflow on devices set above 1.0.\n    final textScaler 
+[1] ───────────────────────────────────\n\n/// Venue row for the Places tab — cover, name, cuisine, distance, tags, save.\nclass _VenueRow extends S
+[1]   ],\n        ),\n      ),\n    );\n  }\n}\n\n/// Host row for the Hosts tab — avatar, name, handle, stats.\nclass _HostRow extends StatelessWidget {
+[1] een (dead search,\n/// dead contact buttons, dead legal tiles) is gone — nothing on this screen\n/// is a no-op.\nclass HelpScreen extends Consu
+[1] r". Pick your seats, choose a payment method and '\n          'confirm — your ticket appears under My Bookings.',\n    ),\n    _Faq(\n      'How 
+[1] the cancellation policy?',\n      'Cancellation policies vary by event — check the event details before '\n          'booking. Generally full r
+[1] tely. Our team reviews the report and '\n          'updates its status — pending, under review, resolved or dismissed. '\n          'The report
+[1] ider.dart';\nimport '../qr_menu/qr_scan_screen.dart';\n\n/// Home screen — "Today" per spec.\n///\n/// A vertically scrolling editorial concierge 
+[1] . Search\n///   3. Quick actions\n///   4. Your Next Table (conditional — only when a confirmed booking exists)\n///   5. Featured Experiences (
+[1] /// Empty sections are hidden. All data comes from Riverpod providers — no\n/// mock data.\nclass HomeScreen extends ConsumerStatefulWidget {\n 
+[1] ─────────────────────────────────────────────────\n\n  /// Trending Now — server-sorted by fill ratio (most popular first).\n  Widget _buildTren
+[1]          );\n        },\n      ),\n    );\n  }\n\n  /// Recommended for You — server-sorted by cuisine overlap with user's tastes.\n  Widget _buildR
+[1]        );\n        },\n      ),\n    );\n  }\n\n  /// Gather Around a Table — photographic category banners.\n  Widget _buildSocialCategories() {\n  
+[1] acing.xl),\n        ],\n      ),\n    );\n  }\n\n  /// Tables Worth Booking — nearby restaurant cards.\n  Widget _buildRestaurants(AsyncValue<List<R
+[1]      );\n        },\n      ),\n    );\n  }\n\n  /// This Week on DineCircle — upcoming dinners in a vertical list.\n  ///\n  /// Excludes dinners alr
+[1] atured, show the full list instead of\n          // hiding the section — the guest still needs something to browse.\n          final list = upc
+[1]    );\n        },\n      ),\n    );\n  }\n\n  /// Find Your Kind of Evening — occasion mood cards.\n  Widget _buildEveningMoods() {\n    const occasi
+[1] AppSpacing.xl),\n        ],\n      ),\n    );\n  }\n\n  /// Your Next Table — next confirmed upcoming booking near the top.\n  ///\n  /// Shows venue
+[1]    ),\n          );\n        },\n      ),\n    );\n  }\n\n  /// Host a Table — invitation for guests who haven't become hosts yet.\n  Widget _buildHo
+[1] t '../../widgets/data_view.dart';\n\n/// Analytics & Insights for hosts — fully server-driven.\n///\n/// Every metric comes from `GET /hosts/:id/
+[1]           ? a.averageRating.toStringAsFixed(1)\n                    : '—',\n                icon: Icons.star_rounded,\n                color: Ap
+[1]    ? '${a.averageRating.toStringAsFixed(1)} ★'\n                    : '—',\n                icon: Icons.star_rounded,\n                color: Ap
+[1] t(\n            approve\n                ? '${guest.user.name} approved — ${guest.seats} seat(s) confirmed'\n                : 'Request from ${g
+[1]                    child: Text(\n                      'Total capacity — ${_dinner.bookedSeats} already sold',\n                      style: Ap
+[1]                        'Announcement sent to $recipientCount guest(s) — $audience',\n                            ),\n                          
+[1]      content: Text(\n                                'Attendance saved — $present of ${_confirmedGuests.length} present',\n                    
+[1]                 content: Text(\n                      'Event cancelled — guests notified & refunds issued',\n                    ),\n           
+[1] ics_screen.dart';\nimport 'event_manage_screen.dart';\n\n/// Host Studio — premium creator dashboard.\n///\n/// Hosts and influencers are the same
+[1] ;\n  String _eventFilter = 'All';\n\n  /// Cosmetic payout-method labels — money is a simulated ledger, so no real\n  /// account details are sho
+[1] ppColors.danger,\n        ),\n      );\n    }\n  }\n\n  /// Deletes a draft — reuses the host-cancel endpoint (`DELETE /events/:id`).\n  Future<void
+[1] ssion.deniedForever) {\n        if (mounted) _snack('Permission denied — pick a city below.');\n        return;\n      }\n\n      final Position p
+[1] \n      } on Object {\n        if (mounted) _snack('Could not get a fix — try again outdoors.');\n        return;\n      }\n\n      ref.invalidate(
+[1]      if (city.isEmpty) {\n        _snack("Couldn't determine your city — pick one below.");\n        return;\n      }\n      setState(() {\n      
+[1] ox(height: AppSpacing.md),\n          Text(\n            '$selectedCity — Explore across the city',\n            style: AppTextStyles.bodySmall.
+[1] port '../../widgets/common_widgets.dart';\n\n/// P1-6 Location Settings — the account's city plus a preferred dining area\n/// (neighbourhood/di
+[1] ed, web otherwise) navigating to the\n  /// venue. No API key required — this is the public Maps URL scheme.\n  /// [travelMode] is one of `dri
+[1]              ),\n            ),\n          ),\n          // Filter chips — toggle marker layers.\n          Positioned(\n            top: 110,\n   
+[1]          ),\n            ),\n          ),\n          // Re-center button — jumps to the live fix (or the venue cluster).\n          Positioned(\n 
+[1]         ),\n            ),\n          ),\n          // City header badge — follows the live fix when available.\n          if (city.isNotEmpty)\n 
+[1] rt';\nimport '../../widgets/data_view.dart';\n\n/// Notifications screen — unified alerts surface combining activity feed,\n/// upcoming-booking 
+[1] etNotificationIcon(NotificationItem n) {\n    // Per-kind leading icon — overrides the legacy type-based mapping.\n    switch (n.itemKind) {\n  
+[1] mport '../../widgets/common_widgets.dart';\n\n/// P1-5 Food Preferences — cuisines/interests, dietary preferences and\n/// allergies, all persis
+[1] en.dart';\nimport 'profile_overview_widgets.dart';\n\n/// Profile screen — a premium dining identity and account hub.\n///\n/// Organised into fiv
+[1] ved venues)\n///   4. Dining preferences (cuisines, dietary, allergies — editable)\n///   5. Grouped navigation menu (My Dining · Hosting · Acc
+[1] dicator()),\n      );\n    }\n\n    // Real counts from backend providers — no fabricated data.\n    final savedCount = ref.watch(savedEventsProvi
+[1]   ],\n        ),\n      ),\n    );\n  }\n\n  /// Dining preferences summary — shows tags for cuisines, dietary and\n  /// allergies from the user mo
+[1] handle`, the `city · homeArea` line, a\n/// "Member since" capsule and — when they exist — the bio and the Instagram\n/// link. Empty fields ar
+[1]  · homeArea` line, a\n/// "Member since" capsule and — when they exist — the bio and the Instagram\n/// link. Empty fields are omitted rather t
+[1]  saved username or the\n    // typed value cannot be a username at all — the local error owns that.\n    if (!changed || handle.isEmpty || !_ha
+[1] e asking, then available / taken /\n/// reserved. Purely informational — Save is never blocked by it.\nclass _HandleAvailabilityRow extends Sta
+[1] o.dart';\nimport 'profile_info_sections.dart';\n\n/// Restaurant profile — the single storefront screen shared by every entry\n/// point: nearby/
+[1] entres the active pill inside the nav rail. Only the rail is scrolled —\n  /// `Scrollable.ensureVisible` would also nudge the page itself.\n  
+[1] r only knows\n/// the venue id (QR scan, deep link, manual code entry) — the profile will\n/// show a skeleton until the fetch resolves.\n///\n//
+[1]        ],\n      ),\n    );\n  }\n}\n\n/// Directions / Call / Save / Share — the four things a guest does before\n/// deciding to go. Unavailable a
+[1]       ),\n        ],\n      ),\n    );\n  }\n}\n\n/// Compact facility chips — icon plus label, wrapping instead of scrolling so a\n/// large system 
+[1] ked by `GET /users/me/blocked`. Unblocking only lifts the restriction —\n/// the server deliberately does not restore follows or conversations
+[1] Spacing.xs),\n          Text(\n            'Your identity stays private — the reported account is never told who filed this.',\n            styl
+[1] /\n/// Used from profiles and chat. The server decides everything real — mutual\n/// follows are removed in one transaction and discovery/messa
+[1] ransaction and discovery/messaging restrictions\n/// apply immediately — so the client only confirms, calls\n/// `POST /users/:id/block`, refre
+[1] ./restaurant_detail/restaurant_profile_route.dart';\n\n/// Saved screen — everything the signed-in diner has bookmarked.\n///\n/// Two server-bac
+[1] s bookmarked.\n///\n/// Two server-backed tabs:\n///   * **Experiences** — `GET /me/saved` through [savedEventsProvider].\n///   * **Restaurants*
+[1] GET /me/saved` through [savedEventsProvider].\n///   * **Restaurants** — `GET /me/followed-restaurants` through\n///     [followedVenuesProvide
+[1] t '../safety/blocked_users_screen.dart';\n\n/// P1-4 Privacy & Security — the four server-backed visibility toggles,\n/// each written immediate
+[1] ll),\n            subtitle: Text(\n              'You have full control — review or undo any block.',\n              style: AppTextStyles.bodySm
+[1] lg),\n          Text(\n            'These settings apply across devices — they are stored on your '\n            'account, not on this phone.',\n
+[1] ord_sheet.dart';\nimport 'privacy_settings_screen.dart';\n\n/// Settings — the P1 account surface, kept clean and minimal: every row here\n/// is
+[1]   title: 'Blocked Users',\n            subtitle: 'Who you have blocked — unblock any time',\n            onTap: () => _push(context, const Bloc
+[1] l account is the same DineCircle account you already '\n          'use — it just adds a public host profile and Host Studio.',\n          style
+[1] art';\nimport 'professional_onboarding_screen.dart';\n\n/// Account Type — the one place the mode of the account is explained and\n/// switched. 
+[1] , name, username, bio and preferences',\n              'No Host Studio — your profile is not listed publicly',\n            ],\n            foot
+[1] ional reference ≤40) so a submit only ever fails\n/// for real reasons — and the success state shows the `FB-…` ticket the\n/// support team as
+[1] ildContext context) {\n    // Success state replaces the form entirely — nothing left to tap twice.\n    if (_ticket != null) {\n      return Sc
+[1]  $_ticket. Track its status from '\n                  'Help & Feedback — we keep every ticket under this reference.',\n                  textAl
+[1]          if (text.length > 2000) {\n                  return 'Too long — keep it under 2000 characters.';\n                }\n                re
+[1] s.dart';\nimport '../../widgets/data_view.dart';\n\n/// My Tables screen — the diner's table reservations.\n///\n/// Backed by `GET /users/me/rese
+[1] wSnackBar(\n        SnackBar(\n          content: Text('Table requested — reference ${reservation.reference}'),\n          backgroundColor: AppC
+[1] /screens/safety/safety_actions.dart';\n\n/// Public host profile screen — experience-first design (spec section 13).\n///\n/// Answers three ques
+[1] (\n                user.rating > 0 ? user.rating.toStringAsFixed(1) : '—',\n                style: AppTextStyles.titleMedium.copyWith(\n        
+[1] ze: 14,\n        );\n      }),\n    );\n  }\n}\n\n/// Hosted experience tile — shows image, title, venue, date, price, and CTA.\nclass _ExperienceTil
+[1]   ),\n        ),\n      ),\n    );\n  }\n}\n\n/// Muted past-experience tile — no join affordance, just title/date/venue.\nclass _PastExperienceTile 
+[1]  the shared Restaurant Profile\n/// screen via [openRestaurantProfile] — the same entry point used by list\n/// taps, search results and deep l
+[1] ecordScan(restaurantId);\n  return menu;\n});\n\n/// Full restaurant menu — the food-first surface a diner reaches from the venue\n/// profile or 
+[1] a\n/// guest can read everything the restaurant published about a dish — photo,\n/// portion description, dietary tags, price — before ordering
+[1] ed about a dish — photo,\n/// portion description, dietary tags, price — before ordering with a server.\nFuture<void> showDishDetail(\n  BuildCo
+[1] sk your server for today\'s '\n                          'availability — DineCircle does not process orders or payments.',\n                   
+[1] port 'deal_ui.dart';\nimport 'deal_detail_screen.dart';\n\n/// Deals tab — premium "Discover Deals" experience.\n///\n/// Reads the live, city-sco
+[1] hind it opens\n/// the shared Restaurant Profile. No payments anywhere — offers are redeemed\n/// directly at the restaurant.\nclass DealsScreen
+[1] ind ('' = unfiltered). `all` and `nearby` need no server\n  /// filter — Nearby narrows the already-resolved city feed client-side.\n  String g
+[1] taurants publish '\n                          'new offers all the time — check back soon.'\n                    : 'No active deals in $city rig
+[1]   Text(\n            'Exclusive offers from your favourite restaurants — redeem '\n            'directly at the venue.',\n            style: App
+[1]      ),\n      ),\n    );\n  }\n}\n\n/// Horizontally scrollable kind chips — never wrap onto multiple rows.\nclass _FilterChipRow extends Stateless
+[1] our filters',\n        message: 'Try a different search term or filter — or reset to see '\n            'every active deal.',\n        action: T
+[1] ',\n    'Oct',\n    'Nov',\n    'Dec',\n  ];\n\n  /// `Rs 500` / `Rs 1,250` — PKR with thousands separators, no decimals\n  /// unless the server va
+[1]  $grouped${parts.length > 1 ? '.${parts[1]}' : ''}';\n  }\n\n  /// `20%` — trims trailing zeros so `20.00` from the numeric column reads\n  /// a
+[1] DateTime.now()).inDays;\n\n  /// Whether the deal expires within a week — drives the urgency badge and\n  /// the Limited-Time Offers section.\n 
+[1] taurantTap: onRestaurantTap,\n      ),\n    ),\n  );\n}\n\n/// Deal Details — a premium, single-deal view.\n///\n/// Shows the offer, its cover art, 
+[1] l rupee price in\n/// `value`; percentage/fixed deals carry a discount — the original bill\n/// depends on what the guest orders, so no prices 
+[1] odyMedium),\n                ],\n                // Redemption capacity — only surfaced when the partner set it.\n                if (deal.maxRe
+[1]                   text: 'The restaurant applies the deal to your bill — you '\n                      'pay the venue directly. DineCircle never
+[1] estaurant. DineCircle deals are '\n              'settled at the venue — there is no in-app payment.',\n              textAlign: TextAlign.cent
+[1] ight: FontWeight.w600,\n        ),\n      ),\n    );\n  }\n}\n\n/// `24 Aug` — short enough for a chip, unambiguous because it carries the year\n/// 
+[1] sine, venue type, deal category, experience date and\n/// availability — every filter the API accepts, edited as a local draft so the\n/// list
+[1] rase.'\n              : 'Try a different spelling or a broader keyword — a cuisine, a '\n                    'neighbourhood or a venue name.',\n
+[1]              'Search a venue, a dish, a deal, an experience or a host — '\n                'one field covers them all.',\n                style
+[1] ///\n/// Four shapes are accepted:\n///   1. `dinecircle://menu/<uuid>` — deep-link scheme\n///   2. `https://<any host>/menu/<uuid>` — universa
+[1] /<uuid>` — deep-link scheme\n///   2. `https://<any host>/menu/<uuid>` — universal link (new canonical)\n///   3. `https://<any host>/venues/<u
+[1] rsal link (new canonical)\n///   3. `https://<any host>/venues/<uuid>` — legacy universal link\n///   4. A bare `<uuid>` — printed directly on 
+[1] host>/venues/<uuid>` — legacy universal link\n///   4. A bare `<uuid>` — printed directly on the QR\n///\n/// Anything else returns `null` so th
+[1] //\n/// Replaces the old full-screen Digital Pass for the first launch — the QR is\n/// enough to show at the door, and check-in hits `POST /bo
+[1] SnackBar(\n        const SnackBar(\n          content: Text('Checked in — enjoy the event!'),\n          backgroundColor: AppColors.success,\n   
+[1] Text(\n                            'Receipt PDFs are not available yet — '\n                            'backend export required.',\n           
+[1] } catch (_) {\n      // Plugin unavailable (e.g. unsupported platform) — assume online.\n      state = true;\n    }\n  }\n\n  static bool _resolve(
+[1]              ],\n                  ),\n                  // Reserve CTA — separate bottom row\n                  const SizedBox(height: AppSpaci
+[1]  app renders; quality 85 keeps a\n    // typical JPEG around 50–120 KB — well under the server's 512 KB cap.\n    final file = await picker.pic
+[1] es) {\n      setState(\n        () => _error = 'That photo is too large — keep it under 512 KB.',\n      );\n      return;\n    }\n    await _run(\n
+[1] lors.info : Colors.white54;\n\n    if (hasRead) {\n      // Double check — read\n      return Row(\n        mainAxisSize: MainAxisSize.min,\n      
+[1] ize: 12, color: color),\n        ],\n      );\n    }\n    // Single check — sent/delivered\n    return Icon(Icons.check_rounded, size: 12, color: 
+[1] port type { UserRole } from './context.js';\n\n/** 402 Payment Required — subscription entitlement missing. */\nexport function paymentRequired(
+[1] clients share this API, so "is this token a partner?" is never enough —\n * every venue read/write must also be scoped to the venues the calle
+[1] d outright *and* so is any account holding a\n * live venue membership — a host who registers a venue keeps the host role\n * (and its publishi
+[1] e, or null when the caller has no relationship to\n * it. Never throws — callers decide between 403 and 404.\n */\nexport async function effecti
+[1] unted behind\n * `requireAuth`, so a missing id means a wiring mistake — fail closed with 401\n * rather than issuing a query with `undefined`.
+[1] import { query } from './db.js';\n\n/**\n * P2-1 blocking — shared server-side enforcement primitives.\n *\n * A block is stored as
+[1] UserRole].\n *\n * One account has two modes: 'personal' (private diner — the default) and\n * 'professional' (public host profile + Host Studio
+[1] ole: string; instagram: string | null;\n    // Account & Settings (P1) — the Settings screens read these straight off\n    // the session boots
+[1] s_only: boolean; allow_tagging: boolean;\n    // Customer account mode — drives the Host Studio gate on both ends.\n    account_type: string; p
+[1] ing each other.\n *\n * Stored format is `scrypt:<salt-hex>:<hash-hex>` — the scheme and salt travel\n * with the digest, so parameters can be c
+[1]  what makes "two guests, one last table" resolve\n * deterministically — the second request re-reads the held covers while the\n * first is sti
+[1] ing, DayHours>;\n  // A venue that has published no weekday map at all — `{}`, or the legacy\n  // `{"Mon-Sun": "17:00-24:00"}` shape — is *unc
+[1]  at all — `{}`, or the legacy\n  // `{"Mon-Sun": "17:00-24:00"}` shape — is *unconfigured*, not closed. This\n  // mirrors the seat-capacity fa
+[1] across the whole venue (tables are not the only capacity\n    // model — a venue may not publish table inventory at all).\n    const { rows: in
+[1] /** Applies schema.sql — idempotent, safe to run repeatedly. */\nimport { readFile } from 'node
+[1] m './db.js';\n\n/**\n * Bearer tokens are stored only as SHA-256 digests — a leaked auth_tokens\n * table can never be replayed against the API. 
+[1] xpress-rate-limit treats `0` as "block everything", not\n * "disabled" — never set it to 0.\n */\nfunction envLimit(name: string, fallback: numb
+[1]  true,\n  legacyHeaders: false,\n  message: { error: 'Too many requests — please try again later' },\n});\n\n/**\n * Stricter rate limiter for auth
+[1] Headers: false,\n  message: { error: 'Too many authentication attempts — please wait' },\n});\n\n/**\n * P2-2 report spam bucket: on top of the on
+[1] `REPORT_RATE_LIMIT_MAX` override,\n * same rules as the other limiters — never 0).\n */\nexport const reportRateLimiter = rateLimit({\n  windowMs
+[1] : true,\n  legacyHeaders: false,\n  message: { error: 'Too many reports — please slow down' },\n});\n\n/** P2-3 feedback spam bucket: 10 tickets p
+[1] acyHeaders: false,\n  message: { error: 'Too many feedback submissions — please try again later' },\n});\n\n/**\n * Request-body keys that must ne
+[1] passwordResetToken`, `newPassword`, `otpCode`, etc. are\n * all caught — not just exact matches. Values are replaced with\n * `[redacted]`, nev
+[1] /**\n * Seed script — the Karachi test world plus a small Lyon reference world.\n *\n * Karac
+[1]  publicly listed Karachi restaurants). Only\n// public basics are real — name, area, cuisine, price band, coordinates. Every\n// event, ticket 
+[1]  Curated creator shortlist (public handles; fictional follower counts — this\n// is not a definitive ranking and none are signed DineCircle ho
+[1] XTS = [\n  'Long table, warm hosts, and the seekh kebab sold out early — already asking for a second edition.',\n  'Smooth check-in at the door
+[1] s flawless, though the dessert service ran late.',\n  'Loved the crowd — half the table were followers, and everyone got along.',\n  'Mock paym
+[1]  coffee refills kept coming. Solid meetup format.',\n  'Solid test run — a couple of plates arrived late, but the host comped round.',\n  'Kara
+[1]  Karachi standard.',\n  'Nihari at eleven in the morning with sheermal — the table talked for two hours.',\n  'Biryani was properly mitha and t
+[1] neCircle candidate venue. The venue has not agreed to any partnership — name, area, cuisine and price band are public; the menu, hours, event
+[1] mo data exercises the top of the ladder; the rest stay eligible hosts —\n  // claimable live via POST /users/me/influencer.\n  const hostIds = 
+[1] ()} creator. Seeded as a candidate host profile for discovery testing — not a signed DineCircle creator.`\n        : `Fictional Karachi test p
+[1] signed DineCircle creator.`\n        : `Fictional Karachi test persona — ${h.focus.toLowerCase()}. Seeded for discovery testing; not a real ac
+[1] kshop' ? 11 : 19;\n      return [\n        e.id, e.title, `${r.tagline} — demo edition`,\n        `Mock ${item(K_TYPE_LABELS, e.ei)} at ${r.name
+[1] + c);\n        return [\n          e.id, c, dish.name, `${dish.section} — mock course line for the test edition`,\n          pick(K_PAIRINGS), c
+[1] ts hold pending seats; the mock\n  //    payment is a PKR wallet label — no real transaction ever happens) ────\n  const bookedSeats = new Map<
+[1] ue = item(K_RESTAURANTS, i);\n      return [\n        [d, 'home', `Home — ${home}`, 'Karachi', home, `Flat ${100 + i}, ${home}`, 24.80 + i * 0.
+[1] `, 24.80 + i * 0.002, 67.02 + i * 0.002],\n        [d, 'work', `Office — ${item(K_AREAS, i + 5)}`, 'Karachi', item(K_AREAS, i + 5),\n          
+[1] e],\n      [e.id, item(dinerIds, i * 3), 'Saved my seat for the meetup — see you there!', at(1, 13, 20 + i), false],\n      [e.id, item(hostIds
+[1] ap((r, i) => [\n      item(branchIds, i), item(restIds, i), `${r.name} — ${r.area}`,\n      `${r.name}, ${r.area}, Karachi`, r.area, 'Karachi',
+[1]   `Mock ${item(r.cuisines, 0)} package for the ${r.area} test listing — three shared plates and chai, priced in PKR.`,\n      int(6, 30) * 500
+[1] Ids, 7), 'Candidate partnership', 'This listing is flagged unverified — awaiting venue contact.', 'partner', false, 'handshake', '4A7A5A', at
+[1] \n      [kid('9', 1), item(hostIds, 0), item(restIds, 0), 'Seaside BBQ — candidate collab',\n        'Mock invite: we would love to test a Seas
+[1] k invite for a counter-side tasting pilot. Pending venue verification — treat as a test record.', 'accepted', at(-9, 12)],\n      [kid('9', 3)
+[1] Y['tasting','seasonal'],false,\n       'I approve each seat personally — ping me if unsure.',\n       ARRAY['${U.ava}'],'confirmed',1120,true),
+[1] med for monthly editions. Your September edition sold out in 48 hours — the October slot is yours whenever you are ready.','accepted','${at(-
+[1]  night. We would like to co-host a 4-night omakase series this season — chef\u2019s counter, full creative control on the menu.','invited','$
+[1] reated_at)\n    VALUES ('${U.alex}','${E.e3}',5.00,'Nora is a magician — best table I have sat at all year.','${at(-7, 15, 0)}')`);\n\n  // ── f
+[1]       console.log(`Database not ready (attempt ${attempt}/${retries}) — retrying in ${delayMs}ms`);\n      await new Promise((resolve) => setT
+[1] eader (same-origin, curl, server-to-server)\n    // are always allowed — the check below is for cross-origin browser traffic.\n    if (!origin)
+[1] tication. Only the venue-scoped router may sit on\n// /api/restaurants — the feed router's `GET /` would shadow the venue list.\napp.use('/api/
+[1]  photos (logo, gallery, dish, deal banner). Same reason\n// as avatars — every render site is an `Image.network` with no bearer token.\napp.use
+[1] se('/api', socialRouter);\n// Saved locations (Home, Work, favourites) — CRUD under the auth'd user.\napp.use('/api/users/me/saved-locations', 
+[1] \n} catch (error) {\n  console.error('Could not connect to the database — exiting.');\n  console.error(error);\n  await pool.end().catch(() => un
+[1] => undefined);\n  process.exit(1);\n}\n// Phase 2a: initPayments removed — no payment gateway configured.\n// Phase 2b: Socket.IO removed — no re
+[1] moved — no payment gateway configured.\n// Phase 2b: Socket.IO removed — no real-time chat layer.\nconst httpServer = app.listen(port, () => {\n
+[1] n) return;\n  shuttingDown = true;\n  console.log(`\n${signal} received — shutting down`);\n  httpServer.close(async () => {\n    await pool.end(
+[1] ilently skips invalid characters, so the\n * alphabet is checked first — a corrupt upload is a 400, not a broken photo.\n */\nexport function de
+[1] _AVATAR_BYTES) {\n    throw new ApiError(413, 'That photo is too large — keep it under 512 KB.');\n  }\n  const contentType = sniffImageType(byt
+[1] -9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;\n\n/** True for a canonical UUID — lets routes 404 instead of a pg cast 500. */\nexport function isUuid(v
+[1] /**\n * Karachi demo venue seed — recognisable Karachi restaurants and cafés, built\n * as COMPLETE Dine
+[1]  validity, terms and redemption steps, a\n * bookable table floor, and — where the venue has one — a curated demo\n * experience led by one of 
+[1] ption steps, a\n * bookable table floor, and — where the venue has one — a curated demo\n * experience led by one of the [HOSTS] accounts.\n *\n 
+[1] ;\n  booked: number;\n  /** Estimated restaurant dining cost per person — paid to the venue, not a\n   *  DineCircle fee. The RSVP itself is fre
+[1] gMenu' | 'familyStyle' | 'sharing' | 'buffet';\n  /** Key into [HOSTS] — the demo host account that leads the experience. */\n  hostKey: HostKe
+[1] ction dealDescription(d: Deal): string {\n  return `${DEMO_DEAL_LABEL} — ${d.description}`;\n}\n\n/** Conditions plus redemption steps, stored in
+[1] top.png',\n};\n\nconst VENUES: Venue[] = [\n  // ── 1. Kolachi Restaurant — Do Darya ────────────────────────────────────────\n  {\n    key: 'kolac
+[1] trance 10 minutes early.',\n      },\n    ],\n  },\n\n  // ── 2. Kababjees — Do Darya ─────────────────────────────────────────────────\n  {\n    ke
+[1] B4', 8, 'Outdoor']],\n    events: [],\n  },\n\n  // ── 3. Bar B Q Tonight — Clifton ────────────────────────────────────────────\n  {\n    key: 'bb
+[1] ', 8, 'Family Cabin']],\n    events: [],\n  },\n\n  // ── 4. Cafe Aylanto — Clifton ───────────────────────────────────────────────\n  {\n    key: 
+[1] door seating is the fallback.',\n      },\n    ],\n  },\n\n  // ── 5. Okra — DHA Phase 8 ───────────────────────────────────────────────────\n  {\n 
+[1] ], ['O4', 4, 'Main Room']],\n    events: [],\n  },\n\n  // ── 6. Xander's — Clifton ───────────────────────────────────────────────────\n  {\n    k
+[1] you are late.',\n      },\n    ],\n  },\n\n  // ── 7. Espresso Shahbaz DHA — DHA Phase 6 ───────────────────────────────────\n  {\n    key: 'espress
+[1]  coffee knowledge needed.',\n      },\n    ],\n  },\n\n  // ── 8. Cafe Flo — Clifton ───────────────────────────────────────────────────\n  {\n    k
+[1] Main Room']],\n    events: [],\n  },\n\n  // ── 9. Butlers Chocolate Café — Zamzama ─────────────────────────────────────\n  {\n    key: 'butlers',
+[1] , 'Ground Floor']],\n    events: [],\n  },\n\n  // ── 10. Esquires Coffee — Zamzama ───────────────────────────────────────────\n  {\n    key: 'esq
+[1] 'S4', 8, 'Group Table']],\n    events: [],\n  },\n\n  // ── 11. Café Zouk — Zamzama ─────────────────────────────────────────────────\n  // Added 
+[1] eCount += 1;\n\n    // Primary branch with Asia/Karachi service windows — the availability\n    // engine reads the branch hours first.\n    awai
+[1] b, 'Asia/Karachi')`,\n      [\n        restaurantId,\n        `${v.name} — ${v.area}`,\n        v.address,\n        v.area,\n        `+9221000${Str
+[1] ? ''],\n        );\n        itemCount += 1;\n      }\n    }\n\n    // Deals — two per venue, each carrying its own image, validity window,\n    // t
+[1] ing;\n  /** False when `q` is missing or outside 1..[SEARCH_QUERY_MAX] — the route 400s. */\n  valid: boolean;\n  categories: SearchCategory[];\n
+[1] the same envelope, ceiling and magic-byte sniffing as\n * `avatars.ts` — the codebase keeps ONE upload convention rather than growing\n * a sec
+[1] ilently skips invalid characters, so the\n * alphabet is checked first — a corrupt upload is a 400, not a broken photo.\n *\n * Like the avatar 
+[1] E_IMAGE_BYTES) {\n    throw new ApiError(413, 'That photo is too large — keep it under 512 KB.');\n  }\n  const contentType = sniffImageType(byt
+[1] ad and a row is never rewritten, so this URL never\n * changes meaning — which is what lets the public route mark it immutable and\n * skip cac
+[1] tion it\n// is disabled by default because no SMS provider is wired up — an operator\n// must set OTP_ENABLED=1 after connecting a provider (Tw
+[1] s-]{7,19}$/, 'Enter a valid phone number');\n\n// POST /api/auth/signin — simple MVP sign-in (non-production only).\nrouter.post('/signin', asyn
+[1] S * 60_000);\n  const code = generateOtp();\n  // Store only the digest — the plaintext code is returned to dev clients\n  // for convenience bu
+[1] #7A4A5A', '#4A7A5A', '#7A6A4A', '#5A4A7A'];\n\n// POST /api/auth/signup — create an email/password account and sign in.\nrouter.post('/signup', 
+[1] At, user: await loadUser(created.id) });\n});\n\n// POST /api/auth/login — email + password.\nrouter.post('/login', async (req, res) => {\n  const
+[1]  expiresAt, user: await loadUser(row.id) });\n});\n\n// GET /api/auth/me — the session's user (used on app start to restore state).\nrouter.get('
+[1] { user: await loadUser(req.userId) });\n});\n\n// POST /api/auth/signout — deletes the token row.\nrouter.post('/signout', requireAuth, async (re
+[1] -confirmed change.\n * Soft-deleted accounts are treated as gone (404) — their PII is already\n * erased and their tokens revoked, so no creden
+[1] racle. Accounts without a password (legacy phone-only) cannot confirm —\n * 409 states that instead of silently allowing an unverified change.
+[1] hrow new ApiError(\n      409,\n      'This account has no password yet — sign up with email first.',\n    );\n  }\n  if (!(await verifyPassword(p
+[1] ma.extend({ phone: phoneSchema });\n\n// POST /api/auth/change-password — verify current, scrypt-rehash the new one,\n// revoke other sessions. 
+[1] user: await loadUser(user.id) });\n});\n\n// POST /api/auth/change-email — START of a verified email change (P1-2).\n// The address is never appl
+[1] ge code (stored hashed, 15-minute TTL, one live challenge\n// per user — a re-request replaces the old code). The new address becomes\n// the l
+[1]  email, expiresAt });\n  }\n});\n\n// POST /api/auth/change-email/confirm — completes the verified change. Wrong\n// or expired codes 401 (and the
+[1] user: await loadUser(user.id) });\n});\n\n// POST /api/auth/change-phone — same confirmation contract as change-email.\n// Numbers are normalised
+[1] exists in this prototype, so the new number is recorded\n// unverified — documented rather than hidden.\nrouter.post('/change-phone', requireAu
+[1] , user: await loadUser(user.id) });\n});\n\n// POST /api/auth/logout-all — revoke EVERY session for the account, including\n// the caller's own t
+[1] s next authenticated call gets a 401 and lands on the login\n// screen — immediate here (row delete), not after a cache TTL.\nrouter.post('/log
+[1] te(row.start_at).getTime() > Date.now(),\n  };\n}\n\n// GET /api/bookings — one user's tickets (My Tables). Always the acting\n// user; `?eventId=
+[1] oval: boolean;\n  status: string;\n};\n\n// POST /api/events/:id/bookings — join & pay. The event row is locked with\n// FOR UPDATE inside a singl
+[1]  either direction. Bookings that already exist are never touched here —\n  // they stay on record and follow the normal cancel/support path.\n 
+[1] ue-pending requests and venue-declined events are not bookable\n    // — treat them as unknown to guests so the venue's decision cannot be\n   
+[1] (event.price_per_seat);\n\n    // Promo codes are validated server-side — the client never decides\n    // whether a discount applies.\n    let d
+[1] tring;\n  payment_status: string;\n};\n\n// POST /api/bookings/:id/cancel — release the seats and mark the booking cancelled.\nrouter.post('/booki
+[1] pending');\n  }\n  return booking;\n}\n\n// POST /api/bookings/:id/approve — the host confirms a pending seat request.\nrouter.post('/bookings/:id/
+[1] ull), eventId, guestUserId });\n});\n\n// POST /api/bookings/:id/decline — the host rejects a pending seat request,\n// releasing the held seat.\n
+[1] rId: result.guestUserId,\n  });\n});\n\n// POST /api/bookings/:id/checkin — mark a ticket used and settle attendance.\n// A valid check-in finalis
+[1] string | number | null;\n  active: boolean;\n};\n\n/**\n * GET /api/cities — all DineCircle-supported cities with their areas.\n *\n * The Flutter l
+[1] ll;\n  host_badges: string[] | null;\n  // Host food preferences (P1-5) — surfaced so the event's dietary card can\n  // show what the host eats
+[1] UUID\n             AND b.status <> 'cancelled'))`;\n\n// GET /api/events — filterable feed of events the viewer may see.\nrouter.get('/', async (
+[1]  blocked pair with the viewer leave the\n  // personalized feed/search — in both directions (the blocked host stops\n  // seeing the blocker's 
+[1] s.map(serialize), count: rows.length });\n});\n\n// GET /api/events/mine — the host's own events, drafts included, newest first.\n// Registered b
+[1] ws.map(serialize), count: rows.length });\n});\n\n// GET /api/events/:id — one visible event with menu, host and venue.\nrouter.get('/:id', async
+[1] ray(z.string()).default([]),\n  // isFeatured is a platform-admin flag — hosts cannot set it. The column\n  // defaults to false in the schema,
+[1] at: z.number().min(0).max(10000).default(0),\n});\n\n// POST /api/events — publish a new event (hosts and partner admins only).\n// `status: 'dra
+[1]  : createEventSchema.parse(req.body);\n  // Force hostId to the caller — prevent impersonation\n  const hostId = req.userId;\n\n  const [venue] =
+[1] atus: z.enum(['published']).optional(),\n});\n\n// PATCH /api/events/:id — the host edits their own draft, or publishes it.\n// Publishing re-val
+[1] res.json({ event: serialize(full!) });\n});\n\n// DELETE /api/events/:id — the host cancels an event. Bookings vanish via\n// cascade; every stil
+[1] /security.js';\n\nconst router = Router();\n\n/**\n * P2-3 Help & Feedback — support tickets raised from the app.\n *\n * Every ticket is owned by t
+[1] ef: z.string().trim().max(40).default(''),\n});\n\n// POST /api/feedback — file a ticket. Rate limited per IP (10/hour default).\nrouter.post('/f
+[1] { feedback: serialize(created) });\n});\n\n// GET /api/users/me/feedback — own ticket history with live statuses.\nrouter.get('/users/me/feedback
+[1]  ──────────────────────────────────\n\n// GET /api/feedback?status=open — admins triage the queue.\nrouter.get(\n  '/feedback',\n  requireRole('su
+[1] = z.object({ status: z.enum(STATUSES) });\n\n// PATCH /api/feedback/:id — advance a ticket's status (support workflow only;\n// users never get 
+[1] t type { UserRole } from '../context.js';\n\n// Phase 2a: 0% commission — inlined so pricing.ts can be deleted.\nconst PLATFORM_COMMISSION_RATE 
+[1] u can only view your own earnings');\n}\n\n// GET /api/hosts/:id/payouts — one earnings line per hosted event.\nrouter.get('/:id/payouts', async 
+[1] count: number;\n  fill_rate: number;\n};\n\n// GET /api/hosts/:id/summary — headline numbers for the earnings panel.\nrouter.get('/:id/summary', a
+[1] ;\n  seats: number;\n  revenue: number;\n};\n\n// GET /api/hosts/:id/trend — net revenue and seats per month.\nrouter.get('/:id/trend', async (req,
+[1] : number;\n  checked_in: number;\n};\n\n// GET /api/hosts/:id/performance — views / bookings / attendance per event.\nrouter.get('/:id/performance
+[1] string;\n  events_together: number;\n};\n\n// GET /api/hosts/:id/partners — distinct venues the host has held tables at.\nrouter.get('/:id/partner
+[1] ───────────────────────────────────────\n// GET /api/hosts/:id/invites — partnership offers (incoming from restaurants).\nrouter.get('/:id/invi
+[1] izeInvite), count: rows.length });\n});\n\n// GET /api/hosts/:id/collabs — ALL collaborations (incoming + outgoing).\nrouter.get('/:id/collabs', 
+[1] ), count: rows.length });\n});\n\n// POST /api/hosts/:id/collabs/propose — host sends a collaboration proposal.\nconst proposeSchema = z.object({
+[1]     `New collaboration proposal from host`,\n        `"${input.title}" — ${input.message.slice(0, 80)}`,\n      ],\n    );\n  }\n\n  // Re-read wit
+[1] ?? created!) });\n});\n\n// POST /api/hosts/:id/collabs/:collabId/cancel — host cancels their own pending proposal.\nrouter.post('/:id/collabs/:c
+[1] cancelled' });\n});\n\n// POST /api/hosts/:id/collabs/:collabId/complete — mark collaboration completed.\nrouter.post('/:id/collabs/:collabId/com
+[1]  'completed' });\n});\n\n// POST /api/hosts/:id/invites/:inviteId/accept — flip an invite to accepted.\n// Only the invite's own host may act on 
+[1]  'accepted' });\n});\n\n// POST /api/hosts/:id/invites/:inviteId/decline — flip an invite to declined.\nrouter.post('/:id/invites/:inviteId/decli
+[1] nterval '90 days'";\n  return null;\n}\n\n// GET /api/hosts/:id/analytics — unified analytics payload with period filter.\nrouter.get('/:id/analyt
+[1] ────────────────────────────\n\n// GET /api/hosts/:id/discover-partners — verified partner restaurants available\n// for collaboration (excludes
+[1] ────────────────────────────\n\n// GET /api/hosts/:id/promotable-events — published upcoming events for promotion.\nrouter.get('/:id/promotable-
+[1] t: rows.length,\n  });\n});\n\n// POST /api/hosts/events/:eventId/promote — record a promotion action.\nrouter.post('/events/:eventId/promote', as
+[1] ts lifecycle\n * (`requested` → `completed`) never changes `available` — no double-counting.\n * `client` is optional: pass the transaction cli
+[1] paid'. A 'scheduled' payout means the\n  // event has not happened yet — the host has not earned that money, so it\n  // must not be withdrawab
+[1] ]);\n  return rows[0]?.available ?? 0;\n}\n\n// GET /api/hosts/:id/wallet — balances plus the withdrawal history.\nrouter.get('/:id/wallet', async
+[1] erId, req.userRole, hostId);\n\n  // Phase 2a: settleDuePayouts removed — payouts table deleted.\n\n  const [summary] = await query<WalletSummary
+[1] ring().trim().min(1).max(60),\n});\n\n// POST /api/hosts/:id/withdrawals — record a (simulated) payout request.\n// Balance check and insert run 
+[1] `FOR UPDATE` on the host's user row serialises concurrent withdrawals —\n//     the second request blocks until the first commits, then re-rea
+[1] arams.id;\n  await requireHost(hostId);\n  // Withdrawals are self-only — even a partner admin cannot move funds.\n  if (req.userId !== hostId) 
+[1] \n        `Amount exceeds available balance ($${available.toFixed(2)}) — this "wallet" only accrues `\n          + 'from simulated bookings; no
+[1] uests >= 6) return 'group';\n  return 'tasting';\n}\n\n// GET /api/offers — active special menus + promo codes for the Deals feed.\nrouter.get('/'
+[1] ather than a bare role check so that a venue's\n * staff/manager/owner — and a host who registered a venue — all reach it, and\n * every query 
+[1]  a venue's\n * staff/manager/owner — and a host who registered a venue — all reach it, and\n * every query is scoped through `scopedRestaurantI
+[1] rray(z.string().uuid()).default([]),\n});\n\n// POST /api/partner/events — create a new event for a partner restaurant.\nrouter.post('/events', a
+[1] recorded as the host, and the event is published\n    // straight away — a venue approving its own listing is meaningless (the\n    // `require
+[1] _per_seat),\n      },\n    },\n  });\n});\n\n// PUT /api/partner/events/:id — update an event (partner who owns the restaurant).\nrouter.put('/event
+[1] s.json({ data: { event: updated } });\n});\n\n// GET /api/partner/events — all events for the partner's restaurants.\nrouter.get('/events', async
+[1] ───────────────────────────────────────\n\n// GET /api/partner/bookings — all bookings for the partner's events.\nrouter.get('/bookings', async 
+[1]  bookings.length } });\n});\n\n// POST /api/partner/bookings/:id/checkin — check in a guest.\nrouter.post('/bookings/:id/checkin', async (req, re
+[1]   coverImage: z.string().default(''),\n});\n\n// POST /api/partner/menus — create a special menu.\nrouter.post('/menus', async (req, res) => {\n  
+[1] rice_per_guest),\n      },\n    },\n  });\n});\n\n// GET /api/partner/menus — special menus for the partner's restaurants.\nrouter.get('/menus', asy
+[1] ──────────────────────────────────────\n\n// GET /api/partner/analytics — business insights for the partner dashboard.\nrouter.get('/analytics',
+[1] ──────────────────────────────────\n\n// GET /api/partner/notifications — notifications for the partner's restaurants.\nrouter.get('/notificatio
+[1] he same call so the app never has to total the\n  // page it was given — `unreadOnly` would otherwise be the only way to know.\n  const unreadP
+[1] },\n  });\n});\n\n// POST /api/partner/notifications/:notificationId/read — clear one badge.\n//\n// Without this the dashboard's `notifications.un
+[1] , read: true } } });\n});\n\n// POST /api/partner/notifications/read-all — acknowledge the whole inbox.\nrouter.post('/notifications/read-all', a
+[1] lizeItem),\n  };\n}\n\n// GET /api/partner/restaurants/:restaurantId/menu — full menu, ordered.\nrouter.get('/:restaurantId/menu', async (req, res
+[1] ─────────────────────\n\n/**\n * GET /api/restaurants/:restaurantId/menu — public menu for the Customer App.\n *\n * Mounted separately (see serve
+[1] ination, optionalDate } from '../api.js';\n\n// Phase 2a: 0% commission — DineCircle takes no cut. The constant is inlined\n// so the pricing mo
+[1]  `/:restaurantId/...` and every handler opens with `requireVenueRole` — a\n * partner can never read another venue's numbers by guessing an id
+[1] Zone = venue.timezone ?? 'UTC';\n\n  // Today in the *venue's* timezone — a Karachi desk at 01:00 must not be shown\n  // yesterday's service ju
+[1] ────────────────────────────────────\n\n// GET /api/partner/restaurants — venues this account may operate.\n//\n// Registration stays open to any
+[1] 180).nullable().optional(),\n});\n\n/**\n * POST /api/partner/restaurants — self-service venue registration.\n *\n * Creates the venue in `pending_
+[1] ,$6,$7,$8,true,$9)`,\n      [\n        venue.id,\n        `${input.name} — Main`,\n        input.address,\n        input.area,\n        input.city,
+[1] oolean().optional(),\n});\n\n/** Column map keeps the whitelist explicit — no dynamic column names. */\nconst PATCHABLE: Record<string, string> =
+[1] s_host_approval',\n};\n\n// PATCH /api/partner/restaurants/:restaurantId — profile management.\nrouter.patch('/:restaurantId', async (req, res) =
+[1] ──────────────────────\n\n/**\n * GET /api/partner/verification/requests — the queue. super_admin sees every\n * pending request; a partner sees 
+[1]   );\n});\n\n// POST /api/partner/restaurants/:restaurantId/verification — (re)submit.\nrouter.post('/:restaurantId/verification', async (req, re
+[1] });\n\n/**\n * POST /api/partner/verification/requests/:requestId/review — platform admin\n * decision. Approval is what flips the venue into `ve
+[1] taff'),\n});\n\n/**\n * POST /api/partner/restaurants/:restaurantId/staff — invite an existing\n * account into the venue. Requires an already-reg
+[1]  });\n});\n\n// POST /api/partner/restaurants/:restaurantId/staff/accept — invitee accepts.\n// Registered on the venue prefix like every other s
+[1] ;\n});\n\n// DELETE /api/partner/restaurants/:restaurantId/staff/:userId — revoke access.\nrouter.delete('/:restaurantId/staff/:userId', async (r
+[1] * PUT /api/partner/restaurants/:restaurantId/branches/:branchId/hours — the\n * weekly service map. When the branch is primary its hours are m
+[1] ─────\n\n/**\n * Server-side plan prices. The client NEVER sends a price — the PATCH handler\n * looks it up here so a tampered request cannot un
+[1] an().optional(),\n  // Phase 3b: partners cannot set status themselves — only admin can activate.\n});\n\n/**\n * PATCH /api/partner/restaurants/:
+[1] });\n\n/**\n * PATCH /api/partner/restaurants/:restaurantId/subscription — owner only.\n *\n * Phase 3b: Partners may change plan and autoRenew, b
+[1] Date());\n    }\n\n    // Phase 3b: status cannot be changed by partners — preserve current.\n    const newStatus = current?.status ?? 'none';\n  
+[1] from '../security.js';\n\nconst router = Router();\n\n/**\n * P2-2 Reports — users may flag profiles, events, reviews and chat messages.\n *\n * Pri
+[1]  the\n * `/reports` queue). Nothing in this file ever exposes a report — let alone\n * the reporter's identity — to the account that was report
+[1] his file ever exposes a report — let alone\n * the reporter's identity — to the account that was reported.\n *\n * The DB is the enforcement lay
+[1]  flag is a 409, not queue pollution. Reports never\n * auto-ban anyone — only the admin status transitions move a case.\n */\n\nconst TARGET_TYPE
+[1] rn {\n        label: 'User',\n        evidence: `profile @${row.handle} — ${row.name}`,\n        ownerId: id,\n      };\n    }\n    case 'event': {
+[1] ortRow = Parameters<typeof serializeReport>[0];\n\n// POST /api/reports — submit a report. Rate limited (reportRateLimiter) and\n// duplicate-gu
+[1] age',\n    };\n    throw notFound(\n      `${noun[targetType]} not found — it may have been removed already`,\n    );\n  }\n\n  // You cannot flag y
+[1] eport: serializeReport(created) });\n});\n\n// GET /api/users/me/reports — the caller's own submissions with live status.\n// Ownership is enforc
+[1] quire the platform-admin role. Reports never ban anyone automatically —\n// a human moves the status; enforcement lives in a later release.\n\n/
+[1] rcement lives in a later release.\n\n// GET /api/reports?status=pending — the moderator queue (reporter included).\nrouter.get(\n  '/reports',\n  
+[1] ject({ status: z.enum(REPORT_STATUSES) });\n\n// PATCH /api/reports/:id — a moderator advances the case. No user content is\n// deleted or hidde
+[1] ult(''),\n});\n\n/**\n * POST /api/restaurants/:restaurantId/reservations — diner books a table.\n * Always created `pending`; the venue confirms 
+[1] ue?.name ?? null,\n    },\n  });\n});\n\n// GET /api/users/me/reservations — the diner's table bookings.\nrouter.get('/users/me/reservations', asyn
+[1] ? 0,\n    ),\n  );\n});\n\n// POST /api/reservations/:reservationId/cancel — the diner cancels.\nrouter.post('/reservations/:reservationId/cancel',
+[1] fore.\nconst serialize = serializeRestaurant;\n\n// GET /api/restaurants — partner venues, filterable (P0-4: live search axes).\nrouter.get('/', 
+[1] ,\n    offset: parsedOffset,\n  });\n});\n\n// GET /api/restaurants/nearby — venues within `radiusKm` of a live GPS fix,\n// distance-ordered (WS-A
+[1] nt: rows.length,\n    radiusKm,\n  });\n});\n\n// GET /api/restaurants/:id — venue profile plus upcoming events.\nrouter.get('/:id', async (req, re
+[1]  e.host_name,\n    })),\n  });\n});\n\n// POST /api/restaurants/:id/follow — the viewer follows the venue (idempotent).\nrouter.post('/:id/follow',
+[1] rue, isFollowing: true });\n});\n\n// DELETE /api/restaurants/:id/follow — the viewer unfollows the venue.\nrouter.delete('/:id/follow', async (r
+[1] tring | null;\n  author_avatar: string | null;\n};\n\n// GET /api/reviews — filterable by host, event or author, newest first.\nrouter.get('/revie
+[1] ring().trim().min(10).max(1000),\n});\n\n// POST /api/events/:id/reviews — a guest reviews an event they attended.\nrouter.post('/events/:id/revi
+[1] ute,\n  // and the activity feed row must all succeed or fail together — otherwise\n  // a crash between the two UPDATEs would leave the host's
+[1] }`,\n        `"${text.length > 80 ? `${text.slice(0, 77)}...` : text}" — ${author?.name ?? 'A guest'}`,\n        eventId,\n      ],\n    );\n  });
+[1] .optional().nullable(),\n});\n\n/**\n * GET /api/users/me/saved-locations — all saved places for the auth'd user.\n */\nrouter.get('/', async (req,
+[1] ows.map(serialize) });\n});\n\n/**\n * POST /api/users/me/saved-locations — create or replace a saved location.\n *\n * For 'home' and 'work' kinds
+[1] serialize(row));\n});\n\n/**\n * DELETE /api/users/me/saved-locations/:id — remove a saved location.\n */\nrouter.delete('/:id', async (req, res) =
+[1] ty a\n  LEFT JOIN users u ON u.id = a.actor_id`;\n\n// GET /api/activity — the signed-in user's feed, newest first.\nrouter.get('/activity', asyn
+[1] ter((a) => a.is_unread).length,\n  });\n});\n\n// POST /api/activity/read — marks every item as read.\nrouter.post('/activity/read', async (req, r
+[1] ;\n  res.json({ read: true });\n});\n\n// GET /api/users/me/notifications — unified alerts surface.\n//\n// Computed on read (no cron, no new table
+[1] \n  type: string;\n  host_name: string | null;\n};\n\n// GET /api/me/saved — events the user bookmarked.\nrouter.get('/me/saved', async (req, res) 
+[1]  e.host_name,\n    })),\n  });\n});\n\n// GET /api/me/followed-restaurants — venues the user saved from a restaurant\n// profile or the Explore fee
+[1] Restaurant), count: rows.length });\n});\n\n// POST /api/events/:id/save — bookmark an event.\nrouter.post('/events/:id/save', async (req, res) =
+[1]  true, eventId: req.params.id });\n});\n\n// DELETE /api/events/:id/save — unbookmark.\nrouter.delete('/events/:id/save', async (req, res) => {\n 
+[1] ---------------------------------------\n\n// POST /api/users/:id/block — block a user and sever the follow graph.\n// Idempotent by design: the
+[1] st a blocked\n// host. Unblocking later does NOT restore these follows — that is deliberate.\nrouter.post('/users/:id/block', async (req, res) 
+[1] Id: target.id, removedFollows });\n});\n\n// DELETE /api/users/:id/block — unblock. Deliberately does NOT restore the\n// follows removed at bloc
+[1] d: false, userId: req.params.id });\n});\n\n// GET /api/users/me/blocked — the caller's own block list (Settings → Privacy\n// → Blocked Users). 
+[1] e: string | null;\n  is_deleted: boolean;\n  // Account & Settings (P1) — privacy toggles, food preferences, home locale.\n  home_area: string;\n
+[1] ax(40)).max(12),\n  })\n  .partial();\n\n/** Column name per incoming key — the whitelist the PATCH builder may touch. */\nconst SETTINGS_COLUMNS 
+[1] eyof z.infer<typeof settingsSchema>, string>;\n\n// PATCH /api/users/me — edit the signed-in profile / settings.\nrouter.patch('/me', async (req
+[1] o upload')\n    .max(MAX_AVATAR_BASE64_CHARS, 'That photo is too large — keep it under 512 KB.'),\n});\n\n// PUT /api/users/me/avatar — body `{ i
+[1] too large — keep it under 512 KB.'),\n});\n\n// PUT /api/users/me/avatar — body `{ image: <base64 | data URL> }`.\nrouter.put('/me/avatar', async
+[1] .json({ user: serialize(user) });\n});\n\n// DELETE /api/users/me/avatar — back to the initials avatar. Idempotent.\nrouter.delete('/me/avatar', 
+[1] ther than deleting the users row. Rationale:\n//   * Records preserved — bookings, reviews and payouts keep their history and\n//     their FKs
+[1] their seats and\n//     roll back the affected events' accrued payouts — all in one transaction.\nrouter.delete('/me', async (req, res) => {\n  
+[1]  new ApiError(\n        409,\n        'This account has no password yet — sign up with email first.',\n      );\n    }\n    if (!(await verifyPass
+[1] ncelled')`,\n      [req.userId],\n    );\n\n    // 5. (syncPayout removed — payouts table deleted in Phase 2a)\n\n    // 6. Anonymise the account i
+[1] .publicOutcome } = outcome;\n  // Phase 2a: gateway settlement removed — no Stripe calls needed.\n\n  res.json({ deleted: true, ...publicOutcome
+[1] res.json({ deleted: true, ...publicOutcome });\n});\n\n// GET /api/users — People-screen discovery list (P0-3). Registered before\n// '/:id' so t
+[1] ];\n  // P2-1: blocked accounts vanish from discovery/search both ways — the\n  // blocker never sees the person they blocked, and the blocked 
+[1] : anything guests can still\n * act on. Drafts are excluded on purpose — nobody has booked a draft, and it\n * is still there (unpublished) if 
+[1] \n  }\n\n  return loadUser(userId);\n}\n\n// GET /api/users/me/account-type — current mode, when it was activated and the\n// upcoming experiences t
+[1] tus: e.status,\n    })),\n  });\n});\n\n// POST /api/users/me/account-type — switch mode on the same account.\n// Personal → Professional promotes 
+[1] , accountType);\n  res.json({ user });\n});\n\n// POST /api/users/me/host — legacy alias kept for already-installed builds.\n// It is now exactly 
+[1]   res.json({ role: user.role, user });\n});\n\n// GET /api/users/me/tier — current ladder rung plus progress toward the next.\n// The client Prof
+[1] er');\n  res.json(tierInfo(me));\n});\n\n// POST /api/users/me/influencer — claim Food Influencer status on the SAME\n// account. Idempotent for e
+[1] nfluencer', user: await loadUser(me.id) });\n});\n\n// GET /api/users/me — the signed-in user's own profile.\nrouter.get('/me', async (req, res) 
+[1]  serialize(user) });\n});\n\n// GET /api/users/handle-available?handle=… — advisory pre-check for the\n// profile editor. Exposes exactly what th
+[1] ason: clash ? 'taken' : null });\n});\n\n// GET /api/users/:id/followers — accounts that follow :id, newest first.\n// P1-4: the target can hide 
+[1] : rows.length,\n    offset,\n  });\n});\n\n// GET /api/users/:id/following — accounts :id follows, newest first.\nrouter.get('/:id/following', asyn
+[1] d) must not read a blocked\n * profile's data back out of `/users/:id` — either direction of a blocked\n * pair gets a 403 for the OTHER accoun
+[1] nger receive the host's upcoming-dinner list. Reviews\n * stay visible — they are the trust record of the platform, not user activity.\n */\nfun
+[1] rue;\n  return target.showActivity !== false;\n}\n\n// GET /api/users/:id — profile card plus hosted upcoming events and reviews.\nrouter.get('/:i
+[1] text.js';\n\nconst router = Router();\n\n/**\n * Public venue-menu surface — intentionally unauthenticated.\n *\n * A QR code printed on a restauran
+[1] }-[0-9a-f]{4}-[0-9a-f]{12}$/i;\n\n// GET /api/public/menu/:restaurantId — unauthenticated diner-facing menu.\nrouter.get('/:restaurantId', async
+[1] , items)),\n  });\n});\n\n/**\n * POST /api/public/menu/:restaurantId/scan — record a QR scan for analytics.\n *\n * Fire-and-forget from the custom
+[1]  app. Rate-limited to 1 scan per device per\n * hour. No PII is stored — only a hash of the device identifier.\n */\nrouter.post('/:restaurantId
+[1]   );\n\n  if (recentScan) {\n    // Already scanned within the last hour — silently accept but don't record.\n    res.json({ recorded: false, rea
+[1] s';\n\nconst router = Router();\n\n/**\n * GET /api/public/avatars/:userId — the uploaded profile photo bytes.\n *\n * Mounted BEFORE requireAuth: `
+[1] at prefix.\nconst venueRouter = Router();\n\n/**\n * Public deals surface — intentionally unauthenticated.\n *\n * Diners browse active deals from 
+[1] -f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;\n\n// GET /api/deals?city=&kind=&q= — unauthenticated diner-facing deals feed.\n// `q` searches the whole ac
+[1] ,\n    limit,\n    offset,\n  });\n});\n\n// GET /api/restaurants/:id/deals — unauthenticated deals for one venue.\nvenueRouter.get('/:restaurantId/
+[1] rom '../api.js';\n\nconst router = Router();\n\n/**\n * Restaurant reviews — public read, authenticated write.\n *\n * Customers can review restaura
+[1] {4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;\n\n// GET /api/restaurants/:id/reviews — public, paginated.\nrouter.get('/:restaurantId/reviews', async (req, r
+[1]    limit,\n    offset,\n  });\n});\n\n// POST /api/restaurants/:id/reviews — authenticated, requires completed reservation.\nconst postReviewSchema
+[1] , isFollowing: row.is_following }),\n    p,\n  );\n}\n\n// GET /api/search — one ranked, categorised page per requested entity type.\nrouter.get('/
+[1] ems,\n    hosts: hosts.items,\n  });\n});\n\n// GET /api/search/suggest?q= — typeahead strings across every source.\nrouter.get('/suggest', async (
+[1] onst router = Router();\n\n/**\n * GET /api/public/venue-images/:imageId — uploaded venue photo bytes.\n *\n * Mounted BEFORE requireAuth, for the
+[1] are never rewritten, so a replaced photo\n * is simply a different URL — which is why this response can be cached hard.\n */\nrouter.get('/:imag
+[1] is the caller's next request, through\n * the existing PATCH endpoints — which keeps this route free of per-module\n * rules and means "upload"
+[1] x(\n      MAX_VENUE_IMAGE_BASE64_CHARS,\n      'That photo is too large — keep it under 512 KB.',\n    ),\n  kind: z.enum(VENUE_IMAGE_KINDS).defa
+[1] y guessing a UUID.\n * The referencing column is the caller's to clear — this only frees the bytes.\n */\nrouter.delete('/:restaurantId/images/:
+[1] efunded and their ticket rows PRESERVED (cancelled, not\n  // deleted) — history keeps its foreign keys intact.\n  const booking = await mustOn
+[1] rt.equal(foreign.status, 403);\n\n  // An id that does not exist is 404 — the two cases stay distinguishable.\n  const missing = await api(ops.t
+[1]  SDK (generateTestHeaderString / constructEvent are pure local crypto —\n * no network, no live keys). This exercises the whole ladder:\n *   c
+[1] harge: CARD_CHARGE,\n  });\n  forged.data.object.amount = 1; // pennies — not the $100.00 the booking holds\n  const { status } = await deliverW
+[1] s the blocker',\n  );\n\n  // Direct profile reads are refused both ways — no private-data leak.\n  const aSeesB = await api(a.token, 'GET', `/us
+[1] s,\n    201,\n  );\n\n  // History remains readable for the blocked guest — no evidence is destroyed.\n  const history = await api(guest.token, 'G
+[1] ─────────────────────────────────────────────\n\ntest('GET subscription — no row returns synthetic default', async () => {\n  const { venueId, o
+[1] ;\n  assert.equal(sub.autoRenew, false);\n});\n\ntest('PATCH subscription — owner sets monthly plan, status stays none (partner cannot self-activ
+[1]  `Expected ~30 days, got ${daysDiff}`);\n});\n\ntest('PATCH subscription — owner switches to yearly', async () => {\n  const { venueId, ownerToke
+[1] `Expected ~365 days, got ${daysDiff}`);\n});\n\ntest('PATCH subscription — status field is ignored (partner cannot self-activate)', async () => 
+[1] wnerToken } = await registerVenue();\n  // Try to set status to active — should be ignored.\n  const { status, json } = await api(ownerToken, '
+[1] atus, 'none'); // Status change ignored\n});\n\ntest('PATCH subscription — staff role gets 403', async () => {\n  const { venueId, ownerToken } =
+[1] ly',\n  });\n  assert.equal(status, 403);\n});\n\ntest('PATCH subscription — unknown plan gets 400', async () => {\n  const { venueId, ownerToken }
+[1] e',\n  });\n  assert.equal(status, 400);\n});\n\ntest('Admin POST activate — sets status to active', async () => {\n  const adminToken = await mint
+[1] ;\n  assert.equal(sub.plan, 'monthly');\n});\n\ntest('Admin POST activate — cancel sets cancelled_at', async () => {\n  const adminToken = await m
+[1] elled');\n  assert.ok(sub.cancelledAt);\n});\n\ntest('Admin POST activate — non-admin gets 403', async () => {\n  const { venueId, ownerToken } = 
+[1] scription`, {\n    plan: 'monthly',\n  });\n  // Owner tries to activate — should fail.\n  const { status } = await api(ownerToken, 'POST', `/adm
+[1] tive',\n  });\n  assert.equal(status, 403);\n});\n\ntest('GET subscription — reads back what was set', async () => {\n  const adminToken = await mi
+[1] pTheme.dark,\n      home: const AuthGate(),\n      // Every named route — bare or query-bearing — resolves through\n      // [generateRoute] so 
+[1]  const AuthGate(),\n      // Every named route — bare or query-bearing — resolves through\n      // [generateRoute] so all screens share the sa
+[1] ever a request fails with `401` so the session can clear\n  /// itself — a token revoked on another device must not leave the app looking\n  //
+[1] `POST` that answers a bare object (no `data` wrapper worth modelling) —\n  /// still unwrapped defensively so callers can read `envelope.data[
+[1] 08` = timeout).\n/// The status is *meaningful* on the partner surface — `403` means the role is\n/// too low or the venue belongs to someone e
+[1] rator, `422` means a\n/// referenced row does not belong to this venue — so screens branch on it\n/// instead of printing a generic toast.\nclas
+[1] nal int total;\n  final bool hasMore;\n\n  /// Unread notification count — present only on `GET /partner/notifications`.\n  final int unread;\n\n  
+[1] n(map['meta']),\n    );\n  }\n\n  /// Raw value under [key] inside `data` — for scalars and nested maps.\n  Object? raw(String key) => data[key];\n
+[1] http://localhost:4000',\n  );\n\n  /// All REST routes live under `/api` — same base as the customer app.\n  static String get apiUrl => '$apiBas
+[1] ames duplicated across screens. The server is still\n/// authoritative — this only decides which controls are enabled before a\n/// request is 
+[1]  only, so an existing package is edited by\n/// the platform, not here — the screen says so instead of offering a dead button.\nclass DiningPac
+[1]  ? 'Unzoned' : zone;\n}\n\n/// The public (unauthenticated) menu payload — what guests see after scanning\n/// the QR code. Mirrors `GET /api/pub
+[1] lity response for one day, including whether hours are\n/// configured — an empty day with no hours is a setup problem, not a busy one.\nclass 
+[1] ence.\n///\n/// Guest dietary requirements are not part of this payload — the platform does\n/// not expose them to venues yet — so the detail s
+[1] of this payload — the platform does\n/// not expose them to venues yet — so the detail sheet says so rather than\n/// implying the data is miss
+[1] "not measured",\n      // which must read differently from a real zero — never fabricate 0.\n      scansAvailable: json['scans'] is Map,\n      
+[1] on or a no-show. This is what the Home "Reservations" KPI\n  /// shows — [total] would count bookings that never happened.\n  int get booked =>
+[1] \n/// The list payload is the only read surface for venue-owned events — there is\n/// no single-event GET — so the detail screen works from th
+[1] ead surface for venue-owned events — there is\n/// no single-event GET — so the detail screen works from this row and the\n/// partial `PUT` wr
+[1]  (`GET /partner/analytics`).\n///\n/// The endpoint is not venue-scoped — it covers every venue the account\n/// operates — so the screen labels
+[1]  is not venue-scoped — it covers every venue the account\n/// operates — so the screen labels it as such instead of implying it followed\n/// t
+[1] ationship, so a venue that only supplied the\n/// space receives `403` — the collaboration screen renders [HostProfile.name]\n/// from the requ
+[1] st int yearlySavingPkr = 10000;\n\n  /// The features both plans unlock — identical across tiers.\n  static const List<String> proFeatures = [\n 
+[1] \n  /// Clears local credentials. The server already dropped the token — this is\n  /// the half of signing out that happens on the device.\n  F
+[1] ${capability.label} needs the ${_minimumRole[capability]?.label} role — '\n    'you are ${role.label.toLowerCase()} here.';\n\nextension Capabil
+[1]  role);\n\n  /// The venue must be verified before it can sell anything — deals, host\n  /// approvals and payouts all hinge on the same server-
+[1] t to\n/// a repository and then `ref.invalidate` the affected provider — writes are\n/// never optimistic, because the same rows are live in th
+[1]  `/auth/signin` is the OTP path and is deliberately not used\n/// here — the desk signs in with a password.\nclass AuthRepository {\n  AuthRepos
+[1] ap(body['user']));\n  }\n\n  /// Revokes all sessions including this one — the caller must drop the local\n  /// token whatever the server answer
+[1] als', Deal.fromJson);\n  }\n\n  /// `403` when the venue is not verified — the create button is disabled for\n  /// that reason, and this message
+[1] ed event. The server answers `{ request: { eventId,\n  /// status } }` — a decision receipt, not a re-serialised row — so the inbox\n  /// refe
+[1] ntId,\n  /// status } }` — a decision receipt, not a re-serialised row — so the inbox\n  /// refetches the list after this instead of splicing 
+[1] nus` surface (special menus),\n/// which supports create and list only — there is no edit or delete route, so\n/// the screen offers neither.\nc
+[1] e over the phone, so `status` defaults to `confirmed`\n/// server-side — a guest who has agreed on the phone is not left pending.\nclass PhoneB
+[1] ssing');\n    return table;\n  }\n\n  /// Deactivates rather than deletes — a table a guest sat at stays on record.\n  Future<void> deleteTable(St
+[1] ─────────────────────────────\n\n  /// (Re)opens a verification request — the path out of a rejection.\n  Future<void> requestVerification(Strin
+[1] ffMember.fromJson);\n  }\n\n  /// Invite by email or phone. `owner` only — the server enforces the rank.\n  Future<StaffMember> inviteStaff(\n    
+[1] nd mirrors it onto the venue when the\n  /// branch is the primary one — so the response's branch is the fresh truth.\n  Future<Branch> saveBra
+[1] ants/:id/images`.\n///\n/// This repository deliberately does ONE thing — store bytes and hand back the\n/// URL the server minted. Repointing a
+[1] t';\nimport '../../widgets/status_chip.dart';\n\n/// Settings & security — the account surface (`/users/me`, `/auth/*`).\n///\n/// Only the server
+[1]  bank account. '\n        'Payout settings are managed by the platform — open a support ticket '\n        'to change them.',\n      children: [\n
+[1] Expanded(\n              child: Text(\n                value.isEmpty ? '—' : value,\n                style: AppTextStyles.bodyMedium,\n          
+[1] enue's own `partnershipStatus` / `verified` / `profileCompletion`\n/// — the same three flags every selling gate on the server depends on. A\n/
+[1]  board row or the Home list.\n///\n/// The sheet reads the whole record — the guest's phone, their notes, the\n/// reference, who booked it — an
+[1] rd — the guest's phone, their notes, the\n/// reference, who booked it — and it also carries the actions that row allows.\n/// The buttons come
+[1]          label: 'Phone',\n              value: r.guestPhone.isEmpty ? '—' : r.guestPhone,\n              trailing: r.guestPhone.isEmpty\n       
+[1]       label: 'Reference',\n              value: r.reference.isEmpty ? '—' : r.reference,\n              trailing: r.reference.isEmpty\n         
+[1] / does not have to confirm its own entry. Table selection is optional — leaving\n/// it unset lets the availability engine assign one — and th
+[1] tional — leaving\n/// it unset lets the availability engine assign one — and the start is collected\n/// as a venue-local instant converted to 
+[1] apture\n/// is mobile-only; on web, manual reference entry is the path — the one honest\n/// route the API supports without a scanner.\nclass Ch
+[1] ue and labels itself as such. The\n/// lifecycle is driven by `status` — there is no delete route — and editing is a\n/// partial write, so onl
+[1] h. The\n/// lifecycle is driven by `status` — there is no delete route — and editing is a\n/// partial write, so only the keys the operator tou
+[1] d/summary` answers `403` for a venue that only supplied the\n/// space — that is rendered as "numbers not shared", never as an error screen.\n/
+[1] owSnackBar(\n      const SnackBar(\n        content: Text('Menu updated — live in the Customer App'),\n        duration: Duration(seconds: 2),\n 
+[1]    ? 'Live in Customer App'\n                    : 'Showing saved menu — live preview unavailable',\n                style: AppTextStyles.label
+[1] //\n/// Create is disabled with a reason while the venue is unverified — the server\n/// answers `403` regardless of the local role, so the gat
+[1] under the header rather than\n/// floating, so the desk always sees it — and always sees it disabled when\n/// the venue may not sell.\nclass _C
+[1] d action, so\n/// the header says plainly that a ticket is the channel — a refund is requested\n/// by filing one, not by tapping a button that
+[1]                  child: Text(\n                    t.ticket.isEmpty ? '—' : t.ticket,\n                    style: AppTextStyles.labelSmall\n    
+[1] oard counter. A metric the server did not\n/// measure is rendered as "—" with an *Unavailable* caption, so it can never\n/// be mistaken for a
+[1] KpiCard(\n        value: scansAvailable ? '${snapshot.scans.today}' : '—',\n        label: 'QR Scans',\n        icon: Icons.qr_code_2,\n        c
+[1] ng to one column on a very narrow screen or\n/// at a large text scale — where a card can no longer hold its own label.\nclass _KpiGrid extends
+[1] lback? onTap;\n\n  /// The metric was not measured. The value reads as "—" instead of `0`.\n  final bool unavailable;\n\n  @override\n  Widget buil
+[1]  Deal*\n/// asks the Deals tab to open its creation form straight away — the tab still\n/// owns the venue-verification and role rules, so an u
+[1] across on a roomy phone, two by two once the labels would not\n/// fit — at 320dp or at a large text scale.\nclass _QuickActionGrid extends Sta
+[1] y, not upcoming, so they are\n/// dropped. A *pending* booking is kept — it still needs a confirmation — and\n/// leads the list because it is 
+[1]  dropped. A *pending* booking is kept — it still needs a confirmation — and\n/// leads the list because it is the one row the desk has to act 
+[1] ,\n      ],\n    );\n  }\n}\n\n/// The rows that did not fit in the preview — one tap to the day board.\nclass _MoreReservationsRow extends Stateles
+[1]  cannot sell\n/// anything, and unread notifications are informational — so they come last.\nclass NeedsAttentionSection extends StatelessWidge
+[1] ks every selling surface, so it outranks a half-filled\n    // profile — and both outrank a notification nobody is waiting on.\n    if (!venue.
+[1] ns.storefront,\n      ),\n    );\n  }\n\n  /// "Pakistani · BBQ · Karachi" — whichever of those the venue actually has.\n  String _identityLine(Ven
+[1] day at a glance inside the hero: covers seated, tables in service and —\n/// only when a capacity is actually configured — occupancy.\n///\n/// 
+[1] bles in service and —\n/// only when a capacity is actually configured — occupancy.\n///\n/// A venue with no seats set up would otherwise be sh
+[1] ns a guest can redeem right now.\n///\n/// Only `isLive` rows are shown — an active-but-not-yet-started or expired deal\n/// is not something th
+[1]  or expired deal\n/// is not something the desk can tell a guest about — and the rail caps at\n/// three so Home stays a dashboard rather than 
+[1]  the\n/// active venue and to events that are still ahead of the clock — a venue that\n/// hosts nothing gets an honest empty state instead of 
+[1] restaurant_<venueId>`. Any prior venue subscription is released first —\n  /// a desk operator can only watch one venue's live feed at a time.
+[1]  if (!isConnected) {\n      debugPrint('🔌 WebSocket: cannot join venue — not connected');\n      return;\n    }\n    if (_currentVenueId == venue
+[1] f (!isConnected) {\n      debugPrint('🔌 WebSocket: cannot send message — not connected');\n      return;\n    }\n    _socket!.emit('chat_message'
+[1]  specific listener.\n  ///\n  /// Common events:\n  ///  * `new_booking` — a reservation was created on a watched venue\n  ///  * `booking_update
+[1] reservation was created on a watched venue\n  ///  * `booking_updated` — status changed (confirmed → seated → completed)\n  ///  * `event_updat
+[1] tus changed (confirmed → seated → completed)\n  ///  * `event_updated` — an event's status or details changed\n  ///  * `new_message` — a chat 
+[1] pdated` — an event's status or details changed\n  ///  * `new_message` — a chat message in a subscribed event room\n  ///  * `notification` — a
+[1] ` — a chat message in a subscribed event room\n  ///  * `notification` — a platform or venue notification\n  void on(String event, Function(dyn
+[1] .onConnectError((data) {\n      debugPrint('🔌 WebSocket: connect error — $data');\n      _setStatus(WebSocketStatus.error);\n    });\n\n    socket
+[1] });\n\n    socket.onError((data) {\n      debugPrint('🔌 WebSocket: error — $data');\n      _setStatus(WebSocketStatus.error);\n    });\n\n    socket
+[1] ce,\n);\n\n/// Server ceiling for `POST /partner/restaurants/:id/images` — mirrors\n/// `MAX_VENUE_IMAGE_BYTES` in `server/src/venue_images.ts`.\n
+[1] package:flutter/material.dart';\n\n/// DineCircle Partner design system — colour palette.\n///\n/// Identical tokens to the customer app so both 
+[1] tic const Color borderLight = Color(0xFF3A3642);\n\n  // Primary accent — warm amber/ember\n  static const Color primary = Color(0xFFFF8A3D);\n  
+[1] ic const Color surfaceSunken = Color(0xFF0E0C10);\n\n  // Chart palette — ordered so the first colour is the primary series.\n  static const Lis
+[1] /// DineCircle Partner design system — spacing scale.\n///\n/// Same numbers as the customer app so a partner 
+[1] rt';\n\nimport 'app_colors.dart';\n\n/// DineCircle Partner design system — typography.\n///\n/// Inter throughout, matching the customer app. Styl
+[1] spacing.dart';\nimport 'app_text_styles.dart';\n\n/// DineCircle Partner — single dark theme for both targets.\n///\n/// Mobile and web run the sa
+[1] final DateFormat _key = DateFormat('yyyy-MM-dd');\n\n  /// `2026-11-01` — the wire form for `?date=`.\n  static String key(DateTime day) => _key
+[1] and + ( ) -';\n    }\n    return null;\n  }\n\n  /// Image fields are URLs — the platform has no partner media upload yet.\n  static String? url(St
+[1] /// Guest-facing links — the payloads the venue's printed QR code encodes.\n///\n/// The public 
+[1] s column on the server, so this is a\n/// pure read of `opening_hours` — it never invents an "open" state the desk has\n/// not actually config
+[1] d` reads green on a\n/// reservation, an experience and a payout alike — one vocabulary across the\n/// whole desk.\nclass StatusChip extends St
+[1] ues(alpha: 0.4)),\n      ),\n      child: Text(\n        text.isEmpty ? '—' : text,\n        style: dense\n            ? AppTextStyles.labelSmall.
+[1] e is that a gap ships as an explicit\n/// disabled state with a reason — this is the widget that carries the reason.\nclass DisabledTile extend
+[1] aption that explains\n/// what the number counts is part of the widget — a bare figure on a dark card\n/// is how a desk misreads a slow day as
+[1] h(color: AppColors.textSecondary) : style,\n    );\n  }\n}\n\n/// A `label — value` line, the workhorse of every detail sheet.\nclass InfoRow exten
+[1]      flex: 6,\n            child: Text(\n              value.isEmpty ? '—' : value,\n              textAlign: TextAlign.end,\n              style
+[1]    );\n      },\n    );\n  }\n}\n\n/// A bordered, scrollable list of tiles — the mobile-shaped counterpart to the\n/// web data table, used whereve
+[1] hem into an overflow menu on a tight\n/// phone or at large text scale — the action never disappears, only the icon\n/// does.\nclass ShellActio
+[1]  SizedBox(width: AppSpacing.sm),\n          Text(\n            'Offline — showing the last data read',\n            style: AppTextStyles.bodySma
+[1]  payload string.\n///\n/// Backed by the pure-Dart `qr_flutter` encoder — the same one the customer app\n/// uses for booking references — so it
+[1] coder — the same one the customer app\n/// uses for booking references — so it renders identically in widget tests and\n/// on the web build, w
+[1] ge value, optional caption and icon.\n///\n/// Lighter than a [KpiCard] — no tone, no tap target — intended for dense\n/// summary rows inside a
+[1] n and icon.\n///\n/// Lighter than a [KpiCard] — no tone, no tap target — intended for dense\n/// summary rows inside a [PremiumCard].\nclass Sta
+[1]  the meaning; it may ellipsis, the percent\n              // never may — so only the label flexes.\n              Expanded(child: Text(label!, 
+[1] or embedding inside a [StatTile]\n/// or [MetricRow]. No axes, no grid — just the line.\nclass Sparkline extends StatelessWidget {\n  const Spar
+[1] t while it loads.\n///\n/// Respects [MediaQueryData.disableAnimations] — when animations are disabled\n/// the shimmer renders as a static tran
+[1] red items) but the backend has no\n/// data for it. The tile is honest — it never fabricates numbers.\nclass NotTrackedTile extends StatelessWi
+[1] \n/// The server stores uploaded photos as `/public/venue-images/<id>` — relative\n/// to the API root, so the value survives a host change. `I
+[1] arrive in the same string columns:\n///  * `/public/venue-images/<id>` — a photo uploaded through the partner app,\n///    stored relative to t
+[1] to the API root and expanded by [mediaImageUrl];\n///  * `http(s)://…` — an external URL;\n///  * anything else — a bundled asset (seeded rows,
+[1] ageUrl];\n///  * `http(s)://…` — an external URL;\n///  * anything else — a bundled asset (seeded rows, older records).\n///\n/// Empty and unrea
+[1] of truth, so an unsaved form and an unsaved photo cannot\n/// disagree — and a screen that saves on every edit never needs to re-read.\nclass I
+[1] es) {\n      setState(\n        () => _error = 'That photo is too large — keep it under 512 KB.',\n      );\n      return;\n    }\n    await _uploa
+[1] han a list of [ImageUploadField]s because a gallery is a\n/// `text[]` — adding and removing shift the array, so each tile cannot own a\n/// sl
+[1] es) {\n      setState(\n        () => _error = 'That photo is too large — keep it under 512 KB.',\n      );\n      return;\n    }\n\n    setState(()
+[1] eight: 2),\n        Text(\n          'Photos guests see on your profile — up to ${widget.maxImages}.',\n          style: AppTextStyles.bodySmall
+[1] promoted to primary\n  /// mobile tabs. They stay *inside* `/business` — one screen, one data\n  /// scope — and only the `?tab=` differs, so s
+[1] bs. They stay *inside* `/business` — one screen, one data\n  /// scope — and only the `?tab=` differs, so shared links keep working.\n  static 
+[1] ows "could not find a generator" the moment a tab query is\n/// pushed — the whole point of the web build's shareable URLs. The generated\n/// 
+[1] e rather than a hard\n/// slide. Honors `MediaQuery.disableAnimations` — users who ask for reduced\n/// motion get an instant swap, no fades at
+[1] ndaryAnimation` drives it) fades out\n          // over the front half — the Material "fade through" pattern.\n          final incoming = Curve
+[1] , because the shadow band sits right where\na hardcoded crop would end — leaving it in bakes a pale fringe along the bottom\nedge of every icon
+[1] tool/prepare_brand_assets.py\n\nReads:\n    dineCircle Dining Logo.png   — the horizontal wordmark on a white canvas\n    DC Partner App Badge.pn
+[1] orizontal wordmark on a white canvas\n    DC Partner App Badge.png     — the rounded-square partner badge on a\n                               
+[1] ng/ (committed, not generated at build time):\n    wordmark_light.png  — transparent bg, dark text recolored to the dark-theme\n               
+[1]   surface colour (#F5F3F0), orange kept as-is\n    wordmark_dark.png   — the original wordmark for light surfaces (login card,\n               
+[1] ard,\n                          print, splash)\n    partner_badge.png   — silhouette-masked transparent crop of the badge at\n                  
+[1] = Venue(\n        id: 'ven_123',\n        name:\n            'Sea & Salt — The Restaurant and Café with a Beautifully Long Name',\n        cuisin

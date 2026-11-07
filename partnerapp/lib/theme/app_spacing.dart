@@ -1,4 +1,4 @@
-/// DineCircle Partner design system — spacing scale.
+/// DineCircle Partner design system, spacing scale.
 ///
 /// Same numbers as the customer app so a partner screen and a guest screen
 /// built from the same components line up.

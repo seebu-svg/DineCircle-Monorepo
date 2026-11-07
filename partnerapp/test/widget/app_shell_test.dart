@@ -93,7 +93,7 @@ void main() {
     addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
 
     // Real surface and MediaQuery agree at 320, so this is a genuine tight
-    // layout, not just a branch decision — the spec's key overflow guard.
+    // layout, not just a branch decision, the spec's key overflow guard.
     await _pumpAt(
       tester,
       const Size(320, 900),

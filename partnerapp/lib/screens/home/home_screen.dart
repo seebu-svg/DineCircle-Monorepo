@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -41,13 +43,9 @@ class HomeScreen extends ConsumerWidget {
     return AppShell(
       active: PrimaryDestination.home,
       title: 'Home',
-      actions: [
-        ShellAction(
-          icon: Icons.notifications_outlined,
-          label: 'Notifications',
-          onPressed: () => _openNotifications(context, venueId),
-        ),
-      ],
+      // No notifications action here: the shell header already carries the
+      // bell with the live unread badge, and two bells a thumb-width apart
+      // both going to the same inbox is one control too many.
       child: snapshot.when(
         loading: () => const HomeSkeleton(),
         error: (error, _) => ListView(
@@ -64,26 +62,73 @@ class HomeScreen extends ConsumerWidget {
       ),
     );
   }
-
-  void _openNotifications(BuildContext context, String venueId) {
-    Navigator.of(context).pushNamed('${AppRoute.inbox}?tab=notifications');
-  }
 }
 
-class HomeBody extends ConsumerWidget {
+class HomeBody extends ConsumerStatefulWidget {
   const HomeBody({super.key, required this.data, required this.venueId});
 
   final DashboardSnapshot data;
   final String venueId;
 
+  @override
+  ConsumerState<HomeBody> createState() => _HomeBodyState();
+}
+
+class _HomeBodyState extends ConsumerState<HomeBody>
+    with WidgetsBindingObserver {
+  Timer? _autoRefresh;
+
+  DashboardSnapshot get data => widget.data;
+  String get venueId => widget.venueId;
+
   ({String venue, String date}) get _key =>
       (venue: venueId, date: data.today.date);
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _startAutoRefresh();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _autoRefresh?.cancel();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Pause the timer when the app is backgrounded, resume on foreground.
+    if (state == AppLifecycleState.resumed) {
+      _startAutoRefresh();
+    } else {
+      _autoRefresh?.cancel();
+    }
+  }
+
+  void _startAutoRefresh() {
+    _autoRefresh?.cancel();
+    _autoRefresh = Timer.periodic(const Duration(seconds: 30), (_) {
+      _silentRefresh();
+    });
+  }
+
+  /// Silent background refresh: invalidates providers but does not await them,
+  /// so the UI never flashes a loading spinner on a timer.
+  void _silentRefresh() {
+    ref.invalidate(dashboardProvider(venueId));
+    ref.invalidate(todayReservationsProvider(_key));
+    ref.invalidate(dealsProvider((venue: venueId, status: 'active')));
+    ref.invalidate(notificationsProvider(false));
+  }
 
   /// The same family keys the sections watch, so a pull refreshes exactly what
   /// is on screen. `dashboardProvider` and today's reservations are awaited
   /// because the spinner should live until the identity block and the booking
   /// rail are real; the secondary rails resolve on their own skeletons.
-  Future<void> _refresh(WidgetRef ref) async {
+  Future<void> _refresh() async {
     ref.invalidate(dashboardProvider(venueId));
     ref.invalidate(todayReservationsProvider(_key));
     ref.invalidate(subscriptionProvider(venueId));
@@ -99,11 +144,11 @@ class HomeBody extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final reservations = ref.watch(todayReservationsProvider(_key));
 
     return RefreshIndicator(
-      onRefresh: () => _refresh(ref),
+      onRefresh: _refresh,
       child: ListView(
         // A day with no rows still has to pull: without always-scrollable
         // physics the empty Home cannot be refreshed at all.
@@ -117,6 +162,10 @@ class HomeBody extends ConsumerWidget {
           const SizedBox(height: AppSpacing.lg),
           TodaysOverview(snapshot: data),
 
+          // ── Revenue & performance ───────────────────────────────────────
+          const SizedBox(height: AppSpacing.lg),
+          RevenueStrip(earnings: data.earnings),
+
           // ── Quick Actions ───────────────────────────────────────────────
           const SizedBox(height: AppSpacing.lg),
           const QuickActionsSection(),
@@ -127,6 +176,7 @@ class HomeBody extends ConsumerWidget {
             reservations: reservations,
             venueId: venueId,
             onRetry: () => ref.invalidate(todayReservationsProvider(_key)),
+            trend: data.today.trend,
           ),
 
           // ── Active Deals ────────────────────────────────────────────────

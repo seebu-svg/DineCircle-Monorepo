@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Restaurants &amp; cafés in Karachi · DineCircle</title>
+  <meta name="description" content="Browse and filter Karachi restaurants and cafés on DineCircle. Menus, cuisine, price ranges, deals and opening hours.">
+  <meta name="theme-color" content="#F97316">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="DineCircle">
+  <meta property="og:title" content="Restaurants &amp; cafés in Karachi · DineCircle">
+  <meta property="og:description" content="Browse and filter Karachi restaurants and cafés on DineCircle. Menus, cuisine, price ranges, deals and opening hours.">
+  <meta property="og:image" content="assets/images/hero_tasting.webp">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/base.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+  <link rel="stylesheet" href="assets/css/pages.css">
+  <script src="assets/js/site.js" defer></script>
+</head>
+<body class="">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header" data-header>
+      <div class="container header-inner">
+        <a class="brand" href="index.html" aria-label="DineCircle home">
+          <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 48 48" focusable="false">
+            <defs>
+              <linearGradient id="dcArc" x1="8" y1="4" x2="40" y2="44" gradientUnits="userSpaceOnUse">
+                <stop offset="0" stop-color="#FDBA74"></stop>
+                <stop offset="1" stop-color="#F97316"></stop>
+              </linearGradient>
+            </defs>
+            <path d="M24 6a18 18 0 1 0 18 18" fill="none" stroke="url(#dcArc)" stroke-width="5" stroke-linecap="round"></path>
+            <path class="brand-fork" d="M20 15v5a4 4 0 0 0 8 0v-5M24 15v5.5M24 24v9" fill="none" stroke-width="2.4" stroke-linecap="round"></path>
+          </svg>
+        </span>
+          <span class="brand-word">Dine<span>Circle</span></span>
+        </a>
+        <nav class="primary-nav" id="primaryNav" aria-label="Primary">
+          <ul>
+          <li><a href="restaurants.html" aria-current="page">Restaurants</a></li>
+          <li><a href="deals.html">Deals</a></li>
+          <li><a href="experiences.html">Experiences</a></li>
+          <li><a href="hosts.html">Hosts</a></li>
+          <li><a href="about.html">About</a></li>
+          </ul>
+          <div class="nav-extra">
+            <span class="nav-extra__city"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21s7-5.1 7-11a7 7 0 1 0-14 0c0 5.9 7 11 7 11Z" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="10" r="2.5" fill="none" stroke="currentColor" stroke-width="1.7"/></svg> Karachi</span>
+            <button class="btn btn--primary" type="button" data-app-cta>Get the app</button>
+          </div>
+        </nav>
+        <div class="header-actions">
+          <div class="city-picker" data-city-picker>
+            <button class="city-btn" type="button" aria-expanded="false" aria-haspopup="listbox" aria-controls="cityMenu">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21s7-5.1 7-11a7 7 0 1 0-14 0c0 5.9 7 11 7 11Z" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="10" r="2.5" fill="none" stroke="currentColor" stroke-width="1.7"/></svg><span data-city-label>Karachi</span><svg class="icon icon--sm chevron" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m7 10 5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <ul class="city-menu" id="cityMenu" role="listbox" aria-label="Choose a city" hidden>
+              <li role="option" aria-selected="true" tabindex="-1" data-city="Karachi"><span>Karachi</span><span class="pill pill--live">Live</span></li>
+              <li role="option" aria-selected="false" aria-disabled="true" tabindex="-1" data-city="Lahore"><span>Lahore</span><span class="pill">Soon</span></li>
+              <li role="option" aria-selected="false" aria-disabled="true" tabindex="-1" data-city="Islamabad"><span>Islamabad</span><span class="pill">Soon</span></li>
+            </ul>
+          </div>
+          <button class="btn btn--primary btn--sm header-cta" type="button" data-app-cta>Get the app</button>
+          <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primaryNav" aria-label="Open menu" data-nav-toggle>
+            <span></span><span></span><span></span>
+          </button>
+        </div>
+      </div>
+    </header>
+  <main id="main">
+<section class="page-hero">
+      <div class="container">
+        <nav class="breadcrumbs" aria-label="Breadcrumb"><ol><li><a href="index.html">Home</a></li><li aria-current="page">Restaurants</li></ol></nav>
+        <p class="eyebrow">Restaurants & cafés</p>
+        <h1>Find your next table</h1>
+        <p class="page-lede">Browse every place on DineCircle, filter by cuisine and read the menu before you decide. Eleven Karachi venues, over a hundred dishes, all priced in PKR.</p>
+        
+      </div>
+    </section>
+    <section class="section section--flush">
+      <div class="container">
+        <div class="filter-panel" data-filter-panel>
+          <div class="filter-search">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            <label class="sr-only" for="venueSearch">Search restaurants, dishes or areas</label>
+            <input id="venueSearch" type="search" placeholder="Search a place, dish or area" autocomplete="off" data-venue-search>
+            <button class="filter-clear" type="button" data-clear-search aria-label="Clear search" hidden><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m6 6 12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg></button>
+          </div>
+          <div class="filter-row">
+            <div class="chips" role="group" aria-label="Filter by cuisine">
+              <button class="chip" type="button" data-filter="all" aria-pressed="false">All</button><button class="chip" type="button" data-filter="pakistani" aria-pressed="false">Pakistani</button><button class="chip" type="button" data-filter="bbq" aria-pressed="false">BBQ</button><button class="chip" type="button" data-filter="seafood" aria-pressed="false">Seafood</button><button class="chip" type="button" data-filter="cafe" aria-pressed="false">Cafés</button><button class="chip" type="button" data-filter="italian" aria-pressed="false">Italian</button><button class="chip" type="button" data-filter="mediterranean" aria-pressed="false">Mediterranean</button><button class="chip" type="button" data-filter="desserts" aria-pressed="false">Desserts</button><button class="chip" type="button" data-filter="coffee" aria-pressed="false">Coffee</button><button class="chip" type="button" data-filter="brunch" aria-pressed="false">Brunch</button>
+            </div>
+            <div class="filter-selects">
+              <label class="select-wrap"><span class="sr-only">Price range</span>
+                <select data-price-filter>
+                  <option value="all">Any price</option>
+                  <option value="2">$$</option>
+                  <option value="3">$$$</option>
+                </select>
+                <svg class="icon icon--sm" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m7 10 5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </label>
+              <label class="select-wrap"><span class="sr-only">Sort by</span>
+                <select data-sort>
+                  <option value="recommended">Recommended</option>
+                  <option value="az">Name A–Z</option>
+                  <option value="price-low">Price: low to high</option>
+                  <option value="price-high">Price: high to low</option>
+                </select>
+                <svg class="icon icon--sm" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m7 10 5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="result-bar">
+          <p class="result-count" data-result-count role="status" aria-live="polite">Showing 11 places</p>
+          <p class="result-hint">Free to browse · pay at the restaurant</p>
+        </div>
+        <div class="venue-grid" id="venueGrid"><article class="venue-card" data-venue-card data-cuisines="pakistani seafood bbq" data-price="3" data-name="kolachi restaurant" data-search="kolachi restaurant sea-facing pakistani dining at do darya do darya, dha phase 8 pakistani seafood bbq grilled prawns fish tikka chicken malai boti mutton chops mutton karahi (half) chicken karahi (full) prawn karahi mutton pulao garlic naan kachumber salad kulfi falooda fresh lime soda">
+          <a class="venue-card__media" href="restaurants/kolachi.html" aria-label="View Kolachi Restaurant">
+            <img class="" src="assets/images/venue_rooftop.webp" alt="Kolachi Restaurant: Sea-facing Pakistani dining at Do Darya" loading="lazy" decoding="async">
+            <div class="badge-row"><span class="badge badge--verified">Verified partner</span><span class="badge badge--offer">-15%</span></div>
+          </a>
+          <div class="venue-card__body">
+            <div class="venue-card__title">
+              <h3><a href="restaurants/kolachi.html">Kolachi Restaurant</a></h3>
+              <span class="price-tier" aria-label="Price range">$$$</span>
+            </div>
+            <p class="meta-line"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21s7-5.1 7-11a7 7 0 1 0-14 0c0 5.9 7 11 7 11Z" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="10" r="2.5" fill="none" stroke="currentColor" stroke-width="1.7"/></svg> Do Darya, DHA Phase 8</p>
+            <p class="cuisine-line">Pakistani · Seafood · BBQ</p>
+            <ul class="menu-preview"><li><span>Grilled Prawns</span><span>Rs. 2,450</span></li><li><span>Fish Tikka</span><span>Rs. 1,890</span></li><li><span>Mutton Karahi (Half)</span><span>Rs. 3,450</span></li><li><span>Chicken Karahi (Full)</span><span>Rs. 2,790</span></li></ul>
+            <div class="venue-card__foot">
+              <a class="text-link" href="restaurants/kolachi.html">View Menu <svg class="icon icon--sm" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4.5 12h14m-5.5-5.5L18.5 12 13 17.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+              <span class="open-pill" data-hours data-open="13:00" data-close="23:30" data-closed="">See hours</span>
+            </div>
+          </div>
+        </article><article class="venue-card" data-venue-card data-cuisines="bbq pakistani" data-price="2" data-name="kababjees" data-search="kababjees charcoal kebabs and family grills do darya, dha phase 8 bbq pakistani chicken seekh kebab beef seekh kebab chicken tikka (half) bihari boti family mixed grill kababjees special platter garlic naan raita soft drink">
+          <a class="venue-card__media" href="restaurants/kababjees.html" aria-label="View Kababjees">
+            <img class="" src="assets/images/dish_steak.webp" alt="Kababjees: Charcoal kebabs and family grills" loading="lazy" decoding="async">
+            <div class="badge-row"><span class="badge badge--verified">Verified partner</span><span class="badge badge--offer">-20%</span></div>
+          </a>
+          <div class="venue-card__body">
+            <div class="venue-card__title">
+              <h3><a href="restaurants/kababjees.html">Kababjees</a></h3>
+              <span class="price-tier" aria-label="Price range">$$</span>
+            </div>
+            <p class="meta-line"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21s7-5.1 7-11a7 7 0 1 0-14 0c0 5.9 7 11 7 11Z" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="10" r="2.5" fill="none" stroke="currentColor" stroke-width="1.7"/></svg> Do Darya, DHA Phase 8</p>
+            <p class="cuisine-line">BBQ · Pakistani</p>
+            <ul class="menu-preview"><li><span>Chicken Seekh Kebab</span><span>Rs. 990</span></li><li><span>Beef Seekh Kebab</span><span>Rs. 1,150</span></li><li><span>Family Mixed Grill</span><span>Rs. 4,590</span></li><li><span>Kababjees Special Platter</span><span>Rs. 2,890</span></li></ul>
+            <div class="venue-card__foot">
+              <a class="text-link" href="restaurants/kababjees.html">View Menu <svg class="icon icon--sm" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4.5 12h14m-5.5-5.5L18.5 12 13 17.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+              <span class="open-pill" data-hours data-open="16:00" data-close="23:59" data-closed="">See hours</span>
+            </div>
+          </div>
+        </article><article class="venue-card" data-venue-card data-cuisines="bbq pakistani karahi" data-price="2" data-name="bar b q tonight" data-search="bar b q tonight clifton grill house, open late boat basin, clifton bbq pakistani karahi chicken malai boti beef bihari kebab mutton seekh kebab grilled chicken (full) chicken karahi (half) mutton karahi (half) tandoori roti green salad mint lemonade">
+          <a class="venue-card__media" href="restaurants/bbq-tonight.html" aria-label="View Bar B Q Tonight">
+            <img class="" src="assets/images/venue_bar.webp" alt="Bar B Q Tonight: Clifton grill house, open late" loading="lazy" decoding="async">
+            <div class="badge-row"><span class="badge badge--verified">Verified partner</span><span class="badge badge--offer">-15%</span></div>
+          </a>
+          <div class="venue-card__body">
+            <div class="venue-card__title">
+              <h3><a href="restaurants/bbq-tonight.html">Bar B Q Tonight</a></h3>
+              <span class="price-tier" aria-label="Price range">$$</span>
+            </div>
+            <p class="meta-line"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21s7-5.1 7-11a7 7 0 1 0-14 0c0 5.9 7 11 7 11Z" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="10" r="2.5" fill="none" stroke="currentColor" stroke-width="1.7"/></svg> Boat Basin, Clifton</p>
+            <p class="cuisine-line">BBQ · Pakistani · Karahi</p>
+            <ul class="menu-preview"><li><span>Chicken Malai Boti</span><span>Rs. 1,250</span></li><li><span>Beef Bihari Kebab</span><span>Rs. 1,450</span></li><li><span>Chicken Karahi (Half)</span><span>Rs. 2,190</span></li><li><span>Mutton Karahi (Half)</span><span>Rs. 3,290</span></li></ul>
+            <div class="venue-card__foot">
+              <a class="text-link" href="restaurants/bbq-tonight.html">View Menu <svg class="icon icon--sm" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4.5 12h14m-5.5-5.5L18.5 12 13 17.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+              <span class="open-pill" data-hours data-open="16:00" data-close="23:59" data-closed="">See hours</span>
+            </div>
+          </div>
+        </article><article class="venue-card" data-venue-card data-cuisines="mediterranean lebanese continental" data-price="3" data-name="cafe aylanto" data-search="cafe aylanto courtyard dining in clifton clifton mediterranean lebanese continental hummus beiruti falafel plate moutabel fattoush grilled chicken breast lamb kofta sea bass fillet penne arrabbiata mushroom risotto baklava chocolate fondant">
+          <a class="venue-card__media" href="restaurants/cafe-aylanto.html" aria-label="View Cafe Aylanto">
+            <img class="" src="assets/images/venue_bar.webp" alt="Cafe Aylanto: Courtyard dining in Clifton" loading="lazy" decoding="async">
+            <div class="badge-row"><span class="badge badge--verified">Verified partner</span><span class="badge badge--offer">-20%</span></div>
+          </a>
+          <div class="venue-card__body">
+            <div class="venue-card__title">
+              <h3><a href="restaurants/cafe-aylanto.html">Cafe Aylanto</a></h3>
+              <span class="price-tier" aria-label="Price range">$$$</span>
+            </div>
+            <p class="meta-line"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21s7-5.1 7-11a7 7 0 1 0-14 0c0 5.9 7 11 7 11Z" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="10" r="2.5" fill="none" stroke="currentColor" stroke-width="1.7"/></svg> Clifton</p>
+            <p class="cuisine-line">Mediterranean · Lebanese · Continental</p>
+            <ul class="menu-preview"><li><span>Hummus Beiruti</span><span>Rs. 890</span></li><li><span>Falafel Plate</span><span>Rs. 950</span></li><li><span>Grilled Chicken Breast</span><span>Rs. 2,350</span></li><li><span>Lamb Kofta</span><span>Rs. 2,890</span></li></ul>
+            <div class="venue-card__foot">
+              <a class="text-link" href="restaurants/cafe-aylanto.html">View Menu <svg class="icon icon--sm" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4.5 12h14m-5.5-5.5L18.5 12 13 17.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+              <span class="open-pill" data-hours data-open="12:00" data-close="23:00" data-closed="">See hours</span>
+            </div>
+          </div>
+        </article><article class="venue-card" data-venue-card data-cuisines="mediterranean continental italian" data-price="3" data-name="okra" data-search="okra mediterranean plates in dha dha phase 8 mediterranean continental italian burrata &amp; tomato calamari fritti soup of the day margherita spicy salami truffle mushroom grilled lamb chops pan-seared salmon wild mushroom pasta tiramisu panna cotta">
+          <a class="venue-card__media" href="restaurants/okra.html" aria-label="View Okra">
+            <img class="" src="assets/images/hero_tasting.webp" alt="Okra: Mediterranean plates in DHA" loading="lazy" decoding="async">
+            <div class="badge-row"><span class="badge badge--verified">Verified partner</span><span class="badge badge--offer">-15%</span></div>
+          </a>
+          <div class="venue-card__body">
+            <div class="venue-card__title">
+              <h3><a href="restaurants/okra.html">Okra</a></h3>
+              <span class="price-tier" aria-label="Price range">$$$</span>
+            </div>
+            <p class="meta-line"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21s7-5.1 7-11a7 7 0 1 0-14 0c0 5.9 7 11 7 11Z" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="10" r="2.5" fill="none" stroke="currentColor" stroke-width="1.7"/></svg> DHA Phase 8</p>
+            <p class="cuisine-line">Mediterranean · Continental · Italian</p>
+            <ul class="menu-preview"><li><span>Burrata &amp; Tomato</span><span>Rs. 1,650</span></li><li><span>Calamari Fritti</span><span>Rs. 1,590</span></li><li><span>Margherita</span><span>Rs. 1,550</span></li><li><span>Spicy Salami</span><span>Rs. 1,850</span></li></ul>
+            <div class="venue-card__foot">
+              <a class="text-link" href="restaurants/okra.html">View Menu <svg class="icon icon--sm" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4.5 12h14m-5.5-5.5L18.5 12 13 17.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+              <span class="open-pill" data-hours data-open="12:30" data-close="23:30" data-closed="mon">See hours</span>
+            </div>
+          </div>
+        </article><article class="venue-card" data-venue-card data-cuisines="cafe continental brunch" data-price="2" data-name="xander&#x27;s" data-search="xander&#x27;s all-day cafe in clifton clifton cafe continental brunch big breakfast eggs benedict french toast shakshuka club sandwich chicken caesar grilled halloumi wrap cappuccino flat white carrot cake chocolate brownie">
+          <a class="venue-card__media" href="restaurants/xanders.html" aria-label="View Xander&#x27;s">
+            <img class="" src="assets/images/dish_brunch.webp" alt="Xander&#x27;s: All-day café in Clifton" loading="lazy" decoding="async">
+            <div class="badge-row"><span class="badge badge--verified">Verified partner</span><span class="badge badge--offer">2nd 50% off</span></div>
+          </a>
+          <div class="venue-card__body">
+            <div class="venue-card__title">
+              <h3><a href="restaurants/xanders.html">Xander&#x27;s</a></h3>
+              <span class="price-tier" aria-label="Price range">$$</span>
+            </div>
+            <p class="meta-line"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21s7-5.1 7-11a7 7 0 1 0-14 0c0 5.9 7 11 7 11Z" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="10" r="2.5" fill="none" stroke="currentColor" stroke-width="1.7"/></svg> Clifton</p>
+            <p class="cuisine-line">Café · Continental · Brunch</p>
+            <ul class="menu-preview"><li><span>Big Breakfast</span><span>Rs. 1,690</span></li><li><span>Eggs Benedict</span><span>Rs. 1,590</span></li><li><span>Club Sandwich</span><span>Rs. 1,450</span></li><li><span>Chicken Caesar</span><span>Rs. 1,390</span></li></ul>
+            <div class="venue-card__foot">
+              <a class="text-link" href="restaurants/xanders.html">View Menu <svg class="icon icon--sm" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4.5 12h14m-5.5-5.5L18.5 12 13 17.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+              <span class="open-pill" data-hours data-open="09:00" data-close="23:00" data-closed="">See hours</span>
+            </div>
+          </div>
+        </article><article class="venue-card" data-venue-card data-cuisines="cafe coffee desserts" data-price="2" data-name="espresso shahbaz dha" data-search="espresso shahbaz dha neighbourhood espresso bar in dha phase 6 dha phase 6 cafe coffee desserts espresso flat white cortado iced latte butter croissant almond danish chocolate cookie grilled cheese chicken panini avocado toast">
+          <a class="venue-card__media" href="restaurants/espresso-shahbaz.html" aria-label="View Espresso Shahbaz DHA">
+            <img class="" src="assets/images/dish_dessert.webp" alt="Espresso Shahbaz DHA: Neighbourhood espresso bar in DHA Phase 6" loading="lazy" decoding="async">
+            <div class="badge-row"><span class="badge badge--verified">Verified partner</span><span class="badge badge--offer">2 for 1</span></div>
+          </a>
+          <div class="venue-card__body">
+            <div class="venue-card__title">
+              <h3><a href="restaurants/espresso-shahbaz.html">Espresso Shahbaz DHA</a></h3>
+              <span class="price-tier" aria-label="Price range">$$</span>
+            </div>
+            <p class="meta-line"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21s7-5.1 7-11a7 7 0 1 0-14 0c0 5.9 7 11 7 11Z" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="10" r="2.5" fill="none" stroke="currentColor" stroke-width="1.7"/></svg> DHA Phase 6</p>
+            <p class="cuisine-line">Café · Coffee · Desserts</p>
+            <ul class="menu-preview"><li><span>Espresso</span><span>Rs. 380</span></li><li><span>Flat White</span><span>Rs. 560</span></li><li><span>Butter Croissant</span><span>Rs. 450</span></li><li><span>Almond Danish</span><span>Rs. 520</span></li></ul>
+            <div class="venue-card__foot">
+              <a class="text-link" href="restaurants/espresso-shahbaz.html">View Menu <svg class="icon icon--sm" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4.5 12h14m-5.5-5.5L18.5 12 13 17.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+              <span class="open-pill" data-hours data-open="08:00" data-close="23:00" data-closed="">See hours</span>
+            </div>
+          </div>
+        </article><article class="venue-card" data-venue-card data-cuisines="cafe french desserts" data-price="2" data-name="cafe flo" data-search="cafe flo french-leaning cafe in clifton clifton cafe french desserts nutella crepe lemon sugar crepe belgian waffle croque monsieur quiche lorraine cheese omelette hot chocolate cafe latte cappuccino">
+          <a class="venue-card__media" href="restaurants/cafe-flo.html" aria-label="View Cafe Flo">
+            <img class="" src="assets/images/venue_interior.webp" alt="Cafe Flo: French-leaning café in Clifton" loading="lazy" decoding="async">
+            <div class="badge-row"><span class="badge badge--verified">Verified partner</span><span class="badge badge--offer">-20%</span></div>
+          </a>
+          <div class="venue-card__body">
+            <div class="venue-card__title">
+              <h3><a href="restaurants/cafe-flo.html">Cafe Flo</a></h3>
+              <span class="price-tier" aria-label="Price range">$$</span>
+            </div>
+            <p class="meta-line"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21s7-5.1 7-11a7 7 0 1 0-14 0c0 5.9 7 11 7 11Z" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="10" r="2.5" fill="none" stroke="currentColor" stroke-width="1.7"/></svg> Clifton</p>
+            <p class="cuisine-line">Café · French · Desserts</p>
+            <ul class="menu-preview"><li><span>Nutella Crepe</span><span>Rs. 990</span></li><li><span>Lemon Sugar Crepe</span><span>Rs. 790</span></li><li><span>Croque Monsieur</span><span>Rs. 1,450</span></li><li><span>Quiche Lorraine</span><span>Rs. 1,290</span></li></ul>
+            <div class="venue-card__foot">
+              <a class="text-link" href="restaurants/cafe-flo.html">View Menu <svg class="icon icon--sm" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4.5 12h14m-5.5-5.5L18.5 12 13 17.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+              <span class="open-pill" data-hours data-open="10:00" data-close="23:30" data-closed="">See hours</span>
+            </div>
+          </div>
+        </article><article class="venue-card" data-venue-card data-cuisines="cafe chocolate desserts" data-price="2" data-name="butlers chocolate café" data-search="butlers chocolate cafe chocolate cafe on zamzama zamzama cafe chocolate desserts chocolate fondue for two chocolate lava cake truffle box (6) chocolate fudge cake cheesecake carrot cake signature hot chocolate iced mocha americano">
+          <a class="venue-card__media" href="restaurants/butlers.html" aria-label="View Butlers Chocolate Café">
+            <img class="" src="assets/images/dish_dessert.webp" alt="Butlers Chocolate Café: Chocolate café on Zamzama" loading="lazy" decoding="async">
+            <div class="badge-row"><span class="badge badge--offer">2 for 1</span></div>
+          </a>
+          <div class="venue-card__body">
+            <div class="venue-card__title">
+              <h3><a href="restaurants/butlers.html">Butlers Chocolate Café</a></h3>
+              <span class="price-tier" aria-label="Price range">$$</span>
+            </div>
+            <p class="meta-line"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21s7-5.1 7-11a7 7 0 1 0-14 0c0 5.9 7 11 7 11Z" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="10" r="2.5" fill="none" stroke="currentColor" stroke-width="1.7"/></svg> Zamzama</p>
+            <p class="cuisine-line">Café · Chocolate · Desserts</p>
+            <ul class="menu-preview"><li><span>Chocolate Fondue for Two</span><span>Rs. 1,890</span></li><li><span>Chocolate Lava Cake</span><span>Rs. 990</span></li><li><span>Chocolate Fudge Cake</span><span>Rs. 890</span></li><li><span>Cheesecake</span><span>Rs. 850</span></li></ul>
+            <div class="venue-card__foot">
+              <a class="text-link" href="restaurants/butlers.html">View Menu <svg class="icon icon--sm" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4.5 12h14m-5.5-5.5L18.5 12 13 17.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+              <span class="open-pill" data-hours data-open="11:00" data-close="23:30" data-closed="">See hours</span>
+            </div>
+          </div>
+        </article><article class="venue-card" data-venue-card data-cuisines="cafe coffee breakfast" data-price="2" data-name="esquires coffee" data-search="esquires coffee coffee house on zamzama zamzama cafe coffee breakfast full breakfast omelette pancake stack americano cappuccino mocha cold brew chicken panini caesar salad soup &amp; toast">
+          <a class="venue-card__media" href="restaurants/esquires.html" aria-label="View Esquires Coffee">
+            <img class="" src="assets/images/venue_bar.webp" alt="Esquires Coffee: Coffee house on Zamzama" loading="lazy" decoding="async">
+            <div class="badge-row"><span class="badge badge--offer">-20%</span></div>
+          </a>
+          <div class="venue-card__body">
+            <div class="venue-card__title">
+              <h3><a href="restaurants/esquires.html">Esquires Coffee</a></h3>
+              <span class="price-tier" aria-label="Price range">$$</span>
+            </div>
+            <p class="meta-line"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21s7-5.1 7-11a7 7 0 1 0-14 0c0 5.9 7 11 7 11Z" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="10" r="2.5" fill="none" stroke="currentColor" stroke-width="1.7"/></svg> Zamzama</p>
+            <p class="cuisine-line">Café · Coffee · Breakfast</p>
+            <ul class="menu-preview"><li><span>Full Breakfast</span><span>Rs. 1,590</span></li><li><span>Omelette</span><span>Rs. 1,290</span></li><li><span>Americano</span><span>Rs. 480</span></li><li><span>Cappuccino</span><span>Rs. 570</span></li></ul>
+            <div class="venue-card__foot">
+              <a class="text-link" href="restaurants/esquires.html">View Menu <svg class="icon icon--sm" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4.5 12h14m-5.5-5.5L18.5 12 13 17.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+              <span class="open-pill" data-hours data-open="08:30" data-close="23:00" data-closed="">See hours</span>
+            </div>
+          </div>
+        </article><article class="venue-card" data-venue-card data-cuisines="italian pizza cafe" data-price="2" data-name="café zouk" data-search="cafe zouk wood-fired pizza and pasta on zamzama zamzama, dha phase 5 italian pizza cafe bruschetta garlic bread with cheese soup of the day margherita chicken tikka pizza pepperoni four cheese chicken alfredo penne arrabbiata chicken lasagna tiramisu chocolate lava cake fresh lime soda">
+          <a class="venue-card__media" href="restaurants/cafe-zouk.html" aria-label="View Café Zouk">
+            <img class="" src="assets/images/dish_pasta.webp" alt="Café Zouk: Wood-fired pizza and pasta on Zamzama" loading="lazy" decoding="async">
+            <div class="badge-row"><span class="badge badge--offer">-15%</span></div>
+          </a>
+          <div class="venue-card__body">
+            <div class="venue-card__title">
+              <h3><a href="restaurants/cafe-zouk.html">Café Zouk</a></h3>
+              <span class="price-tier" aria-label="Price range">$$</span>
+            </div>
+            <p class="meta-line"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21s7-5.1 7-11a7 7 0 1 0-14 0c0 5.9 7 11 7 11Z" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="10" r="2.5" fill="none" stroke="currentColor" stroke-width="1.7"/></svg> Zamzama, DHA Phase 5</p>
+            <p class="cuisine-line">Italian · Pizza · Café</p>
+            <ul class="menu-preview"><li><span>Bruschetta</span><span>Rs. 750</span></li><li><span>Garlic Bread with Cheese</span><span>Rs. 650</span></li><li><span>Margherita</span><span>Rs. 1,450</span></li><li><span>Chicken Tikka Pizza</span><span>Rs. 1,950</span></li></ul>
+            <div class="venue-card__foot">
+              <a class="text-link" href="restaurants/cafe-zouk.html">View Menu <svg class="icon icon--sm" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4.5 12h14m-5.5-5.5L18.5 12 13 17.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+              <span class="open-pill" data-hours data-open="12:00" data-close="23:30" data-closed="">See hours</span>
+            </div>
+          </div>
+        </article></div>
+        <div class="empty-state" data-empty hidden>
+        <span class="empty-icon"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+        <p class="empty-title">No places match those filters.</p>
+        <p>Try a different dish, cuisine or price range.</p>
+        <button class="btn btn--primary btn--sm" type="button" data-clear-filters>Clear filters</button>
+      </div>
+        <div class="inline-cta">
+          <div>
+            <h3>Looking for something specific?</h3>
+            <p>Tell us the dish or the occasion and we will point you to the right table.</p>
+          </div>
+          <a class="btn btn--outline" href="about.html#contact">Contact DineCircle</a>
+        </div>
+      </div>
+    </section>
+  </main>
+  <footer class="site-footer">
+      <div class="container footer-grid">
+        <div class="footer-brand">
+          <a class="brand brand--light" href="index.html" aria-label="DineCircle home">
+            <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 48 48" focusable="false">
+            <defs>
+              <linearGradient id="dcArcLight" x1="8" y1="4" x2="40" y2="44" gradientUnits="userSpaceOnUse">
+                <stop offset="0" stop-color="#FDBA74"></stop>
+                <stop offset="1" stop-color="#F97316"></stop>
+              </linearGradient>
+            </defs>
+            <path d="M24 6a18 18 0 1 0 18 18" fill="none" stroke="url(#dcArcLight)" stroke-width="5" stroke-linecap="round"></path>
+            <path class="brand-fork" d="M20 15v5a4 4 0 0 0 8 0v-5M24 15v5.5M24 24v9" fill="none" stroke-width="2.4" stroke-linecap="round"></path>
+          </svg>
+        </span>
+            <span class="brand-word">Dine<span>Circle</span></span>
+          </a>
+          <p class="footer-tagline">Great food. Shared moments.</p>
+          <p>Restaurants, cafés, real menus, deals and hosted dining experiences in Karachi. Free for diners. You always pay the restaurant directly.</p>
+          <div class="socials" aria-label="Social channels">
+            <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" aria-label="DineCircle on Instagram"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor"/></svg></a>
+            <a href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer" aria-label="DineCircle on Facebook"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M14.5 8.5V7c0-.9.4-1.5 1.4-1.5H17V3.1c-.7-.1-1.5-.1-2.3-.1-2.2 0-3.7 1.3-3.7 3.7v1.8H8.5v3h2.5V21h3.5v-9.5h2.6l.4-3h-3Z" fill="currentColor"/></svg></a>
+            <a href="https://www.tiktok.com/" target="_blank" rel="noopener noreferrer" aria-label="DineCircle on TikTok"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M15.4 3.5c.3 2.1 1.6 3.5 3.6 3.8v2.9c-1.4 0-2.7-.4-3.8-1.2v5.9a5.4 5.4 0 1 1-5.4-5.4c.3 0 .6 0 .9.1v3a2.5 2.5 0 1 0 1.7 2.3V3.5h3Z" fill="currentColor"/></svg></a>
+            <a href="https://www.linkedin.com/" target="_blank" rel="noopener noreferrer" aria-label="DineCircle on LinkedIn"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3.5" y="3.5" width="17" height="17" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M7.7 10v6.3M7.7 7.6v.1M11.4 16.3V10m0 2.1c.5-1 1.4-1.6 2.6-1.6 1.9 0 2.8 1.2 2.8 3.2v2.6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></a>
+          </div>
+        </div>
+        <div class="footer-col"><h3>Explore</h3><ul><li><a href="restaurants.html">Restaurants</a></li><li><a href="deals.html">Deals</a></li><li><a href="experiences.html">Experiences</a></li><li><a href="hosts.html">Hosts</a></li></ul></div><div class="footer-col"><h3>Company</h3><ul><li><a href="about.html">About DineCircle</a></li><li><a href="about.html#contact">Contact us</a></li><li><a href="index.html#how-it-works">How it works</a></li><li><a href="about.html#partners">Partner with us</a></li></ul></div><div class="footer-col"><h3>Legal</h3><ul><li><a href="privacy.html">Privacy Policy</a></li><li><a href="terms.html">Terms & Conditions</a></li></ul></div>
+        <div class="footer-col footer-contact">
+          <h3>Contact</h3>
+          <ul>
+            <li><a href="mailto:hello@dinecircle.app">hello@dinecircle.app</a></li>
+            <li><a href="mailto:partners@dinecircle.app">partners@dinecircle.app</a></li>
+            <li>Karachi, Pakistan</li>
+            <li>Support: Mon–Sat, 10 AM–7 PM</li>
+          </ul>
+          <button class="btn btn--light btn--sm" type="button" data-app-cta>Get the app</button>
+        </div>
+      </div>
+      <div class="container footer-bottom">
+        <p>© 2026 DineCircle. Free for diners, always.</p>
+        <p class="footer-fine">Karachi pilot · Prices in PKR · Preview content for venue menus and offers.</p>
+      </div>
+    </footer>
+  <dialog class="modal" id="appDialog" aria-labelledby="appDialogTitle">
+      <div class="modal-card">
+        <button class="modal-close" type="button" data-close-dialog aria-label="Close"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m6 6 12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg></button>
+        <span class="modal-icon"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3.2 19 6v5.1c0 4.4-2.9 7.9-7 9.7-4.1-1.8-7-5.3-7-9.7V6l7-2.8Z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="m8.8 12.1 2.1 2.1 4.3-4.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <h2 id="appDialogTitle">DineCircle is free for diners</h2>
+        <p>Book a table, join a hosted experience or redeem a deal in the app. No booking fee and no card details. You pay the restaurant directly.</p>
+        <ul class="check-list">
+          <li><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m5 12.5 4.3 4.3L19 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Free to browse, book and join</li>
+          <li><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m5 12.5 4.3 4.3L19 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> 0% booking commission</li>
+          <li><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m5 12.5 4.3 4.3L19 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Prices in PKR, settled at the venue</li>
+        </ul>
+        <div class="modal-actions">
+          <a class="btn btn--primary" href="mailto:hello@dinecircle.app?subject=DineCircle%20launch%20access">Get launch access</a>
+          <a class="btn btn--outline" href="about.html#contact">Contact us</a>
+        </div>
+        <p class="modal-note">Android and iOS apps are rolling out across Karachi.</p>
+      </div>
+    </dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

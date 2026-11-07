@@ -16,7 +16,7 @@ import '../../widgets/brand.dart';
 import '../../widgets/role_gate_builder.dart';
 import '../../widgets/status_chip.dart';
 
-/// Settings & security — the account surface (`/users/me`, `/auth/*`).
+/// Settings & security, the account surface (`/users/me`, `/auth/*`).
 ///
 /// Only the server allowlist on `PATCH /users/me` is written (name, phone, bio,
 /// city, dietary, allergies). Notification cadence is a *device* preference,
@@ -563,7 +563,7 @@ class _PayoutSection extends StatelessWidget {
     return SettingsSection(
       title: 'Payouts',
       footer: 'The partner API exposes no route to read or edit a bank account. '
-        'Payout settings are managed by the platform — open a support ticket '
+        'Payout settings are managed by the platform. Open a support ticket '
         'to change them.',
       children: [
         SettingsTile(

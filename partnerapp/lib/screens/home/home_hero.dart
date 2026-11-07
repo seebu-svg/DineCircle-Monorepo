@@ -226,7 +226,7 @@ class HomeHero extends ConsumerWidget {
     );
   }
 
-  /// "Pakistani · BBQ · Karachi" — whichever of those the venue actually has.
+  /// "Pakistani · BBQ · Karachi", whichever of those the venue actually has.
   String _identityLine(Venue? venue) {
     if (venue == null) return '';
     final parts = <String>[
@@ -280,8 +280,8 @@ class HomeHero extends ConsumerWidget {
 
 /// ─── Service pulse ─────────────────────────────────────────────────────────
 
-/// Today at a glance inside the hero: covers seated, tables in service and —
-/// only when a capacity is actually configured — occupancy.
+/// Today at a glance inside the hero: covers seated, tables in service and,
+/// only when a capacity is actually configured, occupancy.
 ///
 /// A venue with no seats set up would otherwise be shown a 0% occupancy that
 /// reads like a dead night, so the cell is omitted instead of faked.
@@ -306,11 +306,8 @@ class ServicePulseStrip extends StatelessWidget {
         caption: today.tables == 0 ? 'none set up' : 'in service',
       ),
       if (today.hasCapacityConfigured)
-        _PulseCell(
-          label: 'Occupancy',
-          value: '${(today.occupancy.clamp(0.0, 1.0) * 100).round()}%',
-          caption: 'of the room',
-        ),
+        _OccupancyGaugeCell(occupancy: today.occupancy),
+      if (_showNextBooking) _NextBookingCell(nextAt: today.nextBookingAt!),
     ];
 
     return LayoutBuilder(
@@ -344,6 +341,13 @@ class ServicePulseStrip extends StatelessWidget {
         );
       },
     );
+  }
+
+  /// Only show the next-booking cell when there is one within 2 hours.
+  bool get _showNextBooking {
+    final next = today.nextBookingAt;
+    if (next == null) return false;
+    return next.difference(DateTime.now()).inMinutes <= 120;
   }
 }
 
@@ -396,6 +400,134 @@ class _PulseCell extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
         ),
       ],
+    );
+  }
+}
+
+/// Visual occupancy gauge: a circular arc that fills and changes colour as
+/// the room approaches capacity.
+///
+/// Green below 60%, amber 60-85%, red above 85%. A venue with no capacity
+/// configured never reaches this cell (the strip omits it).
+class _OccupancyGaugeCell extends StatelessWidget {
+  const _OccupancyGaugeCell({required this.occupancy});
+
+  final double occupancy;
+
+  Color get _gaugeColor {
+    final pct = occupancy.clamp(0.0, 1.0);
+    if (pct >= 0.85) return AppColors.danger;
+    if (pct >= 0.60) return AppColors.warning;
+    return AppColors.success;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final pct = occupancy.clamp(0.0, 1.0);
+    final pctLabel = '${(pct * 100).round()}%';
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          'OCCUPANCY',
+          style: AppTextStyles.labelSmall.copyWith(
+            color: AppColors.textTertiary,
+            fontSize: 9,
+            letterSpacing: 0.8,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        const SizedBox(height: 4),
+        SizedBox(
+          width: 32,
+          height: 32,
+          child: TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0, end: pct),
+            duration: const Duration(milliseconds: 600),
+            curve: Curves.easeOut,
+            builder: (context, value, _) => Stack(
+              alignment: Alignment.center,
+              children: [
+                SizedBox.expand(
+                  child: CircularProgressIndicator(
+                    value: value,
+                    strokeWidth: 4,
+                    backgroundColor: _gaugeColor.withValues(alpha: 0.18),
+                    color: _gaugeColor,
+                    strokeCap: StrokeCap.round,
+                  ),
+                ),
+                Text(
+                  pctLabel,
+                  style: AppTextStyles.labelSmall.copyWith(
+                    color: _gaugeColor,
+                    fontSize: 8,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          'of the room',
+          style: AppTextStyles.caption.copyWith(
+            color: AppColors.textSecondary,
+            fontSize: 10,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
+    );
+  }
+}
+
+/// Countdown cell showing when the next booking arrives, only rendered when
+/// a reservation is within the next two hours.
+class _NextBookingCell extends StatefulWidget {
+  const _NextBookingCell({required this.nextAt});
+
+  final DateTime nextAt;
+
+  @override
+  State<_NextBookingCell> createState() => _NextBookingCellState();
+}
+
+class _NextBookingCellState extends State<_NextBookingCell> {
+  late final Stream<DateTime> _tick = Stream.periodic(
+    const Duration(minutes: 1),
+    (_) => DateTime.now(),
+  ).asBroadcastStream();
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<DateTime>(
+      initialData: DateTime.now(),
+      stream: _tick,
+      builder: (context, snap) {
+        final now = snap.data ?? DateTime.now();
+        final diff = widget.nextAt.difference(now);
+        final minutes = diff.inMinutes;
+        if (minutes <= 0) {
+          return const _PulseCell(
+            label: 'NEXT BOOKING',
+            value: 'Now',
+            caption: 'arriving',
+          );
+        }
+        final label = minutes >= 60
+            ? '${minutes ~/ 60}h ${minutes % 60}m'
+            : '${minutes}m';
+        return _PulseCell(
+          label: 'NEXT BOOKING',
+          value: label,
+          caption: 'arriving soon',
+        );
+      },
     );
   }
 }

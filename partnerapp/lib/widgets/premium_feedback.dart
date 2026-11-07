@@ -10,7 +10,7 @@ import '../theme/app_text_styles.dart';
 
 /// A pulsing placeholder that mimics the shape of content while it loads.
 ///
-/// Respects [MediaQueryData.disableAnimations] — when animations are disabled
+/// Respects [MediaQueryData.disableAnimations], when animations are disabled
 /// the shimmer renders as a static translucent box instead of animating.
 class ShimmerSkeleton extends StatefulWidget {
   const ShimmerSkeleton({
@@ -219,7 +219,7 @@ class InlineNoticeAction {
 ///
 /// Used wherever a screen would like to show a metric (QR scans, profile
 /// views, loyalty points, modifiers, featured items) but the backend has no
-/// data for it. The tile is honest — it never fabricates numbers.
+/// data for it. The tile is honest, it never fabricates numbers.
 class NotTrackedTile extends StatelessWidget {
   const NotTrackedTile({
     super.key,

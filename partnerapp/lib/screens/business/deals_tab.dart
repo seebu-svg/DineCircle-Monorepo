@@ -19,7 +19,7 @@ import '../../widgets/status_chip.dart';
 
 /// Venue promotions (`…/deals`), driven entirely by the transition map.
 ///
-/// Create is disabled with a reason while the venue is unverified — the server
+/// Create is disabled with a reason while the venue is unverified, the server
 /// answers `403` regardless of the local role, so the gate is the `verified`
 /// flag rather than [Capability.manageDeals] alone. Lifecycle buttons come from
 /// [Deal.allowedTransitions], so the desk never taps a move that would return
@@ -206,7 +206,7 @@ class _DealsTabState extends ConsumerState<DealsTab> {
 }
 
 /// The primary action of the screen. It sits under the header rather than
-/// floating, so the desk always sees it — and always sees it disabled when
+/// floating, so the desk always sees it, and always sees it disabled when
 /// the venue may not sell.
 class _CreateButton extends ConsumerWidget {
   const _CreateButton({required this.venueId, required this.canSell});

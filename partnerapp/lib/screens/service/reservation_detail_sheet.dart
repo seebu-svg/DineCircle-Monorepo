@@ -15,8 +15,8 @@ import '../../widgets/status_chip.dart';
 
 /// Full detail for one reservation, opened from a board row or the Home list.
 ///
-/// The sheet reads the whole record — the guest's phone, their notes, the
-/// reference, who booked it — and it also carries the actions that row allows.
+/// The sheet reads the whole record, the guest's phone, their notes, the
+/// reference, who booked it, and it also carries the actions that row allows.
 /// The buttons come from the same transition map as the board, so a tap never
 /// produces a `409`, and a successful action refreshes the providers behind
 /// the screen that opened it: the dashboard counters, the Home day list and
@@ -132,7 +132,7 @@ class _ReservationDetailSheetState
             InfoRow(label: 'Party', value: r.partyLabel),
             InfoRow(
               label: 'Phone',
-              value: r.guestPhone.isEmpty ? '—' : r.guestPhone,
+              value: r.guestPhone.isEmpty ? '-' : r.guestPhone,
               trailing: r.guestPhone.isEmpty
                   ? null
                   : IconButton(
@@ -143,7 +143,7 @@ class _ReservationDetailSheetState
             ),
             InfoRow(
               label: 'Reference',
-              value: r.reference.isEmpty ? '—' : r.reference,
+              value: r.reference.isEmpty ? '-' : r.reference,
               trailing: r.reference.isEmpty
                   ? null
                   : IconButton(

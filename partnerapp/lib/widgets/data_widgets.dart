@@ -9,7 +9,7 @@ import '../utils/money.dart';
 /// One headline number with its context.
 ///
 /// KPI tiles are the dashboard's primary surface, so the caption that explains
-/// what the number counts is part of the widget — a bare figure on a dark card
+/// what the number counts is part of the widget, a bare figure on a dark card
 /// is how a desk misreads a slow day as an outage.
 class KpiCard extends StatelessWidget {
   const KpiCard({
@@ -130,7 +130,7 @@ class MoneyText extends StatelessWidget {
   }
 }
 
-/// A `label — value` line, the workhorse of every detail sheet.
+/// A `label, value` line, the workhorse of every detail sheet.
 class InfoRow extends StatelessWidget {
   const InfoRow({
     super.key,
@@ -167,7 +167,7 @@ class InfoRow extends StatelessWidget {
           Expanded(
             flex: 6,
             child: Text(
-              value.isEmpty ? '—' : value,
+              value.isEmpty ? '-' : value,
               textAlign: TextAlign.end,
               style: AppTextStyles.bodyMedium.copyWith(
                 color: valueColor ?? AppColors.textPrimary,
@@ -237,7 +237,7 @@ class DataGrid extends StatelessWidget {
   }
 }
 
-/// A bordered, scrollable list of tiles — the mobile-shaped counterpart to the
+/// A bordered, scrollable list of tiles, the mobile-shaped counterpart to the
 /// web data table, used wherever a list has no tabular columns.
 class TileList extends StatelessWidget {
   const TileList({

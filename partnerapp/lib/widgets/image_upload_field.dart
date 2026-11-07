@@ -43,7 +43,7 @@ void retireSupersededPhoto(WidgetRef ref, String venueId, String? previous) {
 /// Controlled: it renders [value] and reports the new stored path through
 /// [onChanged]; it does not hold the value. That keeps the surrounding form the
 /// single source of truth, so an unsaved form and an unsaved photo cannot
-/// disagree — and a screen that saves on every edit never needs to re-read.
+/// disagree, and a screen that saves on every edit never needs to re-read.
 class ImageUploadField extends ConsumerStatefulWidget {
   const ImageUploadField({
     super.key,
@@ -108,7 +108,7 @@ class _ImageUploadFieldState extends ConsumerState<ImageUploadField> {
     }
     if (bytes.length > kMaxVenueImageBytes) {
       setState(
-        () => _error = 'That photo is too large — keep it under 512 KB.',
+        () => _error = 'That photo is too large. Keep it under 512 KB.',
       );
       return;
     }
@@ -278,7 +278,7 @@ class _ImageUploadFieldState extends ConsumerState<ImageUploadField> {
 /// The venue gallery: existing photos plus an add tile.
 ///
 /// One widget rather than a list of [ImageUploadField]s because a gallery is a
-/// `text[]` — adding and removing shift the array, so each tile cannot own a
+/// `text[]`, adding and removing shift the array, so each tile cannot own a
 /// slot the way a single-value field owns its value.
 class VenueGalleryField extends ConsumerStatefulWidget {
   const VenueGalleryField({
@@ -327,7 +327,7 @@ class _VenueGalleryFieldState extends ConsumerState<VenueGalleryField> {
     if (bytes == null || !mounted) return;
     if (bytes.length > kMaxVenueImageBytes) {
       setState(
-        () => _error = 'That photo is too large — keep it under 512 KB.',
+        () => _error = 'That photo is too large. Keep it under 512 KB.',
       );
       return;
     }
@@ -378,7 +378,7 @@ class _VenueGalleryFieldState extends ConsumerState<VenueGalleryField> {
         Text('Gallery', style: AppTextStyles.titleSmall),
         const SizedBox(height: 2),
         Text(
-          'Photos guests see on your profile — up to ${widget.maxImages}.',
+          'Photos guests see on your profile: up to ${widget.maxImages}.',
           style: AppTextStyles.bodySmall.copyWith(
             color: AppColors.textTertiary,
           ),

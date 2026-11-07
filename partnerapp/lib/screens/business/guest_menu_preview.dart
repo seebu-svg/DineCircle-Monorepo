@@ -339,7 +339,7 @@ class _LiveStatusPill extends StatelessWidget {
               child: Text(
                 fromPublicApi
                     ? 'Live in Customer App'
-                    : 'Showing saved menu — live preview unavailable',
+                    : 'Showing saved menu. Live preview unavailable',
                 style: AppTextStyles.labelSmall.copyWith(
                   color: fromPublicApi ? AppColors.success : AppColors.warning,
                 ),

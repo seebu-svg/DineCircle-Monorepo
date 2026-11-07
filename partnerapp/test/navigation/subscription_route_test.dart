@@ -40,7 +40,7 @@ void main() {
         .map((m) => m.label)
         .toList();
     expect(labels, contains('Subscription'));
-    // Every business tab label is unique — the hub must not show two tiles
+    // Every business tab label is unique, the hub must not show two tiles
     // that read the same.
     expect(labels.toSet(), hasLength(labels.length));
   });

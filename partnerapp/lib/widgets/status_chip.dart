@@ -7,7 +7,7 @@ import '../theme/app_text_styles.dart';
 /// A compact status pill.
 ///
 /// The colour comes from [AppColors.forStatus], so `confirmed` reads green on a
-/// reservation, an experience and a payout alike — one vocabulary across the
+/// reservation, an experience and a payout alike, one vocabulary across the
 /// whole desk.
 class StatusChip extends StatelessWidget {
   const StatusChip({
@@ -40,7 +40,7 @@ class StatusChip extends StatelessWidget {
         border: Border.all(color: color.withValues(alpha: 0.4)),
       ),
       child: Text(
-        text.isEmpty ? '—' : text,
+        text.isEmpty ? '-' : text,
         style: dense
             ? AppTextStyles.labelSmall.copyWith(color: color)
             : AppTextStyles.labelMedium.copyWith(color: color),
@@ -139,7 +139,7 @@ enum BannerTone { info, success, warning, danger }
 ///
 /// The partner API has real gaps (no review replies, no media upload, no
 /// redemption counter). The plan's rule is that a gap ships as an explicit
-/// disabled state with a reason — this is the widget that carries the reason.
+/// disabled state with a reason, this is the widget that carries the reason.
 class DisabledTile extends StatelessWidget {
   const DisabledTile({
     super.key,

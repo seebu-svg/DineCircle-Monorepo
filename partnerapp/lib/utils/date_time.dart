@@ -12,7 +12,7 @@ class ServiceDate {
 
   static final DateFormat _key = DateFormat('yyyy-MM-dd');
 
-  /// `2026-11-01` — the wire form for `?date=`.
+  /// `2026-11-01`, the wire form for `?date=`.
   static String key(DateTime day) => _key.format(day);
 
   /// Parses a service-day key. A bad or empty key falls back to today (local),

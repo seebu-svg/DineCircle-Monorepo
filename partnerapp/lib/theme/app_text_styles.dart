@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'app_colors.dart';
 
-/// DineCircle Partner design system — typography.
+/// DineCircle Partner design system, typography.
 ///
 /// Inter throughout, matching the customer app. Styles are getters (not
 /// constants) because `GoogleFonts` resolves the family lazily.

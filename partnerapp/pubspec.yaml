@@ -74,8 +74,12 @@ flutter:
   # Brand assets — derived from the two source PNGs at the repo root by
   # `tool/prepare_brand_assets.py`. The light wordmark reads on the dark
   # theme; the dark wordmark is for light surfaces (login card, print).
+  # Brand assets — derived from the two source PNGs at the repo root by
+  # `tool/prepare_brand_assets.py`. The light wordmark reads on the dark
+  # theme; the dark wordmark is for light surfaces (login, print).
   assets:
     - assets/branding/
+    - assets/images/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

@@ -5,8 +5,8 @@ import '../theme/app_spacing.dart';
 
 /// A real, scannable QR code rendered from an authoritative payload string.
 ///
-/// Backed by the pure-Dart `qr_flutter` encoder — the same one the customer app
-/// uses for booking references — so it renders identically in widget tests and
+/// Backed by the pure-Dart `qr_flutter` encoder, the same one the customer app
+/// uses for booking references, so it renders identically in widget tests and
 /// on the web build, with no native plugin and nothing to request from the API.
 ///
 /// The code stays dark-on-light even inside the dark theme on purpose: inverted

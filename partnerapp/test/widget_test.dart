@@ -2,8 +2,8 @@
 //
 // The real [SessionController] reads flutter_secure_storage on build, which has
 // no implementation under `flutter test`. We override it with a controller that
-// resolves straight to signed-out, so the gate renders the login surface — the
-// same decision the app makes for a fresh install — without touching plugins.
+// resolves straight to signed-out, so the gate renders the login surface, the
+// same decision the app makes for a fresh install, without touching plugins.
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';

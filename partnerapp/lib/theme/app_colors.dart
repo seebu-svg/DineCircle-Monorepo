@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// DineCircle Partner design system — colour palette.
+/// DineCircle Partner design system, colour palette.
 ///
 /// Identical tokens to the customer app so both clients read as one product:
 /// near-black surfaces, warm amber primary, gold secondary.
@@ -17,7 +17,7 @@ class AppColors {
   static const Color border = Color(0xFF272430);
   static const Color borderLight = Color(0xFF3A3642);
 
-  // Primary accent — warm amber/ember
+  // Primary accent, warm amber/ember
   static const Color primary = Color(0xFFFF8A3D);
   static const Color primaryLight = Color(0xFFFFB347);
   static const Color primaryDark = Color(0xFFE67A2E);
@@ -61,7 +61,7 @@ class AppColors {
   static const Color scrim = Color(0x80000000);
   static const Color surfaceSunken = Color(0xFF0E0C10);
 
-  // Chart palette — ordered so the first colour is the primary series.
+  // Chart palette, ordered so the first colour is the primary series.
   static const List<Color> chartPalette = [
     primary,
     gold,

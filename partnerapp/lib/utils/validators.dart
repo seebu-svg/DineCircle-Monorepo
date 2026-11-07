@@ -60,7 +60,7 @@ class Validators {
     return null;
   }
 
-  /// Image fields are URLs — the platform has no partner media upload yet.
+  /// Image fields are URLs, the platform has no partner media upload yet.
   static String? url(String? value, {String field = 'Link', bool required = false}) {
     final trimmed = value?.trim() ?? '';
     if (trimmed.isEmpty) return required ? '$field is required' : null;

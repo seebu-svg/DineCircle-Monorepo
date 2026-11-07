@@ -5,7 +5,7 @@ import '../api/api_client.dart';
 
 /// Venue photo uploads: `POST /partner/restaurants/:id/images`.
 ///
-/// This repository deliberately does ONE thing — store bytes and hand back the
+/// This repository deliberately does ONE thing, store bytes and hand back the
 /// URL the server minted. Repointing a column at that URL stays with whichever
 /// form owns the field (profile, menu item, deal), so "upload" never becomes a
 /// second, parallel way to edit a venue.
