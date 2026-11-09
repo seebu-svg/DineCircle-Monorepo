@@ -61,6 +61,7 @@ dart-defines.local.json
 
 # Scratch workspace for one-off migration/maintenance scripts
 .tmp/
+.tmpx/
 
 # Local APK-unpacking probe and QA screenshots (throwaway artifacts)
 /.apk_probe/
