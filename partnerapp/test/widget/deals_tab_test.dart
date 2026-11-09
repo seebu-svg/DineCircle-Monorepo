@@ -64,6 +64,7 @@ class Repo extends BusinessRepository {
     String dealId, {
     String? title,
     String? description,
+    DealKind? kind,
     double? value,
     String? code,
     DateTime? startsAt,

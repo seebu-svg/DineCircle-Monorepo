@@ -1,0 +1,20 @@
+# Hosting-layer rules for the generated site. Netlify, Cloudflare Pages and
+# Render Static Sites all read this file alongside _headers, so the deploy stays
+# portable. The canonical origin is https://dinecircle.app, which must match
+# seo-config.json and publicWebOrigin in partnerapp/lib/utils/links.dart.
+
+# App-generated share links point at detail pages this static site does not have:
+# a UUID can never match a slug page like /restaurants/okra.html. Send them to
+# the closest real listing instead of a 404. Existing static files are matched
+# before these rules, so the real pages keep working.
+/events/*             https://dinecircle.app/experiences.html   301
+/menu/*               https://dinecircle.app/restaurants.html   301
+/restaurants/*        https://dinecircle.app/restaurants.html   301
+/experiences/*        https://dinecircle.app/experiences.html   301
+/hosts/*              https://dinecircle.app/hosts.html         301
+
+# One origin: HTTP and the www alternative both fold onto the canonical HTTPS
+# host so canonical URLs, sitemap.xml and shared links never disagree.
+http://dinecircle.app/*      https://dinecircle.app/:splat  301
+http://www.dinecircle.app/*  https://dinecircle.app/:splat  301
+https://www.dinecircle.app/* https://dinecircle.app/:splat  301

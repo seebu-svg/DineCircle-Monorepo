@@ -16,6 +16,10 @@ SITE_NAME = "DineCircle"
 EMAIL = "hello@dinecircle.app"
 PARTNER_EMAIL = "partners@dinecircle.app"
 EFFECTIVE = "7 November 2026"
+# Add real DineCircle profile URLs here once the channels exist. A platform
+# homepage is not a substitute: a link reading "DineCircle on Instagram" has to
+# land on a DineCircle profile. The footer renders nothing while this is empty.
+SOCIAL = []
 
 
 def esc(value):
@@ -763,6 +767,16 @@ def footer(base):
     for title, links in FOOTER_COLUMNS:
         items = "".join(f'<li><a href="{base}{href}">{label}</a></li>' for label, href in links)
         cols += f'<div class="footer-col"><h3>{title}</h3><ul>{items}</ul></div>'
+    social_links = "".join(
+        f'<a href="{url}" target="_blank" rel="noopener noreferrer" '
+        f'aria-label="DineCircle on {name}">{icon(name.lower())}</a>'
+        for name, url in SOCIAL
+    )
+    socials = (
+        f'<div class="socials" aria-label="Social channels">{social_links}</div>'
+        if social_links
+        else ""
+    )
     return f'''<footer class="site-footer">
       <div class="container footer-grid">
         <div class="footer-brand">
@@ -772,12 +786,7 @@ def footer(base):
           </a>
           <p class="footer-tagline">Your next great meal starts here.</p>
           <p>DineCircle is your local guide to discovering where to eat and what’s worth going out for. Explore food, places, and people in Karachi.</p>
-          <div class="socials" aria-label="Social channels">
-            <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" aria-label="DineCircle on Instagram">{icon("instagram")}</a>
-            <a href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer" aria-label="DineCircle on Facebook">{icon("facebook")}</a>
-            <a href="https://www.tiktok.com/" target="_blank" rel="noopener noreferrer" aria-label="DineCircle on TikTok">{icon("tiktok")}</a>
-            <a href="https://www.linkedin.com/" target="_blank" rel="noopener noreferrer" aria-label="DineCircle on LinkedIn">{icon("linkedin")}</a>
-          </div>
+          {socials}
         </div>
         {cols}
         <div class="footer-col footer-contact">
