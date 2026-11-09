@@ -50,6 +50,14 @@ class AppConfig {
   static bool get isDevelopment => environment == 'development';
   static bool get isProduction => environment == 'production';
 
+  /// True when a production build was compiled against a non-HTTPS host.
+  ///
+  /// Release manifests no longer permit cleartext traffic, so such a build
+  /// fails every request. Surfacing this at startup turns an opaque network
+  /// error into a named configuration mistake.
+  static bool get isInsecureProductionBuild =>
+      isProduction && !apiBaseUrl.startsWith('https://');
+
   /// Safe to show in the debug sheet: no token, no secret.
   static Map<String, Object> toDebugMap() => {
     'environment': environment,

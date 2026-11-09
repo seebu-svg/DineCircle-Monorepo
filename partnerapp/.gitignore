@@ -45,7 +45,10 @@ app.*.map.json
 /android/app/release
 
 # Environment configs (secrets)
+# dart-defines.json holds the production host; dart-defines.local.json holds a
+# throwaway LAN/tunnel host written by tmp-live/up.sh.
 dart-defines.json
+dart-defines.local.json
 
 # Generated files
 **/*.g.dart

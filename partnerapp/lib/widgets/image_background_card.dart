@@ -83,7 +83,7 @@ class ImageBackgroundCard extends StatelessWidget {
               Image.asset(
                 imageAsset!,
                 fit: BoxFit.cover,
-                errorBuilder: (_, _2, _3) => _fallbackBackground(),
+                errorBuilder: (_, _, _) => _fallbackBackground(),
               )
             else
               _fallbackBackground(),

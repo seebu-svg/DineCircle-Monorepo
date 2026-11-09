@@ -10,7 +10,6 @@ import 'package:partnerapp/providers/module_providers.dart';
 import 'package:partnerapp/providers/venue_scope_provider.dart';
 import 'package:partnerapp/screens/business/qr_tab.dart';
 import 'package:partnerapp/theme/app_theme.dart';
-import 'package:partnerapp/utils/links.dart';
 
 /// The QR screen is the printed artefact of the whole app: if the code does not
 /// render, or the deal codes do not show, a desk has nothing to laminate. Both

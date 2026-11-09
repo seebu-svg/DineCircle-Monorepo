@@ -1,45 +1,71 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../models/subscription.dart';
 import '../../models/venue.dart';
 import '../../navigation/app_routes.dart';
 import '../../providers/module_providers.dart';
 import '../../providers/venue_scope_provider.dart';
-import '../../repositories/venue_repository.dart';
 import '../../theme/app_colors.dart';
+import '../../theme/app_spacing.dart';
 import '../../theme/app_text_styles.dart';
 import '../../utils/business_hours.dart';
+import '../../widgets/async_views.dart';
+import '../../widgets/media_image.dart';
 
-/// Business workspace with responsive management shortcuts.
-/// Existing provider, venue status, and navigation contracts are retained.
+/// The Business workspace: one compact hub per venue.
+///
+/// The [AppShell] header already owns the brand mark, the venue switcher, the
+/// notification bell and the account menu, and it renders the "Business" title,
+/// so this surface starts straight at the restaurant identity card. Repeating
+/// the branding or the venue name here would print the same information twice
+/// on one screen.
+///
+/// Every row points at a screen that already exists. Nothing on this page
+/// invents a destination, and no entry appears in both the shortcut strip and
+/// one of the lists below.
 class WorkspaceTab extends ConsumerWidget {
   const WorkspaceTab({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final venueId = ref.watch(selectedVenueProvider)?.id ?? '';
-    final venueAsync = ref.watch(venueDetailProvider(venueId));
+    final venueId = ref.watch(selectedVenueIdProvider);
 
-    return venueAsync.when(
-      loading: () => const _WorkspaceSkeleton(),
-      error: (_, _) => _WorkspaceError(
+    if (venueId.isEmpty) {
+      return const EmptyState(
+        title: 'No venue selected',
+        message: 'Choose a venue to open its business workspace.',
+        icon: Icons.storefront_outlined,
+      );
+    }
+
+    final detail = ref.watch(venueDetailProvider(venueId));
+    // Watched separately so a slow or failing subscription call never blocks
+    // the management lists the operator actually came here for.
+    final subscription = ref.watch(subscriptionProvider(venueId));
+
+    return detail.when(
+      loading: () => const LoadingSkeleton(count: 4, showHeader: true),
+      error: (error, _) => ErrorView(
+        error: error,
         onRetry: () => ref.invalidate(venueDetailProvider(venueId)),
       ),
-      data: (venueDetail) =>
-          _WorkspaceContent(venueDetail: venueDetail),
+      data: (data) => _WorkspaceBody(
+        venue: data.venue,
+        subscription: subscription,
+      ),
     );
   }
 }
 
-class _WorkspaceContent extends StatelessWidget {
-  const _WorkspaceContent({required this.venueDetail});
+class _WorkspaceBody extends StatelessWidget {
+  const _WorkspaceBody({required this.venue, required this.subscription});
 
-  final VenueDetail venueDetail;
+  final Venue venue;
+  final AsyncValue<VenueSubscription> subscription;
 
   @override
   Widget build(BuildContext context) {
-    final venue = venueDetail.venue;
     final status = BusinessHoursStatus.evaluate(
       hours: venue.openingHours,
       serviceDay: DateTime.now(),
@@ -48,83 +74,97 @@ class _WorkspaceContent extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final padding = constraints.maxWidth < 360 ? 14.0 : 20.0;
-        final maxWidth = constraints.maxWidth >= 700
-            ? 680.0
-            : double.infinity;
+        // Wide windows keep a readable measure instead of stretching the rows
+        // across a desktop monitor; phones use the full width.
+        final maxWidth = constraints.maxWidth >= 900 ? 760.0 : double.infinity;
 
-        return ListView(
-          padding: EdgeInsets.fromLTRB(
-            padding,
-            16,
-            padding,
-            36,
-          ),
-          children: [
-            Center(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: maxWidth),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      'Workspace',
-                      style: AppTextStyles.headlineMedium.copyWith(
-                        color: AppColors.textPrimary,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 5),
-                    Text(
-                      'Manage your restaurant in one place.',
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    _BusinessIdentityCard(
-                      venue: venue,
-                      status: status,
-                    ),
-                    const SizedBox(height: 24),
-                    const _SectionHeader(title: 'Quick access'),
-                    const SizedBox(height: 12),
-                    const _QuickAccessRow(),
-                    const SizedBox(height: 26),
-                    for (final group
-                        in _buildWorkspaceSections(context)) ...[
-                      _SectionHeader(title: group.title),
-                      const SizedBox(height: 12),
-                      _ModuleGroup(items: group.items),
-                      const SizedBox(height: 24),
+        return SafeArea(
+          top: false,
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.md,
+              AppSpacing.sm,
+              AppSpacing.md,
+              AppSpacing.xl,
+            ),
+            children: [
+              Center(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: maxWidth),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _IdentityCard(venue: venue, status: status),
+                      const _SectionLabel('Quick access'),
+                      const _QuickAccessRow(),
+                      const _SectionLabel('Restaurant management'),
+                      const _CompactGroup(rows: _managementRows),
+                      const _SectionLabel('Business operations'),
+                      const _CompactGroup(rows: _operationRows),
+                      const _SectionLabel('Subscription'),
+                      _SubscriptionCard(subscription: subscription),
+                      const _SectionLabel('Account and support'),
+                      const _CompactGroup(rows: _accountRows),
                     ],
-                  ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         );
       },
     );
   }
 }
 
-class _BusinessIdentityCard extends StatelessWidget {
-  const _BusinessIdentityCard({
-    required this.venue,
-    required this.status,
-  });
+// ─── Restaurant identity ────────────────────────────────────────────────────
+
+/// Compact identity card: logo, name, role, verification and trading status.
+class _IdentityCard extends StatelessWidget {
+  const _IdentityCard({required this.venue, required this.status});
 
   final Venue venue;
   final BusinessHoursStatus status;
 
+  /// Prefers the square brand mark and falls back to the cover photo, so a
+  /// venue that has only uploaded one image still gets a real thumbnail.
+  String get _imageSource =>
+      venue.logo.isNotEmpty ? venue.logo : venue.coverImage;
+
+  String get _roleAndCity {
+    final role = venue.myRole.label;
+    if (venue.city.isEmpty) return role;
+    return '$role, ${venue.city}';
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Trading status: green only for a venue that is actually open. A venue
+    // with no configured hours says so instead of pretending to be closed.
+    final (IconData statusIcon, String statusLabel, Color statusColor) =
+        switch (status.status) {
+          VenueOpenStatus.open => (
+              Icons.circle,
+              'Open now',
+              AppColors.success,
+            ),
+          VenueOpenStatus.closed => (
+              Icons.circle_outlined,
+              'Closed',
+              AppColors.textSecondary,
+            ),
+          VenueOpenStatus.notConfigured => (
+              Icons.circle_outlined,
+              'Hours not set',
+              AppColors.textTertiary,
+            ),
+        };
+
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(AppSpacing.md - 2),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         border: Border.all(color: AppColors.border),
       ),
       child: Column(
@@ -133,20 +173,20 @@ class _BusinessIdentityCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: const Icon(
-                  Icons.storefront_rounded,
-                  color: AppColors.primary,
-                  size: 25,
+              ClipRRect(
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                child: SizedBox(
+                  width: 48,
+                  height: 48,
+                  child: _imageSource.isEmpty
+                      ? _LogoFallback()
+                      : MediaImage(
+                          source: _imageSource,
+                          fallbackIcon: Icons.storefront_rounded,
+                        ),
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: AppSpacing.sm + 4),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -156,14 +196,15 @@ class _BusinessIdentityCard extends StatelessWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: AppTextStyles.titleMedium.copyWith(
-                        fontWeight: FontWeight.w700,
                         color: AppColors.textPrimary,
+                        fontWeight: FontWeight.w700,
+                        height: 1.2,
                       ),
                     ),
-                    const SizedBox(height: 5),
+                    const SizedBox(height: 3),
                     Text(
-                      '${venue.myRole.label} · ${venue.city}',
-                      maxLines: 2,
+                      _roleAndCity,
+                      maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: AppTextStyles.bodySmall.copyWith(
                         color: AppColors.textSecondary,
@@ -174,51 +215,61 @@ class _BusinessIdentityCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.sm + 4),
           Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              _StatusPill(
+              _InfoPill(
                 icon: venue.verified
                     ? Icons.verified_rounded
-                    : Icons.info_outline_rounded,
-                label: venue.verified
-                    ? 'Verified'
-                    : 'Not verified',
+                    : Icons.gpp_maybe_outlined,
+                label: venue.verified ? 'Verified' : 'Not verified',
                 color: venue.verified
                     ? AppColors.success
                     : AppColors.textSecondary,
               ),
-              _StatusPill(
-                icon: status.isOpen
-                    ? Icons.circle
-                    : Icons.circle_outlined,
-                label: status.isOpen ? 'Open now' : 'Closed',
-                color: status.isOpen
-                    ? AppColors.success
-                    : AppColors.textSecondary,
+              _InfoPill(
+                icon: statusIcon,
+                label: statusLabel,
+                color: statusColor,
               ),
+              // "Open until 22:00" / "Opens at 18:00": the next trading window
+              // when the venue is shut, so the desk does not have to open the
+              // hours editor to answer that question.
+              if (status.detail.isNotEmpty)
+                Text(
+                  status.detail,
+                  style: AppTextStyles.labelSmall.copyWith(
+                    color: AppColors.textTertiary,
+                  ),
+                ),
             ],
           ),
-          if (status.detail.isNotEmpty) ...[
-            const SizedBox(height: 10),
-            Text(
-              status.detail,
-              softWrap: true,
-              style: AppTextStyles.bodySmall.copyWith(
-                color: AppColors.textTertiary,
-              ),
-            ),
-          ],
         ],
       ),
     );
   }
 }
 
-class _StatusPill extends StatelessWidget {
-  const _StatusPill({
+class _LogoFallback extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: AppColors.primary.withValues(alpha: 0.12),
+      child: const Icon(
+        Icons.storefront_rounded,
+        size: 24,
+        color: AppColors.primary,
+      ),
+    );
+  }
+}
+
+/// A small bordered pill: one fact, one colour.
+class _InfoPill extends StatelessWidget {
+  const _InfoPill({
     required this.icon,
     required this.label,
     required this.color,
@@ -231,19 +282,17 @@ class _StatusPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 10,
-        vertical: 7,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(100),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
+        border: Border.all(color: color.withValues(alpha: 0.25)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 13, color: color),
-          const SizedBox(width: 6),
+          Icon(icon, size: 11, color: color),
+          const SizedBox(width: 4),
           Text(
             label,
             style: AppTextStyles.labelSmall.copyWith(
@@ -257,38 +306,39 @@ class _StatusPill extends StatelessWidget {
   }
 }
 
+// ─── Quick access ───────────────────────────────────────────────────────────
+
+/// The three destinations an operator opens most often.
 class _QuickAccessRow extends StatelessWidget {
   const _QuickAccessRow();
 
   @override
   Widget build(BuildContext context) {
     final items = [
-      _QuickAccessItem(
+      const _Shortcut(
         icon: Icons.storefront_outlined,
-        label: 'Profile',
-        onTap: () =>
-            Navigator.of(context).pushNamed('/business?tab=profile'),
+        label: 'Restaurant Profile',
+        route: '${AppRoute.business}?tab=profile',
       ),
-      _QuickAccessItem(
-        icon: Icons.location_city_outlined,
-        label: 'Branches',
-        onTap: () =>
-            Navigator.of(context).pushNamed('/business?tab=branches'),
+      const _Shortcut(
+        icon: Icons.qr_code_2,
+        label: 'QR Codes',
+        route: '${AppRoute.business}?tab=qr',
       ),
-      _QuickAccessItem(
-        icon: Icons.settings_outlined,
-        label: 'Settings',
-        onTap: () =>
-            Navigator.of(context).pushNamed(AppRoute.settings),
+      const _Shortcut(
+        icon: Icons.card_membership_outlined,
+        label: 'Subscription',
+        route: '${AppRoute.business}?tab=subscription',
       ),
     ];
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        const gap = 10.0;
-        final columns = constraints.maxWidth < 290 ? 2 : 3;
-        final width =
-            (constraints.maxWidth - gap * (columns - 1)) / columns;
+        const gap = AppSpacing.sm;
+        // Two columns only below 300dp, where three tiles would squeeze the
+        // labels into ellipses on a small phone at large text scale.
+        final columns = constraints.maxWidth < 300 ? 2 : 3;
+        final width = (constraints.maxWidth - gap * (columns - 1)) / columns;
 
         return Wrap(
           spacing: gap,
@@ -297,7 +347,7 @@ class _QuickAccessRow extends StatelessWidget {
             for (final item in items)
               SizedBox(
                 width: width,
-                child: _QuickAccessTile(item: item),
+                child: _ShortcutTile(item: item),
               ),
           ],
         );
@@ -306,50 +356,51 @@ class _QuickAccessRow extends StatelessWidget {
   }
 }
 
-class _QuickAccessItem {
-  const _QuickAccessItem({
+class _Shortcut {
+  const _Shortcut({
     required this.icon,
     required this.label,
-    required this.onTap,
+    required this.route,
   });
 
   final IconData icon;
   final String label;
-  final VoidCallback onTap;
+  final String route;
 }
 
-class _QuickAccessTile extends StatelessWidget {
-  const _QuickAccessTile({required this.item});
+class _ShortcutTile extends StatelessWidget {
+  const _ShortcutTile({required this.item});
 
-  final _QuickAccessItem item;
+  final _Shortcut item;
 
   @override
   Widget build(BuildContext context) {
     return Material(
       color: AppColors.surface,
-      borderRadius: BorderRadius.circular(15),
+      borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
       child: InkWell(
-        onTap: item.onTap,
-        borderRadius: BorderRadius.circular(15),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        onTap: () => Navigator.of(context).pushNamed(item.route),
         child: Container(
-          constraints: const BoxConstraints(minHeight: 94),
+          // A minimum, not a fixed height: the tile grows at 2.0 text scale
+          // instead of clipping its label.
+          constraints: const BoxConstraints(
+            minHeight: AppSpacing.minTapTarget + 20,
+          ),
           padding: const EdgeInsets.symmetric(
-            horizontal: 8,
-            vertical: 14,
+            horizontal: 6,
+            vertical: AppSpacing.sm + 2,
           ),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(15),
+            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
             border: Border.all(color: AppColors.border),
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                item.icon,
-                color: AppColors.primary,
-                size: 25,
-              ),
-              const SizedBox(height: 9),
+              Icon(item.icon, color: AppColors.primary, size: 22),
+              const SizedBox(height: 6),
               Text(
                 item.label,
                 textAlign: TextAlign.center,
@@ -368,28 +419,90 @@ class _QuickAccessTile extends StatelessWidget {
   }
 }
 
-class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({required this.title});
+// ─── Settings-style lists ───────────────────────────────────────────────────
 
-  final String title;
+/// One navigable row inside a [_CompactGroup].
+class _Row {
+  const _Row({
+    required this.icon,
+    required this.label,
+    required this.route,
+  });
 
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      title.toUpperCase(),
-      style: AppTextStyles.labelSmall.copyWith(
-        color: AppColors.textTertiary,
-        letterSpacing: 1.1,
-        fontWeight: FontWeight.w700,
-      ),
-    );
-  }
+  final IconData icon;
+  final String label;
+  final String route;
 }
 
-class _ModuleGroup extends StatelessWidget {
-  const _ModuleGroup({required this.items});
+/// Restaurant Profile is deliberately absent: it is the first quick-access
+/// shortcut, and listing it twice on one screen is the duplication the redesign
+/// is meant to remove.
+///
+/// Booking Policies and Amenities both live inside the venue profile, so each
+/// row deep-links to that section rather than opening the same top of page.
+const List<_Row> _managementRows = [
+  _Row(
+    icon: Icons.restaurant_menu_outlined,
+    label: 'Menu Configuration',
+    route: '${AppRoute.business}?tab=menu',
+  ),
+  _Row(
+    icon: Icons.policy_outlined,
+    label: 'Booking Policies',
+    route: '${AppRoute.business}?tab=profile&section=policies',
+  ),
+  _Row(
+    icon: Icons.schedule_outlined,
+    label: 'Operating Hours',
+    route: '${AppRoute.service}?tab=tables',
+  ),
+  _Row(
+    icon: Icons.widgets_outlined,
+    label: 'Amenities and Facilities',
+    route: '${AppRoute.business}?tab=profile&section=amenities',
+  ),
+];
 
-  final List<_ModuleItem> items;
+/// QR management is intentionally not repeated here; it is a quick-access
+/// shortcut above.
+const List<_Row> _operationRows = [
+  _Row(
+    icon: Icons.event_available_outlined,
+    label: 'Reservations Management',
+    route: '${AppRoute.service}?tab=reservations',
+  ),
+  _Row(
+    icon: Icons.auto_awesome_outlined,
+    label: 'Dining Experiences',
+    route: '${AppRoute.experiences}?tab=experiences',
+  ),
+  _Row(
+    icon: Icons.how_to_reg_outlined,
+    label: 'Check-in',
+    route: '${AppRoute.service}?tab=checkin',
+  ),
+];
+
+/// Settings and support sit below the subscription block, per the workspace
+/// hierarchy.
+const List<_Row> _accountRows = [
+  _Row(
+    icon: Icons.settings_outlined,
+    label: 'Account settings',
+    route: AppRoute.settings,
+  ),
+  _Row(
+    icon: Icons.support_agent_outlined,
+    label: 'Help and Support',
+    route: '${AppRoute.inbox}?tab=support',
+  ),
+];
+
+/// A joined list of rows drawn as one dark surface with hairline dividers.
+class _CompactGroup extends StatelessWidget {
+  const _CompactGroup({required this.rows});
+
+  final List<_Row> rows;
 
   @override
   Widget build(BuildContext context) {
@@ -397,19 +510,20 @@ class _ModuleGroup extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         border: Border.all(color: AppColors.border),
       ),
       child: Column(
         children: [
-          for (var i = 0; i < items.length; i++) ...[
+          for (var i = 0; i < rows.length; i++) ...[
             if (i > 0)
               const Divider(
                 height: 1,
-                indent: 66,
+                thickness: 1,
+                indent: 52,
                 color: AppColors.border,
               ),
-            _ModuleTile(item: items[i]),
+            _RowTile(row: rows[i]),
           ],
         ],
       ),
@@ -417,53 +531,43 @@ class _ModuleGroup extends StatelessWidget {
   }
 }
 
-class _ModuleTile extends StatelessWidget {
-  const _ModuleTile({required this.item});
+class _RowTile extends StatelessWidget {
+  const _RowTile({required this.row});
 
-  final _ModuleItem item;
+  final _Row row;
 
   @override
   Widget build(BuildContext context) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: item.onTap,
-        child: Padding(
+        onTap: () => Navigator.of(context).pushNamed(row.route),
+        child: Container(
+          // 52dp keeps every row above the 48dp accessible minimum while
+          // staying compact, and the row still grows with text scaling.
+          constraints: const BoxConstraints(minHeight: 52),
           padding: const EdgeInsets.symmetric(
-            horizontal: 14,
-            vertical: 12,
+            horizontal: AppSpacing.md - 2,
+            vertical: AppSpacing.sm,
           ),
           child: Row(
             children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.10),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  item.icon,
-                  color: AppColors.primary,
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: 12),
+              Icon(row.icon, size: 19, color: AppColors.primary),
+              const SizedBox(width: AppSpacing.md - 4),
               Expanded(
                 child: Text(
-                  item.label,
-                  softWrap: true,
+                  row.label,
                   style: AppTextStyles.bodyMedium.copyWith(
                     color: AppColors.textPrimary,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: AppSpacing.sm),
               const Icon(
                 Icons.chevron_right_rounded,
+                size: 19,
                 color: AppColors.textTertiary,
-                size: 20,
               ),
             ],
           ),
@@ -473,227 +577,209 @@ class _ModuleTile extends StatelessWidget {
   }
 }
 
-class _WorkspaceSkeleton extends StatelessWidget {
-  const _WorkspaceSkeleton();
+// ─── Subscription ───────────────────────────────────────────────────────────
+
+/// Partner Pro summary: status, plan, renewal date and the one action that
+/// matters. Values come from the server subscription row; nothing is assumed
+/// when that row cannot be read.
+class _SubscriptionCard extends StatelessWidget {
+  const _SubscriptionCard({required this.subscription});
+
+  final AsyncValue<VenueSubscription> subscription;
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.all(20),
-      children: [
-        Container(
-          height: 155,
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(20),
-          ),
-        ),
-        const SizedBox(height: 24),
-        Row(
-          children: [
-            for (var i = 0; i < 3; i++) ...[
-              if (i > 0) const SizedBox(width: 10),
+    final sub = subscription.valueOrNull;
+
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md - 2),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  color: AppColors.gold.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusSm + 2),
+                ),
+                child: const Icon(
+                  Icons.workspace_premium_outlined,
+                  size: 18,
+                  color: AppColors.gold,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm + 2),
               Expanded(
-                child: Container(
-                  height: 94,
-                  decoration: BoxDecoration(
-                    color: AppColors.surface,
-                    borderRadius: BorderRadius.circular(15),
+                child: Text(
+                  'Partner Pro',
+                  style: AppTextStyles.titleSmall.copyWith(
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ),
+              _SubscriptionPill(subscription: subscription),
             ],
+          ),
+          if (sub?.plan != null) ...[
+            const SizedBox(height: AppSpacing.sm + 2),
+            Text(
+              '${sub!.plan!.label} plan, ${_pkr(sub.pricePkr)}',
+              style: AppTextStyles.bodySmall.copyWith(
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
           ],
-        ),
-        const SizedBox(height: 26),
-        for (var i = 0; i < 3; i++) ...[
-          Container(
-            height: 170,
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(16),
+          if (sub?.plan != null && sub?.periodEnd != null) ...[
+            const SizedBox(height: 2),
+            Text(
+              '${sub!.autoRenew ? 'Renews on' : 'Ends on'} ${_shortDate(sub.periodEnd!)}',
+              style: AppTextStyles.labelSmall.copyWith(
+                color: AppColors.textTertiary,
+              ),
+            ),
+          ],
+          if (sub == null && !subscription.isLoading) ...[
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              'Subscription details could not be loaded.',
+              style: AppTextStyles.labelSmall.copyWith(
+                color: AppColors.textTertiary,
+              ),
+            ),
+          ],
+          if (sub == null && subscription.isLoading) ...[
+            const SizedBox(height: AppSpacing.sm + 2),
+            Container(
+              height: 12,
+              width: 150,
+              decoration: BoxDecoration(
+                color: AppColors.surfaceElevated,
+                borderRadius: BorderRadius.circular(AppSpacing.radiusXs),
+              ),
+            ),
+          ],
+          const SizedBox(height: AppSpacing.sm + 4),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: () => Navigator.of(context).pushNamed(
+                '${AppRoute.business}?tab=subscription',
+              ),
+              icon: const Icon(Icons.tune_rounded, size: 17),
+              label: const Text('Manage Subscription'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.primary,
+                minimumSize: const Size.fromHeight(AppSpacing.minTapTarget),
+                side: BorderSide(
+                  color: AppColors.primary.withValues(alpha: 0.4),
+                ),
+              ),
             ),
           ),
-          const SizedBox(height: 20),
         ],
-      ],
+      ),
     );
   }
 }
 
-class _WorkspaceError extends StatelessWidget {
-  const _WorkspaceError({required this.onRetry});
+/// Status pill for the subscription row. Uses the model's own label so the
+/// card, the subscription screen and the docs cannot drift apart.
+class _SubscriptionPill extends StatelessWidget {
+  const _SubscriptionPill({required this.subscription});
 
-  final VoidCallback onRetry;
+  final AsyncValue<VenueSubscription> subscription;
+
+  Color get _color {
+    final sub = subscription.valueOrNull;
+    if (sub == null) return AppColors.textTertiary;
+    return switch (sub.status) {
+      SubscriptionStatus.active => AppColors.success,
+      SubscriptionStatus.trialing => AppColors.info,
+      SubscriptionStatus.pastDue => AppColors.warning,
+      SubscriptionStatus.cancelled => AppColors.danger,
+      SubscriptionStatus.none => AppColors.textTertiary,
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return SingleChildScrollView(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              minHeight: constraints.maxHeight,
-            ),
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 360),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(
-                        Icons.error_outline_rounded,
-                        size: 44,
-                        color: AppColors.textTertiary,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Unable to load workspace',
-                        textAlign: TextAlign.center,
-                        style: AppTextStyles.titleMedium,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Check your connection and try again.',
-                        textAlign: TextAlign.center,
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      FilledButton.icon(
-                        onPressed: onRetry,
-                        icon: const Icon(Icons.refresh_rounded),
-                        label: const Text('Try Again'),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
+    final sub = subscription.valueOrNull;
+    if (sub == null) {
+      // Unknown is not a status; an empty box holds the space while the row
+      // loads or after a failed read.
+      return const SizedBox.shrink();
+    }
+
+    final color = _color;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      child: Text(
+        sub.status.label,
+        style: AppTextStyles.labelSmall.copyWith(
+          color: color,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
     );
   }
 }
 
-class _WorkspaceSection {
-  const _WorkspaceSection({
-    required this.title,
-    required this.items,
-  });
+// ─── Shared bits ────────────────────────────────────────────────────────────
+
+/// Uppercase group label above a list. Deliberately lighter than the shared
+/// [SectionHeader]: this screen is a settings page, not a marketing surface.
+class _SectionLabel extends StatelessWidget {
+  const _SectionLabel(this.title);
 
   final String title;
-  final List<_ModuleItem> items;
-}
 
-class _ModuleItem {
-  const _ModuleItem({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-}
-
-List<_WorkspaceSection> _buildWorkspaceSections(
-  BuildContext context,
-) {
-  void go(String route) {
-    Navigator.of(context).pushNamed(route);
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 20, bottom: AppSpacing.sm),
+      child: Text(
+        title.toUpperCase(),
+        style: AppTextStyles.labelSmall.copyWith(
+          color: AppColors.textTertiary,
+          letterSpacing: 1.0,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
   }
+}
 
-  return [
-    _WorkspaceSection(
-      title: 'Business Management',
-      items: [
-        _ModuleItem(
-          icon: Icons.store_outlined,
-          label: 'Venue Profile',
-          onTap: () => go('/business?tab=profile'),
-        ),
-        _ModuleItem(
-          icon: Icons.location_city_outlined,
-          label: 'Branches',
-          onTap: () => go('/business?tab=branches'),
-        ),
-        _ModuleItem(
-          icon: Icons.qr_code_2,
-          label: 'QR Codes',
-          onTap: () => go('/business?tab=qr'),
-        ),
-        _ModuleItem(
-          icon: Icons.payments_outlined,
-          label: 'Packages & Billing',
-          onTap: () => go('/business?tab=packages'),
-        ),
-      ],
-    ),
-    _WorkspaceSection(
-      title: 'Operations',
-      items: [
-        _ModuleItem(
-          icon: Icons.event_available_outlined,
-          label: 'Reservations',
-          onTap: () => go('/service?tab=reservations'),
-        ),
-        _ModuleItem(
-          icon: Icons.confirmation_number_outlined,
-          label: 'Bookings & Check-in',
-          onTap: () => go('/service?tab=bookings'),
-        ),
-        _ModuleItem(
-          icon: Icons.table_restaurant_outlined,
-          label: 'Tables & Hours',
-          onTap: () => go('/service?tab=tables'),
-        ),
-      ],
-    ),
-    _WorkspaceSection(
-      title: 'Experiences',
-      items: [
-        _ModuleItem(
-          icon: Icons.pending_actions_outlined,
-          label: 'Experience Requests',
-          onTap: () => go('/experiences?tab=requests'),
-        ),
-        _ModuleItem(
-          icon: Icons.auto_awesome_outlined,
-          label: 'Experiences & Hosts',
-          onTap: () => go('/experiences?tab=experiences'),
-        ),
-      ],
-    ),
-    _WorkspaceSection(
-      title: 'Account & Support',
-      items: [
-        _ModuleItem(
-          icon: Icons.star_outline_rounded,
-          label: 'Reviews',
-          onTap: () => go('/inbox?tab=reviews'),
-        ),
-        _ModuleItem(
-          icon: Icons.notifications_none_rounded,
-          label: 'Notifications',
-          onTap: () => go('/inbox?tab=notifications'),
-        ),
-        _ModuleItem(
-          icon: Icons.support_agent_outlined,
-          label: 'Help & Support',
-          onTap: () => go('/inbox?tab=support'),
-        ),
-        _ModuleItem(
-          icon: Icons.settings_outlined,
-          label: 'Account Settings',
-          onTap: () => go(AppRoute.settings),
-        ),
-      ],
-    ),
-  ];
+/// `5000` -> `PKR 5,000`, matching the subscription screen's own formatting.
+String _pkr(int amount) {
+  final digits = amount.abs().toString();
+  final buffer = StringBuffer();
+  for (var i = 0; i < digits.length; i++) {
+    if (i > 0 && (digits.length - i) % 3 == 0) buffer.write(',');
+    buffer.write(digits[i]);
+  }
+  return 'PKR $buffer';
+}
+
+/// ISO-ish `yyyy-MM-dd` in the device's timezone, the format the subscription
+/// screen already uses.
+String _shortDate(DateTime date) {
+  final local = date.toLocal();
+  return '${local.year}-'
+      '${local.month.toString().padLeft(2, '0')}-'
+      '${local.day.toString().padLeft(2, '0')}';
 }

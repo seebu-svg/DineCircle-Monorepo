@@ -35,6 +35,11 @@ yarn-error.log*
 tmp-live/
 .tmp/
 .temp/
+.tmpx/
+
+# Python bytecode
+__pycache__/
+*.pyc
 
 # QA and testing artifacts (root level)
 .qa/
@@ -55,4 +60,5 @@ supabase/.temp/
 
 # Local config files with secrets
 dart-defines.json
+dart-defines.local.json
 key.properties

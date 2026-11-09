@@ -1,10 +1,10 @@
 {
-  "STRIPE_PUBLISHABLE_KEY": "pk_test_your_stripe_publishable_key",
-  "GOOGLE_MAPS_API_KEY": "AIzaYourGoogleMapsApiKey",
-  "ENVIRONMENT": "development",
-  "ENABLE_DEBUG_LOGGING": "true",
+  "STRIPE_PUBLISHABLE_KEY": "",
+  "GOOGLE_MAPS_API_KEY": "",
+  "ENVIRONMENT": "production",
+  "ENABLE_DEBUG_LOGGING": "false",
   "ENABLE_ANALYTICS": "false",
   "ENABLE_CRASH_REPORTING": "false",
-  "API_BASE_URL": "http://localhost:4000",
-  "API_TIMEOUT_MS": "30000"
+  "API_BASE_URL": "https://dinecircle-api.onrender.com",
+  "API_TIMEOUT_MS": "60000"
 }

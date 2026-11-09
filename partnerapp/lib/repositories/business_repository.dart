@@ -58,6 +58,7 @@ class BusinessRepository {
     String dealId, {
     String? title,
     String? description,
+    DealKind? kind,
     double? value,
     String? code,
     DateTime? startsAt,
@@ -70,6 +71,7 @@ class BusinessRepository {
       body: {
         if (title != null) 'title': title.trim(),
         if (description != null) 'description': description.trim(),
+        if (kind != null) 'kind': kind.wire,
         'value': ?value,
         if (code != null) 'code': code.trim().toUpperCase(),
         if (startsAt != null) 'startsAt': startsAt.toUtc().toIso8601String(),
@@ -86,8 +88,8 @@ class BusinessRepository {
   /// Drafts are deleted; anything that has been live is retired to `expired`.
   /// The answer distinguishes the two so the list can say what happened.
   Future<bool> deleteDeal(String venueId, String dealId) async {
-    final raw = await _api.deleteJson('${base(venueId)}/deals/$dealId');
-    return asBool(asMap(raw)['deleted']);
+    final envelope = await _api.envelopeDelete('${base(venueId)}/deals/$dealId');
+    return envelope.data['deleted'] == true;
   }
 
   // ── Earnings & payouts ─────────────────────────────────────────────────────

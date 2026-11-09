@@ -669,6 +669,7 @@ class _DealFormSheetState extends ConsumerState<_DealFormSheet> {
           widget.draft!.id,
           title: input.title,
           description: input.description,
+          kind: input.kind,
           value: input.value,
           code: input.code,
           startsAt: input.startsAt,

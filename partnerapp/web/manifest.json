@@ -1,11 +1,11 @@
 {
-    "name": "partnerapp",
-    "short_name": "partnerapp",
+    "name": "DineCircle Partner",
+    "short_name": "DC Partner",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Manage your venue's menus, tables, deals and guest operations.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

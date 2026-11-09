@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'config/app_config.dart';
 import 'navigation/app_routes.dart';
 import 'providers/app_providers.dart';
 import 'screens/auth/auth_gate.dart';
@@ -10,6 +11,16 @@ import 'theme/app_theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // A production build pointed at a plain-http host cannot reach the API,
+  // because release manifests forbid cleartext. Say so once at startup rather
+  // than letting every screen fail with a generic network error.
+  if (AppConfig.isInsecureProductionBuild) {
+    debugPrint(
+      'CONFIGURATION ERROR: ENVIRONMENT=production but API_BASE_URL is '
+      '${AppConfig.apiBaseUrl}. Rebuild with an https host.',
+    );
+  }
 
   // Device preferences are resolved once, up front, and injected so no screen
   // ever awaits storage mid-build (see [sharedPreferencesProvider]).

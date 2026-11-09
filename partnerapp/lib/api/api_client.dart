@@ -123,6 +123,9 @@ class ApiClient {
   Future<ApiEnvelope> envelopePut(String path, {Object? body}) async =>
       ApiEnvelope.parse(await putJson(path, body: body));
 
+  Future<ApiEnvelope> envelopeDelete(String path, {Object? body}) async =>
+      ApiEnvelope.parse(await deleteJson(path, body: body));
+
   /// `POST` that answers a bare object (no `data` wrapper worth modelling),
   /// still unwrapped defensively so callers can read `envelope.data['token']`.
   Future<Map<String, dynamic>> postMap(

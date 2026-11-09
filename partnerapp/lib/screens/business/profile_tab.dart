@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../models/venue.dart';
+import '../../navigation/app_routes.dart';
 import '../../providers/app_providers.dart';
 import '../../providers/module_providers.dart';
 import '../../providers/venue_scope_provider.dart';
@@ -55,25 +56,77 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
               venue: data.venue,
               counts: data.counts,
               onEdit: () => setState(() => _editing = true),
+              // `/business?tab=profile&section=policies` lands on that block
+              // instead of the top of the page, so the workspace can link
+              // straight to Booking Policies and Amenities.
+              initialSection: routeQuery(context)['section'],
             ),
     );
   }
 }
 
-class _ProfileView extends StatelessWidget {
+class _ProfileView extends StatefulWidget {
   const _ProfileView({
     required this.venue,
     required this.counts,
     required this.onEdit,
+    this.initialSection,
   });
 
   final Venue venue;
   final VenueCounts counts;
   final VoidCallback onEdit;
 
+  /// Optional section key from the route query: `policies` or `amenities`.
+  final String? initialSection;
+
+  @override
+  State<_ProfileView> createState() => _ProfileViewState();
+}
+
+class _ProfileViewState extends State<_ProfileView> {
+  final ScrollController _scrollController = ScrollController();
+  // Anchors for the two sections the workspace deep-links into.
+  final GlobalKey _aboutKey = GlobalKey();
+  final GlobalKey _policiesKey = GlobalKey();
+  bool _jumped = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // The target only has a context once the list has laid out.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _jumpToSection());
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  /// Scrolls to the requested section once. A missing or unknown value leaves
+  /// the screen at the top, exactly as before.
+  void _jumpToSection() {
+    if (_jumped || !mounted) return;
+    final anchor = switch (widget.initialSection) {
+      'policies' => _policiesKey,
+      'amenities' => _aboutKey,
+      _ => null,
+    };
+    if (anchor == null) return;
+    _jumped = true;
+    final target = anchor.currentContext;
+    if (target == null) return;
+    Scrollable.ensureVisible(
+      target,
+      alignment: 0.05,
+      duration: const Duration(milliseconds: 300),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final v = venue;
+    final v = widget.venue;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -81,6 +134,7 @@ class _ProfileView extends StatelessWidget {
         final padding = compact ? 14.0 : 20.0;
 
         return ListView(
+          controller: _scrollController,
           padding: EdgeInsets.fromLTRB(
             padding, 16, padding, 36,
           ),
@@ -114,7 +168,7 @@ class _ProfileView extends StatelessWidget {
                           capability: Capability.manageProfile,
                           builder: (context, allowed, _) {
                             return OutlinedButton.icon(
-                              onPressed: allowed ? onEdit : null,
+                              onPressed: allowed ? widget.onEdit : null,
                               icon: const Icon(
                                 Icons.edit_outlined,
                                 size: 17,
@@ -132,7 +186,8 @@ class _ProfileView extends StatelessWidget {
 
                     const SizedBox(height: 24),
 
-                    const _ProfileSectionTitle(
+                    _ProfileSectionTitle(
+                      key: _aboutKey,
                       title: 'About Restaurant',
                       icon: Icons.storefront_outlined,
                     ),
@@ -237,27 +292,27 @@ class _ProfileView extends StatelessWidget {
                         ),
                         KpiCard(
                           label: 'Tables',
-                          value: '${counts.tables}',
+                          value: '${widget.counts.tables}',
                           icon: Icons.table_restaurant_outlined,
                         ),
                         KpiCard(
                           label: 'Menu Items',
-                          value: '${counts.menuItems}',
+                          value: '${widget.counts.menuItems}',
                           icon: Icons.restaurant_menu_outlined,
                         ),
                         KpiCard(
                           label: 'Branches',
-                          value: '${counts.branches}',
+                          value: '${widget.counts.branches}',
                           icon: Icons.location_city_outlined,
                         ),
                         KpiCard(
                           label: 'Upcoming',
-                          value: '${counts.upcomingEvents}',
+                          value: '${widget.counts.upcomingEvents}',
                           icon: Icons.event_outlined,
                         ),
                         KpiCard(
                           label: 'Pending',
-                          value: '${counts.pendingReservations}',
+                          value: '${widget.counts.pendingReservations}',
                           icon: Icons.pending_actions_outlined,
                         ),
                       ],
@@ -265,7 +320,8 @@ class _ProfileView extends StatelessWidget {
 
                     const SizedBox(height: 24),
 
-                    const _ProfileSectionTitle(
+                    _ProfileSectionTitle(
+                      key: _policiesKey,
                       title: 'Booking Policies',
                       icon: Icons.policy_outlined,
                     ),
@@ -425,6 +481,7 @@ class _ProfilePill extends StatelessWidget {
 
 class _ProfileSectionTitle extends StatelessWidget {
   const _ProfileSectionTitle({
+    super.key,
     required this.title,
     required this.icon,
   });

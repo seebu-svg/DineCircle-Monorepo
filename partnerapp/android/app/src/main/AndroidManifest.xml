@@ -4,16 +4,12 @@
     <!-- Venue photos can be taken with the camera as well as picked from the
          gallery. Mirrors the customer app's avatar picker. -->
     <uses-permission android:name="android.permission.CAMERA"/>
-    <!-- LAN test builds talk to the local DineCircle API over plain http://
-         (API_BASE_URL in dart-defines.json), which Android blocks by default
-         since API 28. Declared here rather than only in the debug overlay so
-         release APKs built for device testing can reach the LAN host too,
-         mirroring the customer app. Hosted releases use https, so this can be
-         dropped once LAN testing is finished. -->
+    <!-- Release builds talk to the hosted API over https only. Plain http is
+         permitted solely by the debug overlay (src/debug/AndroidManifest.xml)
+         so LAN development keeps working without weakening the shipped app. -->
     <application
-        android:label="partnerapp"
+        android:label="DineCircle Partner"
         android:name="${applicationName}"
-        android:usesCleartextTraffic="true"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"

@@ -718,6 +718,37 @@
     });
   }
 
+  /* Newsletter -------------------------------------------------------------- */
+  function initNewsletter() {
+    var form = $("[data-newsletter]");
+    if (!form) return;
+
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+      var field = $("input[type=email]", form);
+      var email = field ? String(field.value || "").trim() : "";
+      if (!email) {
+        toast("Add an email address so we can write back.");
+        if (field) field.focus();
+        return;
+      }
+
+      var subject = "DineCircle newsletter signup";
+      var body = [
+        "Please add this address to the DineCircle newsletter:",
+        email,
+        "",
+        "Sent from the DineCircle website"
+      ].join("\n");
+
+      window.location.href = "mailto:" + CONTACT_EMAIL +
+        "?subject=" + encodeURIComponent(subject) +
+        "&body=" + encodeURIComponent(body);
+
+      toast("Opening your email app with the signup ready.");
+    });
+  }
+
   /* Boot ------------------------------------------------------------------- */
   function boot() {
     initHeader();
@@ -730,6 +761,7 @@
     initExperienceFilters();
     initCopyCodes();
     initContactForm();
+    initNewsletter();
   }
 
   if (document.readyState === "loading") {
@@ -737,4 +769,58 @@
   } else {
     boot();
   }
+})();
+
+/* Accessible homepage carousel. The first slide remains usable without JS. */
+(function () {
+  "use strict";
+  var root = document.querySelector('[data-hero-carousel]');
+  if (!root) return;
+  var slides = Array.from(root.querySelectorAll('[data-hero-slide]'));
+  var tabs = Array.from(root.querySelectorAll('[data-hero-goto]'));
+  var pause = root.querySelector('[data-hero-pause]');
+  var status = root.querySelector('[data-hero-status]');
+  var motion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  var index = 0, timer, paused = motion.matches, hovering = false, focused = false;
+  function schedule() {
+    clearTimeout(timer);
+    if (!paused && !hovering && !focused && !document.hidden) timer = setTimeout(function () { show(index + 1, false); }, 6500);
+  }
+  function show(next, announce) {
+    index = (next + slides.length) % slides.length;
+    slides.forEach(function (slide, i) {
+      slide.hidden = i !== index;
+      slide.inert = i !== index;
+      slide.classList.toggle('is-active', i === index);
+      tabs[i].setAttribute('aria-pressed', String(i === index));
+    });
+    if (announce) status.textContent = slides[index].getAttribute('aria-label');
+    schedule();
+  }
+  function updatePause() {
+    pause.setAttribute('aria-pressed', String(paused));
+    pause.setAttribute('aria-label', paused ? 'Play slideshow' : 'Pause slideshow');
+    pause.textContent = paused ? '▶' : 'Ⅱ';
+    schedule();
+  }
+  tabs.forEach(function (tab, i) { tab.addEventListener('click', function () { show(i, true); }); });
+  root.querySelector('[data-hero-prev]').addEventListener('click', function () { show(index - 1, true); });
+  root.querySelector('[data-hero-next]').addEventListener('click', function () { show(index + 1, true); });
+  pause.addEventListener('click', function () { paused = !paused; updatePause(); });
+  root.addEventListener('keydown', function (event) {
+    if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') { event.preventDefault(); show(index + (event.key === 'ArrowRight' ? 1 : -1), true); }
+  });
+  root.addEventListener('mouseenter', function () { hovering = true; schedule(); });
+  root.addEventListener('mouseleave', function () { hovering = false; schedule(); });
+  root.addEventListener('focusin', function () { focused = true; schedule(); });
+  root.addEventListener('focusout', function () { setTimeout(function () { focused = root.contains(document.activeElement); schedule(); }, 0); });
+  document.addEventListener('visibilitychange', schedule);
+  motion.addEventListener('change', function () { paused = motion.matches; updatePause(); });
+  var startX, startY;
+  root.addEventListener('touchstart', function (event) { startX = event.changedTouches[0].clientX; startY = event.changedTouches[0].clientY; }, {passive:true});
+  root.addEventListener('touchend', function (event) {
+    var dx = event.changedTouches[0].clientX - startX, dy = event.changedTouches[0].clientY - startY;
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)) show(index + (dx < 0 ? 1 : -1), true);
+  }, {passive:true});
+  updatePause();
 })();

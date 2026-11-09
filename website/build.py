@@ -6,8 +6,10 @@ per-host detail pages, legal pages) from one content model so the header,
 footer and card components never drift. Run: python3 build.py
 """
 from pathlib import Path
+from urllib.parse import quote
 import html
 import unicodedata
+from seo import enhance_page, write_crawl_files
 
 ROOT = Path(__file__).parent
 SITE_NAME = "DineCircle"
@@ -768,8 +770,8 @@ def footer(base):
             {brand_mark(base, light=True)}
             <span class="brand-word">Dine<span>Circle</span></span>
           </a>
-          <p class="footer-tagline">Great food. Shared moments.</p>
-          <p>Restaurants, cafés, real menus, deals and hosted dining experiences in Karachi. Free for diners. You always pay the restaurant directly.</p>
+          <p class="footer-tagline">Your next great meal starts here.</p>
+          <p>DineCircle is your local guide to discovering where to eat and what’s worth going out for. Explore food, places, and people in Karachi.</p>
           <div class="socials" aria-label="Social channels">
             <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" aria-label="DineCircle on Instagram">{icon("instagram")}</a>
             <a href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer" aria-label="DineCircle on Facebook">{icon("facebook")}</a>
@@ -818,7 +820,7 @@ def app_dialog(base):
 
 
 def page(title, description, base, active, body, og="assets/images/hero_tasting.webp", body_class=""):
-    full_title = f"{title} · DineCircle" if title != "DineCircle" else title
+    full_title = title if "DineCircle" in title else f"{title} · DineCircle"
     return f'''<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1107,6 +1109,46 @@ def build_home():
     exp_cards = "".join(exp_card(e, "") for e in EXPERIENCES[:3])
     host_cards = "".join(host_card(h, "") for h in HOSTS)
 
+    area_specs = [
+        ("Do Darya", "Sea-facing dinners and late-night grills"),
+        ("Clifton", "Neighbourhood cafés and courtyard dining"),
+        ("Zamzama", "Coffee, chocolate and wood-fired pizza"),
+        ("DHA Phase 8", "Mediterranean plates and family grills"),
+        ("DHA Phase 6", "Espresso bars and quick lunches"),
+        ("DHA Phase 5", "Pizza and pasta around the corner"),
+    ]
+    area_cards = ""
+    for area, blurb in area_specs:
+        places = [v for v in VENUES if area.lower() in v["area"].lower()]
+        sample = ", ".join(v["name"] for v in places[:2])
+        count_label = "place" if len(places) == 1 else "places"
+        area_cards += f'''<a class="area-card" href="restaurants.html?q={quote(area)}">
+          <span class="area-card__count">{len(places)} {count_label}</span>
+          <h3>{esc(area)}</h3>
+          <p>{esc(blurb)}</p>
+          <span class="area-card__sample">{esc(sample)}</span>
+          <span class="area-card__link">Browse {esc(area)} <span aria-hidden="true">→</span></span>
+        </a>'''
+
+    home_faqs = [
+        ("Is DineCircle free?",
+         "Yes. Browsing, booking tables and joining dining experiences are free for diners. DineCircle takes no booking commission. You pay the restaurant for your food and drinks."),
+        ("How do deals work?",
+         "Find an offer on the Deals page or the venue page, show it to your server before ordering, and the venue applies it to the bill. Some offers need a code; others just need you to ask. Each deal lists its own terms."),
+        ("What does joining an experience cost?",
+         "Joining is free. Each experience shows an estimated dining cost per person, which you pay directly to the venue on the day. There is no online checkout and no DineCircle fee."),
+        ("Are the menus and prices accurate?",
+         "Menus, prices and opening hours are supplied by each venue and can change with the season. This site shows preview content for the Karachi pilot. Confirm details with the restaurant before you order."),
+        ("Which cities do you cover?",
+         "Karachi is live. Lahore and Islamabad are next, with the same model: free for diners, subscription-based for partners and zero booking commission."),
+    ]
+    faq_items = "".join(
+        f'<details class="faq-item"><summary>{esc(q)}<span class="faq-icon" aria-hidden="true"></span></summary><p>{esc(a)}</p></details>'
+        for q, a in home_faqs
+    )
+
+    dish_total = sum(len(block["items"]) for v in VENUES for block in v["menu"])
+
     cuisine_chips = "".join(
         f'<a class="chip" href="restaurants.html?cuisine={c}">{label}</a>'
         for c, label in [
@@ -1116,49 +1158,72 @@ def build_home():
         ]
     )
 
-    body = f'''<section class="hero">
-      <div class="container hero-grid">
-        <div class="hero-copy">
-          <p class="eyebrow pill-eyebrow"><span class="pulse" aria-hidden="true"></span> Now live in Karachi</p>
-          <h1>Find your next <span class="accent">favourite table</span> in Karachi.</h1>
-          <p class="lede">Browse restaurants and cafés, read the real menu, unlock a deal and join hosted dining experiences. Free for diners, always: you pay the restaurant directly.</p>
-          <form class="hero-search" action="restaurants.html" method="get" role="search" data-search-form>
-            <label class="sr-only" for="heroQuery">Search restaurants, dishes or cuisines</label>
-            {icon("search")}
-            <input id="heroQuery" name="q" type="search" placeholder="Search restaurants, dishes or cuisines" autocomplete="off">
-            <button class="btn btn--primary" type="submit">Search</button>
-          </form>
-          <div class="quick-tags">
-            <span>Popular:</span>
-            <a href="restaurants.html?q=BBQ">BBQ</a>
-            <a href="restaurants.html?q=Brunch">Brunch</a>
-            <a href="restaurants.html?q=Coffee">Coffee</a>
-            <a href="restaurants.html?q=Karahi">Karahi</a>
+    body = f'''<section class="editorial-hero" data-hero-carousel role="region" aria-roledescription="carousel" aria-label="Discover DineCircle" tabindex="0">
+      <div class="editorial-hero__slides">
+        <article class="editorial-slide is-active" data-hero-slide role="group" aria-roledescription="slide" aria-label="1 of 3: Restaurants & cafés">
+          <img class="editorial-slide__image" src="assets/images/venue_rooftop.webp" alt="A restaurant terrace glowing under evening lights" fetchpriority="high" decoding="async">
+          <div class="container editorial-slide__inner">
+            <div class="editorial-slide__copy">
+              <p class="editorial-kicker"><span></span> Your local food guide</p>
+              <h1>Your next great meal<br><em>starts here.</em></h1>
+              <p class="editorial-slide__description">Discover restaurants and cafés, explore menus and deals, and find dining experiences near you.</p>
+              <div class="editorial-slide__actions"><a class="btn btn--primary" href="restaurants.html">Explore restaurants <span aria-hidden="true">↗</span></a><a class="editorial-link" href="about.html">Meet DineCircle <span aria-hidden="true">→</span></a></div>
+              <p class="editorial-slide__assurance">Karachi, Pakistan <span aria-hidden="true">·</span> Free for diners</p>
+            </div>
+            <div class="editorial-slide__caption"><span>01 / THE DINECIRCLE EDIT</span><strong>A taste of your neighbourhood</strong></div>
           </div>
-          <dl class="hero-stats">
-            <div><dt>Places</dt><dd>11</dd></div>
-            <div><dt>Dishes</dt><dd>100+</dd></div>
-            <div><dt>Hosts</dt><dd>5</dd></div>
-            <div><dt>To join</dt><dd>Rs. 0</dd></div>
-          </dl>
+        </article>
+        <article class="editorial-slide" data-hero-slide role="group" aria-roledescription="slide" aria-label="2 of 3: Dining offers" hidden inert>
+          <img class="editorial-slide__image" src="assets/images/dish_steak.webp" alt="A beautifully plated dinner ready to be enjoyed" loading="lazy" decoding="async">
+          <div class="container editorial-slide__inner">
+            <div class="editorial-slide__copy">
+              <p class="editorial-kicker"><span></span> Good food. Clear value.</p>
+              <h2>Find your favourite.<br><em>Savour the value.</em></h2>
+              <p class="editorial-slide__description">Explore dining deals with clear prices and terms. See what’s included, check when an offer applies, and choose what works for your table.</p>
+              <div class="editorial-slide__actions"><a class="btn btn--primary" href="deals.html">Discover dining offers <span aria-hidden="true">↗</span></a><a class="editorial-link" href="about.html">Meet DineCircle <span aria-hidden="true">→</span></a></div>
+              <p class="editorial-slide__assurance">Karachi, Pakistan <span aria-hidden="true">·</span> Free for diners</p>
+            </div>
+            <div class="editorial-slide__caption"><span>02 / THE DINECIRCLE EDIT</span><strong>A little extra to savour</strong></div>
+          </div>
+        </article>
+        <article class="editorial-slide" data-hero-slide role="group" aria-roledescription="slide" aria-label="3 of 3: Hosted experiences" hidden inert>
+          <img class="editorial-slide__image" src="assets/images/hero_tasting.webp" alt="An intimate candlelit table set for a shared dinner" loading="lazy" decoding="async">
+          <div class="container editorial-slide__inner">
+            <div class="editorial-slide__copy">
+              <p class="editorial-kicker"><span></span> Food brings us together</p>
+              <h2>A reason to go out.<br><em>A table to share.</em></h2>
+              <p class="editorial-slide__description">From a relaxed brunch to a shared dinner, discover experiences led by local hosts and food creators. Find good food, fresh conversation, and a reason to get together.</p>
+              <div class="editorial-slide__actions"><a class="btn btn--primary" href="experiences.html">Explore experiences <span aria-hidden="true">↗</span></a><a class="editorial-link" href="about.html">Meet DineCircle <span aria-hidden="true">→</span></a></div>
+              <p class="editorial-slide__assurance">Karachi, Pakistan <span aria-hidden="true">·</span> Free for diners</p>
+            </div>
+            <div class="editorial-slide__caption"><span>03 / THE DINECIRCLE EDIT</span><strong>More than a meal</strong></div>
+          </div>
+        </article>
+      </div>
+      <div class="container editorial-hero__bottom">
+        <div class="editorial-tabs" role="group" aria-label="Choose a slide">
+          <button type="button" data-hero-goto="0" aria-label="Show slide 1: Restaurants and cafés" aria-pressed="true"><span>01</span> Places to love</button>
+          <button type="button" data-hero-goto="1" aria-label="Show slide 2: Dining offers" aria-pressed="false"><span>02</span> More to savour</button>
+          <button type="button" data-hero-goto="2" aria-label="Show slide 3: Hosted experiences" aria-pressed="false"><span>03</span> Find your circle</button>
         </div>
-        <div class="hero-visual">
-          <figure class="hero-photo hero-photo--main">
-            {img("", "hero_tasting", "A candlelit table set for a hosted dinner", eager=True)}
-          </figure>
-          <figure class="hero-photo hero-photo--small">
-            {img("", "venue_rooftop", "A rooftop restaurant terrace under string lights")}
-          </figure>
-          <div class="float-card float-card--deal">
-            <span class="float-icon" aria-hidden="true">%</span>
-            <span><strong>15% off</strong><small>family dinner · Kolachi</small></span>
-          </div>
-          <div class="float-card float-card--free">
-            <span class="float-icon">{icon("check")}</span>
-            <span><strong>Free to join</strong><small>no booking fee, ever</small></span>
-          </div>
+        <div class="editorial-controls">
+          <button type="button" data-hero-prev aria-label="Previous slide">←</button>
+          <button type="button" data-hero-pause aria-label="Pause slideshow" aria-pressed="false">Ⅱ</button>
+          <button type="button" data-hero-next aria-label="Next slide">→</button>
         </div>
       </div>
+      <span class="sr-only" data-hero-status aria-live="polite" aria-atomic="true"></span>
+    </section>
+    <section class="discovery-bar" aria-label="Find your next table">
+      <div class="container discovery-bar__inner">
+        <div><span class="editorial-small">A city full of flavour</span><h2>What are you craving?</h2></div>
+        <form class="discovery-search" action="restaurants.html" method="get" role="search" data-search-form>
+          <label class="sr-only" for="heroQuery">Search restaurants, dishes or cuisines</label>
+          <span aria-hidden="true">⌕</span><input id="heroQuery" name="q" type="search" placeholder="Try BBQ, brunch or your favourite café" autocomplete="off">
+          <button class="btn btn--primary" type="submit">Find a table <span aria-hidden="true">→</span></button>
+        </form>
+      </div>
+      <div class="container discovery-bar__tags"><span>Follow your craving</span><a href="restaurants.html?q=BBQ">Smoky BBQ ↗</a><a href="restaurants.html?q=Brunch">Slow brunches ↗</a><a href="restaurants.html?q=Coffee">Coffee & conversation ↗</a><a href="restaurants.html?cuisine=seafood">By the sea ↗</a></div>
     </section>
 
     <section class="trust-strip" aria-label="DineCircle at a glance">
@@ -1172,8 +1237,8 @@ def build_home():
 
     <section class="section" id="featured">
       <div class="container">
-        {section_head("Featured places", "Restaurants and cafés worth the drive",
-                      "From Do Darya seafood to Zamzama coffee. Menus, areas and price ranges come straight from each venue.",
+        {section_head("Places", "Find a place that feels like your kind of place",
+                      "Sea-facing dinners, neighbourhood cafés, and familiar flavours. Explore Karachi’s restaurants by cuisine, atmosphere, area, and menu.",
                       '<a class="btn btn--outline" href="restaurants.html">Explore Restaurants</a>')}
         <div class="venue-grid">{featured_cards}</div>
         <div class="cuisine-rail">
@@ -1183,37 +1248,70 @@ def build_home():
       </div>
     </section>
 
-    <section class="section section--cream" id="deals">
+    <section class="section section--cream" id="neighbourhoods">
       <div class="container">
-        {section_head("Deals", "A better bill, without the coupon hunting",
-                      "Show the offer at the table and the venue applies it. No vouchers, no online payment, no extra fee from DineCircle.",
+        {section_head("Neighbourhoods", "Find your corner of Karachi",
+                      "From sea-facing tables on Do Darya to espresso bars on Zamzama. Pick an area and see every place we cover there.",
+                      '<a class="btn btn--outline" href="restaurants.html">Explore Restaurants</a>')}
+        <div class="area-grid">{area_cards}</div>
+      </div>
+    </section>
+
+    <section class="section" id="deals">
+      <div class="container">
+        {section_head("Value", "Good food, with the details up front",
+                      "Browse dining deals with clear prices and terms. Check the offer, any minimum spend, and when it applies before you decide.",
                       '<a class="btn btn--outline" href="deals.html">Discover Deals</a>')}
         <div class="deal-grid deal-grid--three">{deal_cards}</div>
       </div>
     </section>
 
-    <section class="section" id="experiences">
+    <section class="section section--cream" id="experiences">
       <div class="container">
-        {section_head("Dining experiences", "Pull up a chair with people who love food",
-                      "Hosted dinners, brunches and meetups around Karachi. Joining is free: you pay the venue for your meal.",
+        {section_head("Experiences", "Find what’s worth going out for",
+                      "A weekend brunch, a coffee meetup, or a dinner worth sharing. Explore local dining experiences, meet your host, and see what to expect before you join.",
                       '<a class="btn btn--outline" href="experiences.html">Explore Experiences</a>')}
         <div class="exp-grid">{exp_cards}</div>
       </div>
     </section>
 
-    <section class="section section--cream" id="hosts">
+    <section class="section" id="hosts">
       <div class="container">
-        {section_head("Hosts", "Meet the people behind the table",
-                      "Food creators, community hosts and coffee people who plan the evening so you only have to show up.",
+        {section_head("People", "Let local people lead you to good food",
+                      "Meet the local hosts and food creators guiding discovery through Karachi’s food culture, one favourite place and shared table at a time.",
                       '<a class="btn btn--outline" href="hosts.html">Discover Hosts</a>')}
         <div class="host-grid">{host_cards}</div>
+      </div>
+    </section>
+
+    <section class="section section--cream" id="why">
+      <div class="container">
+        {section_head("Why DineCircle", "Clear prices, no commission, no checkout",
+                      f"{dish_total} dishes with PKR prices across {len(VENUES)} venues, {len(ALL_DEALS)} live offers and {len(EXPERIENCES)} hosted experiences. Every listing is supplied by the venue.")}
+        <div class="value-grid">
+          <article class="value-card">
+            <span class="style-icon">{icon("check")}</span>
+            <h3>Free for diners</h3>
+            <p>Browsing, booking a table and joining a hosted experience cost nothing. DineCircle takes no booking commission, so you pay the restaurant for your food and drinks.</p>
+          </article>
+          <article class="value-card">
+            <span class="style-icon">{icon("book")}</span>
+            <h3>Prices before you go</h3>
+            <p>Every venue page lists menu sections, dishes, PKR prices, opening hours and area, so you can plan a meal without guessing the bill.</p>
+          </article>
+          <article class="value-card">
+            <span class="style-icon">{icon("verified")}</span>
+            <h3>No checkout, no wallet</h3>
+            <p>There is no in-app payment and no card details stored on DineCircle. Show your booking or deal at the venue and settle the bill directly.</p>
+          </article>
+        </div>
       </div>
     </section>
 
     <section class="section" id="how-it-works">
       <div class="container">
         {section_head("How it works", "Discover. Choose. Visit.",
-                      "Three steps, no checkout, no commission. DineCircle stays free for diners.")}
+                      "Find a place, explore the menu, and make a plan. Your next meal starts with a little local discovery.")}
         <ol class="steps">
           <li class="step">
             <span class="step-num">01</span>
@@ -1237,23 +1335,111 @@ def build_home():
       </div>
     </section>
 
+    <section class="section section--cream" id="faq">
+      <div class="container faq-layout">
+        <div>
+          <p class="eyebrow">FAQs</p>
+          <h2>Questions, answered</h2>
+          <p class="section-note">Still stuck? Email <a href="mailto:hello@dinecircle.app">hello@dinecircle.app</a> and we will reply within one working day.</p>
+          <div class="about-actions"><a class="btn btn--outline" href="about.html#faq">Read all FAQs</a></div>
+        </div>
+        <div class="faq-list">{faq_items}</div>
+      </div>
+    </section>
+
+    <section class="app-band" id="app" aria-label="Get the DineCircle app">
+      <div class="container app-band__inner">
+        <div class="app-band__copy">
+          <p class="eyebrow">The DineCircle app</p>
+          <h2>Carry your next table in your pocket</h2>
+          <p>Menus, deals and bookings in one place. Browse before you leave, show your booking at the door, and pay the restaurant directly when you are done.</p>
+          <ul class="check-list check-list--light">
+            <li>{icon("book")} Full menus with PKR prices</li>
+            <li>{icon("spark")} Deals with clear terms and codes</li>
+            <li>{icon("calendar")} Table bookings and hosted experiences</li>
+          </ul>
+          <div class="app-band__actions">
+            <button class="btn btn--primary" type="button" data-app-cta>Get the app</button>
+            <a class="btn btn--ghost-light" href="#how-it-works">How booking works</a>
+          </div>
+          <p class="app-band__fine">Free for diners. Download links are opening in phases across Karachi.</p>
+        </div>
+        <figure class="app-band__figure">
+          <img src="assets/images/venue_bar.webp" alt="Guests settling in at a warmly lit restaurant bar" loading="lazy" decoding="async">
+        </figure>
+      </div>
+    </section>
+
+    <section class="section" id="partners">
+      <div class="container partner-panel">
+        <div class="partner-copy">
+          <p class="eyebrow">For restaurants &amp; cafés</p>
+          <h2>Put your full menu on the map</h2>
+          <p>List your venue, publish a QR-ready menu, run deals and host experiences. DineCircle charges a flat subscription and never a commission on your bookings.</p>
+          <ul class="check-list">
+            <li>{icon("check")} PKR 5,000 per month or PKR 50,000 per year</li>
+            <li>{icon("check")} 0% booking commission</li>
+            <li>{icon("check")} No payment gateway or payout setup</li>
+            <li>{icon("check")} Activation after a simple bank transfer, JazzCash or Easypaisa payment</li>
+          </ul>
+          <div class="about-actions">
+            <a class="btn btn--primary" href="mailto:partners@dinecircle.app?subject=DineCircle%20partner%20enquiry">Talk to the partner team</a>
+            <a class="btn btn--outline" href="restaurants.html">See how listings look</a>
+          </div>
+        </div>
+        <aside class="price-card">
+          <p class="eyebrow eyebrow--sm">Partner plan</p>
+          <p class="price-card__amount">Rs. 5,000<span>/ month</span></p>
+          <p class="price-card__alt">or Rs. 50,000 per year</p>
+          <hr>
+          <ul class="check-list check-list--sm">
+            <li>{icon("check")} Full menu and QR menu</li>
+            <li>{icon("check")} Deals and redemption terms</li>
+            <li>{icon("check")} Table reservations</li>
+            <li>{icon("check")} Hosted experiences</li>
+            <li>{icon("check")} Reviews and replies</li>
+          </ul>
+          <a class="btn btn--primary btn--block" href="mailto:partners@dinecircle.app?subject=DineCircle%20partner%20enquiry">Request activation</a>
+          <p class="aside-fine">Manual activation after payment verification. No commission on any booking.</p>
+        </aside>
+      </div>
+    </section>
+
+    <section class="newsletter-band" id="newsletter" aria-label="DineCircle newsletter">
+      <div class="container newsletter-inner">
+        <div>
+          <p class="eyebrow">Stay in the loop</p>
+          <h2>New places, before they get busy</h2>
+          <p>Occasional notes on new venues, offers worth leaving home for, and experiences with seats left.</p>
+        </div>
+        <div>
+          <form class="newsletter-form" data-newsletter>
+            <label class="sr-only" for="newsletterEmail">Email address</label>
+            <input id="newsletterEmail" name="email" type="email" required placeholder="you@example.com" autocomplete="email">
+            <button class="btn btn--primary" type="submit">Subscribe</button>
+          </form>
+          <p class="newsletter-fine">We only email about DineCircle. Prefer to write first? <a href="mailto:hello@dinecircle.app?subject=DineCircle%20newsletter">hello@dinecircle.app</a></p>
+        </div>
+      </div>
+    </section>
+
     <section class="cta-band">
       <div class="container cta-band__inner">
         <div>
           <p class="eyebrow">Your table is waiting</p>
-          <h2>Good food, better company.</h2>
-          <p>Join DineCircle free, or list your restaurant and put your full menu on the map.</p>
+          <h2>Make your next meal a local discovery.</h2>
+          <p>Keep restaurants, menus, deals, and dining experiences close at hand. Discover your next favourite with DineCircle.</p>
         </div>
         <div class="cta-band__actions">
           <button class="btn btn--light" type="button" data-app-cta>Get the app</button>
-          <a class="btn btn--ghost-light" href="about.html#partners">Partner with us</a>
+          <a class="btn btn--ghost-light" href="#partners">Partner with us</a>
         </div>
       </div>
     </section>'''
 
     return page(
-        "DineCircle",
-        "Discover Karachi's restaurants, cafés, menus, deals and hosted dining experiences. Free for diners. Pay the restaurant directly.",
+        "Restaurants, Cafés & Dining in Karachi | DineCircle",
+        "Discover restaurants and cafés, explore menus and deals, and find dining experiences near you. DineCircle is your local food guide, starting in Karachi.",
         "", "", body,
     )
 
@@ -1275,7 +1461,7 @@ def build_restaurants():
     body = f'''{page_hero(
         "Restaurants & cafés",
         "Find your next table",
-        "Browse every place on DineCircle, filter by cuisine and read the menu before you decide. Eleven Karachi venues, over a hundred dishes, all priced in PKR.",
+        "From neighbourhood cafés to dinner by the sea, find places for your mood and craving. Explore cuisines, get a feel for the atmosphere, and browse menus with prices in PKR.",
         crumbs_html=crumbs("", [("Home", "index.html"), ("Restaurants", None)]),
     )}
     <section class="section section--flush">
@@ -1490,7 +1676,7 @@ def build_deals():
     body = f'''{page_hero(
         "Deals",
         "Offers worth ordering",
-        "Twenty-two launch offers across eleven Karachi venues. Every deal lists its terms up front and is applied by the venue at the table, never through an online checkout.",
+        "Find dining deals across Karachi’s restaurants and cafés. Compare prices, see what’s included, and read the terms before you go. Offers are applied by the venue at the table.",
         crumbs_html=crumbs("", [("Home", "index.html"), ("Deals", None)]),
     )}
     <section class="section section--flush">
@@ -1533,7 +1719,7 @@ def build_experiences():
     body = f'''{page_hero(
         "Dining experiences",
         "Pull up a chair with people who love food",
-        "Hosted dinners, brunches and coffee meetups around Karachi. Joining is always free: you pay the venue for your meal at the end of the evening.",
+        "Discover reasons to get out and share a table, from relaxed brunches to hosted dinners and coffee meetups around Karachi. Meet the host, explore the menu, and check the estimated dining cost before you join.",
         crumbs_html=crumbs("", [("Home", "index.html"), ("Experiences", None)]),
     )}
     <section class="section section--flush">
@@ -1707,8 +1893,8 @@ def build_hosts():
     cards = "".join(host_card(h, "") for h in HOSTS)
     body = f'''{page_hero(
         "Hosts",
-        "The people who plan the table",
-        "Food creators, community hosts and coffee people who host small tables around Karachi. Every host sets the tone, handles introductions and makes showing up alone feel easy.",
+        "Local people. Fresh food discoveries.",
+        "Meet the local hosts and food creators helping you discover Karachi through its food. Explore their interests, favourite flavours, and upcoming tables to find an experience that feels right for you.",
         crumbs_html=crumbs("", [("Home", "index.html"), ("Hosts", None)]),
     )}
     <section class="section section--flush">
@@ -1826,8 +2012,8 @@ def build_about():
 
     body = f'''{page_hero(
         "About DineCircle",
-        "Great food. Shared moments.",
-        "DineCircle is a Karachi-first discovery platform for restaurants, cafés and the people who bring tables together. Free for diners, honest about menus, and built around paying the venue directly.",
+        "Your local guide to good food and shared tables.",
+        "DineCircle is your local guide to discovering where to eat and what’s worth going out for. We bring restaurants, cafés, menus, deals, and dining experiences together, starting with Karachi.",
         crumbs_html=crumbs("", [("Home", "index.html"), ("About & contact", None)]),
     )}
     <section class="section section--flush">
@@ -1835,8 +2021,8 @@ def build_about():
         <div>
           <p class="eyebrow">Our story</p>
           <h2>A simpler way to decide where to eat</h2>
-          <p class="detail-lede">Restaurant discovery in Karachi usually means scrolling through photos, guessing at prices and calling three numbers to find a table. DineCircle puts the useful parts in one place: the full menu with PKR prices, current deals with their terms, real opening hours and a way to join a table with other people.</p>
-          <p>We are not a delivery app, a payment gateway or a social network. We do not take a cut of your bill. Restaurants list their menus and offers; hosts plan experiences; diners show up and pay the venue. That is the whole loop.</p>
+          <p class="detail-lede">Good food is part of how we know our city: a favourite café, a family dinner, a new place recommended by someone local. DineCircle helps you explore those possibilities with menus, prices, offers, and the people behind shared dining experiences.</p>
+          <p>Explore places for their food and atmosphere, find value with clear prices and terms, and discover experiences with local hosts and food creators. Whether you’re revisiting a favourite or trying somewhere new, we help you make a plan with confidence.</p>
           <div class="about-actions">
             <a class="btn btn--primary" href="restaurants.html">Explore Restaurants</a>
             <a class="btn btn--outline" href="#partners">For restaurants</a>
@@ -1857,11 +2043,11 @@ def build_about():
 
     <section class="section">
       <div class="container">
-        {section_head("What we stand for", "Three rules we do not bend")}
+        {section_head("What we stand for", "Local discovery, with care")}
         <div class="value-grid">
           <article class="value-card"><span class="style-icon">{icon("check")}</span><h3>Free for diners</h3><p>No booking fee, no subscription and no commission on your bill. If a venue charges for food, that is the only charge you see.</p></article>
-          <article class="value-card"><span class="style-icon">{icon("book")}</span><h3>Real menus, real prices</h3><p>Every dish is listed by the venue in PKR. No bait pricing, no vague market price and no DineCircle markup.</p></article>
-          <article class="value-card"><span class="style-icon">{icon("users")}</span><h3>Local tables</h3><p>Karachi restaurants, Karachi hosts. Experiences are small, hosted and designed for people who actually want to talk.</p></article>
+          <article class="value-card"><span class="style-icon">{icon("book")}</span><h3>Useful details, clearly shared</h3><p>Explore venue menus with prices in PKR and dining offers with their terms, so you know what to expect before you go.</p></article>
+          <article class="value-card"><span class="style-icon">{icon("users")}</span><h3>Rooted in local food culture</h3><p>Restaurants, cafés, hosts, and food creators bring Karachi’s food culture to life. Get to know the people and places around your next table.</p></article>
         </div>
       </div>
     </section>
@@ -2048,12 +2234,13 @@ def build_terms():
 def write(path, content):
     target = ROOT / path
     target.parent.mkdir(parents=True, exist_ok=True)
-    target.write_text(content, encoding="utf-8")
+    target.write_text(enhance_page(path, content), encoding="utf-8")
     return target
 
 
 def main():
     written = 0
+    paths = []
     pages = {
         "index.html": build_home(),
         "restaurants.html": build_restaurants(),
@@ -2066,16 +2253,21 @@ def main():
     }
     for path, content in pages.items():
         write(path, content)
+        paths.append(path)
         written += 1
     for v in VENUES:
         write(f'restaurants/{v["slug"]}.html', build_venue(v))
+        paths.append(f'restaurants/{v["slug"]}.html')
         written += 1
     for e in EXPERIENCES:
         write(f'experiences/{e["slug"]}.html', build_experience(e))
+        paths.append(f'experiences/{e["slug"]}.html')
         written += 1
     for h in HOSTS:
         write(f'hosts/{h["slug"]}.html', build_host(h))
+        paths.append(f'hosts/{h["slug"]}.html')
         written += 1
+    write_crawl_files(paths)
     print(f"Built {written} pages into {ROOT}")
 
 

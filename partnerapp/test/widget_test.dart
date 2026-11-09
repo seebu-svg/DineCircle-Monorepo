@@ -21,7 +21,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [sessionProvider.overrideWith(_SignedOutSession.new)],
-        child: const PartnerApp(),
+        child: const PartnerApp(showOnboarding: false),
       ),
     );
     await tester.pumpAndSettle();
