@@ -14,14 +14,25 @@ import '../../utils/business_hours.dart';
 import '../../utils/date_time.dart';
 import '../../widgets/media_image.dart';
 
-/// ─── Venue hero ────────────────────────────────────────────────────────────
+/// ─── Restaurant header ─────────────────────────────────────────────────────
 
-/// The branded identity block at the top of Home.
+/// The compact identity block at the top of Home.
 ///
-/// Everything it shows is real: the cover and logo come from the venue record,
-/// the open/closed pill is derived from the *configured* weekly hours, and the
+/// Everything it shows is real: the logo comes from the venue record, the
+/// open/closed pill is derived from the *configured* weekly hours, and the
 /// subscription pill only appears once the server has answered. A venue with no
-/// photo gets the brand gradient rather than a broken image or a stock picture.
+/// logo gets the storefront fallback rather than a broken image or a stock
+/// picture.
+///
+/// It is deliberately short. It used to be a full-bleed photograph with the
+/// venue name set at display size and a four-cell service pulse strip under it,
+/// which spent half a phone screen on branding and repeated numbers that the
+/// overview below already owns. What is left is the restaurant's name, its
+/// state and the date the board is showing.
+///
+/// The notification bell is not here: the shell header already renders one with
+/// the live unread badge. Two bells a thumb-width apart, both opening the same
+/// inbox, is one control too many.
 class HomeHero extends ConsumerWidget {
   const HomeHero({super.key, required this.snapshot});
 
@@ -39,7 +50,7 @@ class HomeHero extends ConsumerWidget {
             clock: DateTime.now(),
           );
     // A failed or pending subscription read simply means "no pill yet": the
-    // hero must never guess a billing state it has not been told.
+    // header must never guess a billing state it has not been told.
     final subscription =
         ref.watch(subscriptionProvider(snapshot.venue.id)).valueOrNull;
 
@@ -47,8 +58,6 @@ class HomeHero extends ConsumerWidget {
         ? snapshot.venue.name
         : venue!.name.trim();
     final identity = _identityLine(venue);
-    final greeting =
-        '${greetingFor(DateTime.now())} · ${DisplayDate.dayLong(serviceDay)}';
 
     final pills = <Widget>[
       HeroPill(
@@ -64,160 +73,92 @@ class HomeHero extends ConsumerWidget {
       if (subscription != null) _subscriptionPill(context, subscription),
     ];
 
-    final panel = Container(
-      clipBehavior: Clip.antiAlias,
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.sm + 6),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         border: Border.all(color: AppColors.border),
       ),
-      child: Stack(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Positioned.fill(child: _cover(venue)),
-          // Warm brand tint, then the scrim that keeps the copy readable on a
-          // busy photograph. Both are decoration only.
-          Positioned.fill(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    AppColors.primary.withValues(alpha: 0.26),
-                    AppColors.primary.withValues(alpha: 0.02),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          Positioned.fill(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    AppColors.bg.withValues(alpha: 0.12),
-                    AppColors.bg.withValues(alpha: 0.66),
-                    AppColors.bg.withValues(alpha: 0.95),
-                  ],
-                  stops: const [0, 0.55, 1],
-                ),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              _logoTile(venue),
+              const SizedBox(width: AppSpacing.sm + 4),
+              Expanded(
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    _logoTile(venue),
-                    const SizedBox(width: AppSpacing.md),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            greeting,
-                            style: AppTextStyles.overline.copyWith(
-                              color: AppColors.textSecondary,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            name,
-                            style: AppTextStyles.displaySmall.copyWith(
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: -0.4,
-                              height: 1.15,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          if (identity.isNotEmpty) ...[
-                            const SizedBox(height: 2),
-                            Text(
-                              identity,
-                              style: AppTextStyles.bodySmall.copyWith(
-                                color: AppColors.textSecondary,
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ],
+                    Text(
+                      DisplayDate.dayLong(serviceDay),
+                      style: AppTextStyles.overline.copyWith(
+                        color: AppColors.textTertiary,
+                        fontSize: 10.5,
+                        letterSpacing: 0.8,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
+                    const SizedBox(height: 1),
+                    Text(
+                      name,
+                      style: AppTextStyles.titleMedium.copyWith(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -0.2,
+                        height: 1.2,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    if (identity.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        identity,
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: AppColors.textSecondary,
+                          fontSize: 12,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
                   ],
                 ),
-                if (pills.isNotEmpty) ...[
-                  const SizedBox(height: AppSpacing.md),
-                  Wrap(
-                    spacing: 6,
-                    runSpacing: 6,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    children: pills,
-                  ),
-                ],
-                const SizedBox(height: AppSpacing.md),
-                Container(
-                  height: 1,
-                  color: Colors.white.withValues(alpha: 0.10),
-                ),
-                const SizedBox(height: AppSpacing.sm + 2),
-                ServicePulseStrip(today: snapshot.today),
-              ],
-            ),
+              ),
+            ],
           ),
+          if (pills.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.sm + 4),
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: pills,
+            ),
+          ],
         ],
       ),
     );
-
-    // Subtle settle-in when the dashboard mounts; skipped when the device asks
-    // for reduced motion.
-    if (MediaQuery.disableAnimationsOf(context)) return panel;
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0.985, end: 1),
-      duration: const Duration(milliseconds: 180),
-      curve: Curves.easeOut,
-      builder: (context, scale, child) =>
-          Transform.scale(scale: scale, child: child),
-      child: panel,
-    );
   }
 
-  Widget _cover(Venue? venue) {
-    final cover = (venue?.coverImage ?? '').trim();
-    if (cover.isEmpty) {
-      return const DecoratedBox(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [AppColors.surfaceHigh, AppColors.surface],
-          ),
-        ),
-      );
-    }
-    return MediaImage(source: cover, fallbackIcon: Icons.storefront);
-  }
-
+  /// The venue logo, or its cover, or the storefront fallback.
   Widget _logoTile(Venue? venue) {
     final logo = (venue?.logo ?? '').trim();
     final cover = (venue?.coverImage ?? '').trim();
     return Container(
-      width: 52,
-      height: 52,
+      width: 42,
+      height: 42,
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.24)),
+        color: AppColors.surfaceElevated,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd - 2),
+        border: Border.all(color: AppColors.border),
       ),
       child: MediaImage(
         source: logo.isNotEmpty ? logo : cover,
@@ -278,266 +219,14 @@ class HomeHero extends ConsumerWidget {
   };
 }
 
-/// ─── Service pulse ─────────────────────────────────────────────────────────
-
-/// Today at a glance inside the hero: covers seated, tables in service and,
-/// only when a capacity is actually configured, occupancy.
-///
-/// A venue with no seats set up would otherwise be shown a 0% occupancy that
-/// reads like a dead night, so the cell is omitted instead of faked.
-class ServicePulseStrip extends StatelessWidget {
-  const ServicePulseStrip({super.key, required this.today});
-
-  final TodayService today;
-
-  @override
-  Widget build(BuildContext context) {
-    final cells = <Widget>[
-      _PulseCell(
-        label: 'Covers today',
-        value: '${today.covers}',
-        caption: today.hasCapacityConfigured
-            ? 'of ${today.capacity} seats'
-            : 'capacity not set',
-      ),
-      _PulseCell(
-        label: 'Tables',
-        value: '${today.tables}',
-        caption: today.tables == 0 ? 'none set up' : 'in service',
-      ),
-      if (today.hasCapacityConfigured)
-        _OccupancyGaugeCell(occupancy: today.occupancy),
-      if (_showNextBooking) _NextBookingCell(nextAt: today.nextBookingAt!),
-    ];
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final scale = MediaQuery.textScalerOf(context).scale(1);
-        if (scale >= 1.6 || constraints.maxWidth < 300) {
-          final width = (constraints.maxWidth - AppSpacing.md) / 2;
-          return Wrap(
-            spacing: AppSpacing.md,
-            runSpacing: AppSpacing.sm,
-            children: [
-              for (final cell in cells) SizedBox(width: width, child: cell),
-            ],
-          );
-        }
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            for (var i = 0; i < cells.length; i++) ...[
-              if (i > 0) ...[
-                Container(
-                  width: 1,
-                  height: 30,
-                  color: Colors.white.withValues(alpha: 0.12),
-                ),
-                const SizedBox(width: AppSpacing.md),
-              ],
-              Expanded(child: cells[i]),
-            ],
-          ],
-        );
-      },
-    );
-  }
-
-  /// Only show the next-booking cell when there is one within 2 hours.
-  bool get _showNextBooking {
-    final next = today.nextBookingAt;
-    if (next == null) return false;
-    return next.difference(DateTime.now()).inMinutes <= 120;
-  }
-}
-
-class _PulseCell extends StatelessWidget {
-  const _PulseCell({
-    required this.label,
-    required this.value,
-    required this.caption,
-  });
-
-  final String label;
-  final String value;
-  final String caption;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          label.toUpperCase(),
-          style: AppTextStyles.labelSmall.copyWith(
-            color: AppColors.textTertiary,
-            fontSize: 9,
-            letterSpacing: 0.8,
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        const SizedBox(height: 2),
-        FittedBox(
-          fit: BoxFit.scaleDown,
-          alignment: Alignment.centerLeft,
-          child: Text(
-            value,
-            style: AppTextStyles.numericMedium.copyWith(
-              fontWeight: FontWeight.w700,
-              height: 1.1,
-            ),
-          ),
-        ),
-        Text(
-          caption,
-          style: AppTextStyles.caption.copyWith(
-            color: AppColors.textSecondary,
-            fontSize: 10,
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ],
-    );
-  }
-}
-
-/// Visual occupancy gauge: a circular arc that fills and changes colour as
-/// the room approaches capacity.
-///
-/// Green below 60%, amber 60-85%, red above 85%. A venue with no capacity
-/// configured never reaches this cell (the strip omits it).
-class _OccupancyGaugeCell extends StatelessWidget {
-  const _OccupancyGaugeCell({required this.occupancy});
-
-  final double occupancy;
-
-  Color get _gaugeColor {
-    final pct = occupancy.clamp(0.0, 1.0);
-    if (pct >= 0.85) return AppColors.danger;
-    if (pct >= 0.60) return AppColors.warning;
-    return AppColors.success;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final pct = occupancy.clamp(0.0, 1.0);
-    final pctLabel = '${(pct * 100).round()}%';
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          'OCCUPANCY',
-          style: AppTextStyles.labelSmall.copyWith(
-            color: AppColors.textTertiary,
-            fontSize: 9,
-            letterSpacing: 0.8,
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        const SizedBox(height: 4),
-        SizedBox(
-          width: 32,
-          height: 32,
-          child: TweenAnimationBuilder<double>(
-            tween: Tween(begin: 0, end: pct),
-            duration: const Duration(milliseconds: 600),
-            curve: Curves.easeOut,
-            builder: (context, value, _) => Stack(
-              alignment: Alignment.center,
-              children: [
-                SizedBox.expand(
-                  child: CircularProgressIndicator(
-                    value: value,
-                    strokeWidth: 4,
-                    backgroundColor: _gaugeColor.withValues(alpha: 0.18),
-                    color: _gaugeColor,
-                    strokeCap: StrokeCap.round,
-                  ),
-                ),
-                Text(
-                  pctLabel,
-                  style: AppTextStyles.labelSmall.copyWith(
-                    color: _gaugeColor,
-                    fontSize: 8,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          'of the room',
-          style: AppTextStyles.caption.copyWith(
-            color: AppColors.textSecondary,
-            fontSize: 10,
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ],
-    );
-  }
-}
-
-/// Countdown cell showing when the next booking arrives, only rendered when
-/// a reservation is within the next two hours.
-class _NextBookingCell extends StatefulWidget {
-  const _NextBookingCell({required this.nextAt});
-
-  final DateTime nextAt;
-
-  @override
-  State<_NextBookingCell> createState() => _NextBookingCellState();
-}
-
-class _NextBookingCellState extends State<_NextBookingCell> {
-  late final Stream<DateTime> _tick = Stream.periodic(
-    const Duration(minutes: 1),
-    (_) => DateTime.now(),
-  ).asBroadcastStream();
-
-  @override
-  Widget build(BuildContext context) {
-    return StreamBuilder<DateTime>(
-      initialData: DateTime.now(),
-      stream: _tick,
-      builder: (context, snap) {
-        final now = snap.data ?? DateTime.now();
-        final diff = widget.nextAt.difference(now);
-        final minutes = diff.inMinutes;
-        if (minutes <= 0) {
-          return const _PulseCell(
-            label: 'NEXT BOOKING',
-            value: 'Now',
-            caption: 'arriving',
-          );
-        }
-        final label = minutes >= 60
-            ? '${minutes ~/ 60}h ${minutes % 60}m'
-            : '${minutes}m';
-        return _PulseCell(
-          label: 'NEXT BOOKING',
-          value: label,
-          caption: 'arriving soon',
-        );
-      },
-    );
-  }
-}
-
 /// ─── Pills ─────────────────────────────────────────────────────────────────
 
-/// One state pill inside the hero: verification, trading hours, subscription.
+/// One state pill in the header: verification, trading hours, subscription.
 ///
 /// Tappable pills get [onTap]; decorative ones stay inert so a status can never
-/// look like a button it is not.
+/// look like a button it is not. The pill carries no outline: a tinted fill is
+/// enough definition on a dark surface, and three bordered capsules in a row
+/// read as a toolbar rather than as state.
 class HeroPill extends StatelessWidget {
   const HeroPill({
     super.key,
@@ -557,14 +246,13 @@ class HeroPill extends StatelessWidget {
     final content = Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.16),
+        color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
-        border: Border.all(color: color.withValues(alpha: 0.38)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 12, color: color),
+          Icon(icon, size: 11, color: color),
           const SizedBox(width: 4),
           Flexible(
             // Loose so the pill keeps its natural width inside a Wrap and
@@ -576,6 +264,7 @@ class HeroPill extends StatelessWidget {
                 color: color,
                 fontSize: 10.5,
                 fontWeight: FontWeight.w600,
+                letterSpacing: 0.1,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,

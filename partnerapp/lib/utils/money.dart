@@ -20,7 +20,10 @@ String currencySymbol(String code) {
     case 'GBP':
       return '£';
     case 'PKR':
-      return 'Rs ';
+      // Pakistani Rupees, written the way partners and guests read it on menu
+      // cards and receipts: `Rs. 1,250`. PKR is the only trading currency on
+      // the partner surface, so this symbol is what every amount here shows.
+      return 'Rs. ';
     case 'AED':
       return 'AED ';
     default:
@@ -41,10 +44,15 @@ String formatMoney(
 }
 
 /// Inserts thousands separators left of the decimal point.
+///
+/// Grouping starts at the first comma a reader expects, i.e. four digits
+/// (`1,250`), not five. A price of 1250 shown as `1250` reads as an
+/// unformatted number next to `12,500`, which is how menu prices looked wrong
+/// side by side on the same card.
 String _grouped(String decimal) {
   final parts = decimal.split('.');
   final digits = parts.first;
-  if (digits.length < 5) return decimal;
+  if (digits.length < 4) return decimal;
   final buffer = StringBuffer();
   final lead = digits.length % 3;
   for (var i = 0; i < digits.length; i++) {

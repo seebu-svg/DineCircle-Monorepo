@@ -6,70 +6,45 @@ import '../../navigation/app_routes.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_spacing.dart';
 import '../../theme/app_text_styles.dart';
-import '../../widgets/image_background_card.dart';
 import '../../widgets/status_chip.dart';
 import '../service/reservation_detail_sheet.dart';
 import 'home_sections.dart';
 
 /// ─── Today's Overview ──────────────────────────────────────────────────────
 
-/// A small animated green dot that pulses to indicate live auto-refresh.
+/// A small green dot that marks the dashboard numbers as live.
 ///
-/// Rendered beside section labels so the desk knows the numbers are keeping
-/// themselves up to date without a manual pull.
-class LivePulseIndicator extends StatefulWidget {
+/// It is deliberately not an animation. The 30-second refresh is the pulse: a
+/// repeating controller would schedule a frame for as long as Home is on
+/// screen, which both costs a phone that holds the board open all evening and
+/// stops `pumpAndSettle` from ever returning in a widget test.
+class LivePulseIndicator extends StatelessWidget {
   const LivePulseIndicator({super.key});
 
   @override
-  State<LivePulseIndicator> createState() => _LivePulseIndicatorState();
-}
-
-class _LivePulseIndicatorState extends State<LivePulseIndicator>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 1500),
-  )..repeat(reverse: true);
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, _) => Container(
-        width: 8,
-        height: 8,
-        decoration: BoxDecoration(
-          color: AppColors.success.withValues(
-            alpha: 0.4 + (_controller.value * 0.6),
+    return Semantics(
+      label: 'Updating automatically',
+      child: const SizedBox(
+        width: 6,
+        height: 6,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: AppColors.success,
+            shape: BoxShape.circle,
           ),
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.success.withValues(
-                alpha: 0.3 * _controller.value,
-              ),
-              blurRadius: 4 * _controller.value,
-              spreadRadius: 1 * _controller.value,
-            ),
-          ],
         ),
       ),
     );
   }
 }
 
-/// The four numbers the desk checks first.
+/// The four numbers the desk checks first: bookings, tables, live deals and
+/// the evening book.
 ///
-/// Every value is a live dashboard counter. A metric the server did not
-/// measure is rendered as ": " with an *Unavailable* caption, so it can never
-/// be mistaken for a real zero. Each tile taps through to the surface that
-/// explains it.
+/// Every value is a live dashboard counter. Each tile taps through to the
+/// surface that explains it, so the overview is a doorway rather than a report:
+/// deals management stays in Deals and the analytics stay in Insights.
 class TodaysOverview extends StatelessWidget {
   const TodaysOverview({super.key, required this.snapshot});
 
@@ -77,9 +52,11 @@ class TodaysOverview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final counters = snapshot.today.reservations;
+    final today = snapshot.today;
+    final counters = today.reservations;
     final pending = counters.pending;
-    final scansAvailable = snapshot.scansAvailable;
+    final activeDeals = snapshot.deals.active;
+    final upcomingExperiences = snapshot.events.upcoming;
 
     final cards = <Widget>[
       _KpiCard(
@@ -87,40 +64,34 @@ class TodaysOverview extends StatelessWidget {
         label: 'Reservations',
         icon: Icons.event_available,
         color: AppColors.primary,
-        subtitle: pending > 0 ? '$pending to confirm' : 'All confirmed',
-        subtitleColor: pending > 0 ? AppColors.warning : AppColors.success,
-        trend: snapshot.today.yesterdayCovers > 0 || snapshot.today.covers > 0
-            ? snapshot.today.coversDelta
-            : null,
-        imageAsset: CardImageAssets.reservations,
+        caption: pending > 0 ? '$pending to confirm' : 'All confirmed',
+        captionColor: pending > 0 ? AppColors.warning : AppColors.success,
         onTap: () => _go(context, '${AppRoute.service}?tab=reservations'),
       ),
       _KpiCard(
-        value: scansAvailable ? '${snapshot.scans.today}' : '-',
-        label: 'QR Scans',
-        icon: Icons.qr_code_2,
+        value: '${today.tables}',
+        label: 'Tables',
+        icon: Icons.table_restaurant_outlined,
         color: AppColors.info,
-        subtitle: scansAvailable ? 'Today' : 'Unavailable',
-        unavailable: !scansAvailable,
-        imageAsset: CardImageAssets.qrScans,
-        onTap: () => _go(context, '${AppRoute.business}?tab=qr'),
+        caption: today.hasCapacityConfigured
+            ? 'of ${today.capacity} seats'
+            : (today.tables == 0 ? 'Not set up' : 'In service'),
+        onTap: () => _go(context, '${AppRoute.service}?tab=tables'),
       ),
       _KpiCard(
-        value: '${snapshot.deals.active}',
+        value: '$activeDeals',
         label: 'Active Deals',
-        icon: Icons.local_offer,
+        icon: Icons.local_offer_outlined,
         color: AppColors.gold,
-        subtitle: 'Live now',
-        imageAsset: CardImageAssets.activeDeals,
+        caption: activeDeals == 0 ? 'None live' : 'Live now',
         onTap: () => _go(context, '${AppRoute.business}?tab=deals'),
       ),
       _KpiCard(
-        value: '${snapshot.events.upcoming}',
+        value: '$upcomingExperiences',
         label: 'Experiences',
-        icon: Icons.auto_awesome,
+        icon: Icons.auto_awesome_outlined,
         color: AppColors.success,
-        subtitle: 'Upcoming',
-        imageAsset: CardImageAssets.experiences,
+        caption: upcomingExperiences == 0 ? 'None upcoming' : 'Upcoming',
         onTap: () => _go(context, '${AppRoute.experiences}?tab=experiences'),
       ),
     ];
@@ -130,12 +101,12 @@ class TodaysOverview extends StatelessWidget {
       children: [
         Row(
           children: [
-            const Expanded(child: SectionLabel(title: "TODAY'S OVERVIEW")),
+            const Expanded(child: SectionLabel(title: "Today's Overview")),
             const SizedBox(width: AppSpacing.sm),
             const LivePulseIndicator(),
           ],
         ),
-        const SizedBox(height: AppSpacing.sm),
+        const SizedBox(height: AppSpacing.sm + 2),
         _KpiGrid(cards: cards),
       ],
     );
@@ -145,8 +116,11 @@ class TodaysOverview extends StatelessWidget {
       Navigator.of(context).pushReplacementNamed(route);
 }
 
-/// Two columns of KPI cards, dropping to one column on a very narrow screen or
-/// at a large text scale, where a card can no longer hold its own label.
+/// Four tiles across a wide window, two by two on a phone, one column only when
+/// a card can no longer hold its own label.
+///
+/// Paired cards share the taller height, so a caption on one side never leaves
+/// the row looking like two different components.
 class _KpiGrid extends StatelessWidget {
   const _KpiGrid({required this.cards});
 
@@ -157,8 +131,10 @@ class _KpiGrid extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final scale = MediaQuery.textScalerOf(context).scale(1);
-        final single = scale >= 1.8 || constraints.maxWidth < 300;
-        if (single) {
+        final columns = constraints.maxWidth >= 700 && scale < 1.3
+            ? 4
+            : (scale >= 1.8 || constraints.maxWidth < 300 ? 1 : 2);
+        if (columns == 1) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -170,18 +146,30 @@ class _KpiGrid extends StatelessWidget {
           );
         }
         final rows = <Widget>[];
-        for (var i = 0; i < cards.length; i += 2) {
+        for (var i = 0; i < cards.length; i += columns) {
+          final row = cards.sublist(
+            i,
+            (i + columns).clamp(0, cards.length),
+          );
           rows.add(
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(child: cards[i]),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(child: cards[i + 1]),
-              ],
+            IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  for (var j = 0; j < row.length; j++) ...[
+                    if (j > 0) const SizedBox(width: AppSpacing.sm),
+                    Expanded(child: row[j]),
+                  ],
+                  // A short final row keeps the same tile width as a full one.
+                  for (var j = row.length; j < columns; j++) ...[
+                    const SizedBox(width: AppSpacing.sm),
+                    const Expanded(child: SizedBox.shrink()),
+                  ],
+                ],
+              ),
             ),
           );
-          if (i + 2 < cards.length) {
+          if (i + columns < cards.length) {
             rows.add(const SizedBox(height: AppSpacing.sm));
           }
         }
@@ -191,175 +179,104 @@ class _KpiGrid extends StatelessWidget {
   }
 }
 
+/// One metric tile: a small tinted icon, the counter, and one line that says
+/// what the counter means.
 class _KpiCard extends StatelessWidget {
   const _KpiCard({
     required this.value,
     required this.label,
     required this.icon,
     required this.color,
-    this.onTap,
-    this.subtitle,
-    this.subtitleColor,
-    this.unavailable = false,
-    this.trend,
-    this.imageAsset,
+    required this.onTap,
+    required this.caption,
+    this.captionColor,
   });
 
   final String value;
   final String label;
   final IconData icon;
   final Color color;
-  final String? subtitle;
-  final Color? subtitleColor;
-  final VoidCallback? onTap;
-
-  /// The metric was not measured. The value reads as ": " instead of `0`.
-  final bool unavailable;
-
-  /// Positive = up vs yesterday, negative = down, zero = flat.
-  /// When non-null a small arrow is rendered beside the subtitle.
-  final int? trend;
-
-  /// Optional photographic background. When provided, the card renders with a
-  /// dark scrim overlay for readability. When null, falls back to a plain
-  /// gradient surface.
-  final String? imageAsset;
+  final String caption;
+  final Color? captionColor;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final tone = unavailable ? AppColors.textTertiary : color;
     final radius = BorderRadius.circular(AppSpacing.radiusLg);
     return Material(
       color: Colors.transparent,
       borderRadius: radius,
       clipBehavior: Clip.antiAlias,
       child: Ink(
-        decoration: imageAsset != null
-            ? null
-            : BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [AppColors.surface, AppColors.surfaceElevated],
-                ),
-                borderRadius: radius,
-                border: Border.all(color: AppColors.border),
-              ),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: radius,
+          border: Border.all(color: AppColors.border),
+        ),
         child: InkWell(
           onTap: onTap,
-          child: imageAsset != null
-              ? ImageBackgroundCard(
-                  imageAsset: imageAsset,
-                  overlayOpacity: 0.70,
-                  borderRadius: radius,
-                  border: Border.all(color: AppColors.border),
-                  child: Padding(
-                    padding: const EdgeInsets.all(AppSpacing.md),
-                    child: _buildContent(tone),
-                  ),
-                )
-              : Padding(
-                  padding: const EdgeInsets.all(AppSpacing.md),
-                  child: _buildContent(tone),
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.sm + 6),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 26,
+                      height: 26,
+                      decoration: BoxDecoration(
+                        color: color.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(AppSpacing.radiusXs + 3),
+                      ),
+                      child: Icon(icon, color: color, size: 15),
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Expanded(
+                      child: Text(
+                        label,
+                        style: AppTextStyles.labelSmall.copyWith(
+                          color: AppColors.textSecondary,
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.1,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
                 ),
+                const SizedBox(height: AppSpacing.sm + 2),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    value,
+                    style: AppTextStyles.numericLarge.copyWith(
+                      fontSize: 24,
+                      height: 1.05,
+                      letterSpacing: -0.4,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  caption,
+                  style: AppTextStyles.caption.copyWith(
+                    fontSize: 11,
+                    color: captionColor ?? AppColors.textTertiary,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
-  }
-
-  Widget _buildContent(Color tone) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Row(
-          children: [
-            Container(
-              width: 30,
-              height: 30,
-              decoration: BoxDecoration(
-                color: tone.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(
-                  AppSpacing.radiusSm,
-                ),
-                border: Border.all(
-                  color: tone.withValues(alpha: 0.22),
-                ),
-              ),
-              child: Icon(icon, color: tone, size: 16),
-            ),
-            const Spacer(),
-            if (onTap != null)
-              const Icon(
-                Icons.chevron_right,
-                size: 16,
-                color: AppColors.textTertiary,
-              ),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        FittedBox(
-          fit: BoxFit.scaleDown,
-          alignment: Alignment.centerLeft,
-          child: Text(
-            value,
-            style: AppTextStyles.metricValue.copyWith(
-              fontSize: 28,
-              color: unavailable
-                  ? AppColors.textTertiary
-                  : AppColors.textPrimary,
-            ),
-          ),
-        ),
-        const SizedBox(height: 2),
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                label,
-                style: AppTextStyles.labelSmall.copyWith(
-                  color: AppColors.textSecondary,
-                  fontWeight: FontWeight.w500,
-                  letterSpacing: 0.2,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            if (trend != null) _TrendArrow(delta: trend!),
-          ],
-        ),
-        if (subtitle != null) ...[
-          const SizedBox(height: 2),
-          Text(
-            subtitle!,
-            style: AppTextStyles.labelSmall.copyWith(
-              color: subtitleColor ?? AppColors.textTertiary,
-              fontSize: 10,
-            ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
-      ],
-    );
-  }
-}
-
-/// A small coloured arrow beside a KPI label showing up/down vs yesterday.
-class _TrendArrow extends StatelessWidget {
-  const _TrendArrow({required this.delta});
-
-  final int delta;
-
-  @override
-  Widget build(BuildContext context) {
-    final (icon, color) = switch (delta.sign) {
-      1 => (Icons.trending_up, AppColors.success),
-      -1 => (Icons.trending_down, AppColors.danger),
-      _ => (Icons.trending_flat, AppColors.textTertiary),
-    };
-    return Icon(icon, size: 14, color: color);
   }
 }
 
@@ -367,11 +284,12 @@ class _TrendArrow extends StatelessWidget {
 
 /// The four things a desk does between tables.
 ///
-/// Every tile lands on a registered route: the two Business tiles on a `?tab=`
-/// of the Business section, the reservations tile on the day board. *Add Deal*
-/// asks the Deals tab to open its creation form straight away, the tab still
-/// owns the venue-verification and role rules, so an unverified venue simply
-/// sees why the button is disabled.
+/// Every tile lands on a registered route: the menu and QR tiles on a `?tab=`
+/// of the Business section, *Create Deal* asking its destination to open the
+/// creation form, and *Reservations* opening the day board. The destinations
+/// still own the venue-verification and role rules, so an unverified venue sees
+/// why an action is unavailable instead of being walked into a form it cannot
+/// submit.
 class QuickActionsSection extends StatelessWidget {
   const QuickActionsSection({super.key});
 
@@ -379,64 +297,59 @@ class QuickActionsSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final tiles = <Widget>[
       _QuickActionTile(
+        tileKey: const ValueKey('home-quick-reservations'),
+        icon: Icons.event_note,
+        label: 'Reservations',
+        color: AppColors.primary,
+        onTap: () =>
+            Navigator.of(context)
+                .pushReplacementNamed('${AppRoute.service}?tab=reservations'),
+      ),
+      _QuickActionTile(
         tileKey: const ValueKey('home-quick-menu'),
         icon: Icons.restaurant_menu,
         label: 'Edit Menu',
-        caption: 'Dishes & prices',
-        color: AppColors.primary,
-        imageAsset: CardImageAssets.editMenu,
-        onTap: () => Navigator.of(
-          context,
-        ).pushReplacementNamed('${AppRoute.business}?tab=menu'),
+        color: AppColors.info,
+        onTap: () =>
+            Navigator.of(context)
+                .pushReplacementNamed('${AppRoute.business}?tab=menu'),
       ),
       _QuickActionTile(
         tileKey: const ValueKey('home-quick-deal'),
-        icon: Icons.add_circle_outline,
+        icon: Icons.local_offer_outlined,
         label: 'Create Deal',
-        caption: 'Publish an offer',
         color: AppColors.gold,
-        imageAsset: CardImageAssets.createDeal,
-        onTap: () => Navigator.of(
-          context,
-        ).pushReplacementNamed('${AppRoute.business}?tab=deals&create=1'),
+        onTap: () => Navigator.of(context)
+            .pushReplacementNamed('${AppRoute.business}?tab=deals&create=1'),
       ),
       _QuickActionTile(
         tileKey: const ValueKey('home-quick-qr'),
         icon: Icons.qr_code_2,
-        label: 'QR Code',
-        caption: 'Share the menu',
-        color: AppColors.info,
-        imageAsset: CardImageAssets.qrCode,
-        onTap: () => Navigator.of(
-          context,
-        ).pushReplacementNamed('${AppRoute.business}?tab=qr'),
-      ),
-      _QuickActionTile(
-        tileKey: const ValueKey('home-quick-reservations'),
-        icon: Icons.event_available,
-        label: 'Reservations',
-        caption: "Today's board",
+        label: 'Show QR',
         color: AppColors.success,
-        imageAsset: CardImageAssets.reservationsBoard,
-        onTap: () => Navigator.of(
-          context,
-        ).pushReplacementNamed('${AppRoute.service}?tab=reservations'),
+        onTap: () =>
+            Navigator.of(context)
+                .pushReplacementNamed('${AppRoute.business}?tab=qr'),
       ),
     ];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SectionLabel(title: 'QUICK ACTIONS'),
-        const SizedBox(height: AppSpacing.sm),
+        const SectionLabel(title: 'Quick Actions'),
+        const SizedBox(height: AppSpacing.sm + 2),
         _QuickActionGrid(tiles: tiles),
       ],
     );
   }
 }
 
-/// Four tiles across on a roomy phone, two by two once the labels would not
-/// fit, at 320dp or at a large text scale.
+/// Two by two on a phone, four across when the window can hold them.
+///
+/// Four-across was the original phone shape and it never worked: at 320 dp a
+/// column is 70 dp wide, so a two-word label broke over three lines. Two tiles
+/// with room to breathe read faster from across a dining room than four
+/// cramped ones.
 class _QuickActionGrid extends StatelessWidget {
   const _QuickActionGrid({required this.tiles});
 
@@ -447,19 +360,41 @@ class _QuickActionGrid extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final scale = MediaQuery.textScalerOf(context).scale(1);
-        final columns = constraints.maxWidth >= 320 && scale < 1.4 ? 4 : 2;
+        final columns = constraints.maxWidth >= 700 && scale < 1.3
+            ? 4
+            : (constraints.maxWidth < 300 || scale >= 1.8 ? 1 : 2);
+        if (columns == 1) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              for (var i = 0; i < tiles.length; i++) ...[
+                if (i > 0) const SizedBox(height: AppSpacing.sm),
+                tiles[i],
+              ],
+            ],
+          );
+        }
         final rows = <Widget>[];
         for (var i = 0; i < tiles.length; i += columns) {
-          final slice = tiles.sublist(i, (i + columns).clamp(0, tiles.length));
+          final row = tiles.sublist(
+            i,
+            (i + columns).clamp(0, tiles.length),
+          );
           rows.add(
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                for (var j = 0; j < slice.length; j++) ...[
-                  if (j > 0) const SizedBox(width: AppSpacing.sm),
-                  Expanded(child: slice[j]),
+            IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  for (var j = 0; j < row.length; j++) ...[
+                    if (j > 0) const SizedBox(width: AppSpacing.sm),
+                    Expanded(child: row[j]),
+                  ],
+                  for (var j = row.length; j < columns; j++) ...[
+                    const SizedBox(width: AppSpacing.sm),
+                    const Expanded(child: SizedBox.shrink()),
+                  ],
                 ],
-              ],
+              ),
             ),
           );
           if (i + columns < tiles.length) {
@@ -472,125 +407,92 @@ class _QuickActionGrid extends StatelessWidget {
   }
 }
 
+/// One quick action: a tinted icon and the verb it performs.
+///
+/// No caption. The label is the whole invitation, and a second line under it
+/// ("Dishes & prices", "Menu on the table") was four pieces of prose competing
+/// with four verbs on the same screen.
 class _QuickActionTile extends StatelessWidget {
   const _QuickActionTile({
     required this.tileKey,
     required this.icon,
     required this.label,
-    required this.caption,
     required this.color,
     required this.onTap,
-    this.imageAsset,
   });
 
   final Key tileKey;
   final IconData icon;
   final String label;
-  final String caption;
   final Color color;
   final VoidCallback onTap;
-  final String? imageAsset;
 
   @override
   Widget build(BuildContext context) {
-    final radius = BorderRadius.circular(AppSpacing.radiusLg);
+    final radius = BorderRadius.circular(AppSpacing.radiusMd);
     return Material(
       color: Colors.transparent,
       borderRadius: radius,
       clipBehavior: Clip.antiAlias,
       child: Ink(
-        decoration: imageAsset != null
-            ? null
-            : BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    color.withValues(alpha: 0.10),
-                    AppColors.surface,
-                    AppColors.surfaceElevated,
-                  ],
-                ),
-                borderRadius: radius,
-                border: Border.all(color: AppColors.border),
-              ),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: radius,
+          border: Border.all(color: AppColors.border),
+        ),
         child: InkWell(
           key: tileKey,
           onTap: onTap,
-          child: imageAsset != null
-              ? ImageBackgroundCard(
-                  imageAsset: imageAsset,
-                  overlayOpacity: 0.72,
-                  borderRadius: radius,
-                  border: Border.all(color: AppColors.border),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: AppSpacing.md,
-                      horizontal: AppSpacing.xs,
+          child: ConstrainedBox(
+            // 32 dp chip plus 12 above and below clears the 44 dp tap target
+            // without a second wrapper.
+            constraints: const BoxConstraints(minHeight: 56),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.sm + 6,
+                vertical: AppSpacing.sm + 4,
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: color.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
                     ),
-                    child: _buildContent(),
+                    child: Icon(icon, color: color, size: 17),
                   ),
-                )
-              : Padding(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: AppSpacing.md,
-                    horizontal: AppSpacing.xs,
+                  const SizedBox(width: AppSpacing.sm + 4),
+                  Expanded(
+                    child: Text(
+                      label,
+                      style: AppTextStyles.titleSmall.copyWith(
+                        color: AppColors.textPrimary,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
-                  child: _buildContent(),
-                ),
+                ],
+              ),
+            ),
+          ),
         ),
       ),
     );
   }
-
-  Widget _buildContent() {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 38,
-          height: 38,
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.14),
-            borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-            border: Border.all(color: color.withValues(alpha: 0.28)),
-          ),
-          child: Icon(icon, color: color, size: 19),
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        Text(
-          label,
-          style: AppTextStyles.labelSmall.copyWith(
-            color: AppColors.textPrimary,
-            fontWeight: FontWeight.w600,
-            fontSize: 11,
-          ),
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 2),
-        Text(
-          caption,
-          style: AppTextStyles.caption.copyWith(
-            color: AppColors.textTertiary,
-            fontSize: 9,
-          ),
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          textAlign: TextAlign.center,
-        ),
-      ],
-    );
-  }
 }
 
-/// ─── Upcoming Reservations ─────────────────────────────────────────────────
+/// ─── Today's Reservations ──────────────────────────────────────────────────
 
 /// The bookings that still hold a table: pending, confirmed or seated.
 ///
 /// Cancelled, completed and no-show rows are history, not upcoming, so they are
-/// dropped. A *pending* booking is kept,it still needs a confirmation,and
+/// dropped. A *pending* booking is kept, it still needs a confirmation, and
 /// leads the list because it is the one row the desk has to act on. The rest
 /// follow in start-time order and the list is capped at [limit].
 List<Reservation> upcomingReservations(
@@ -615,7 +517,6 @@ class TodaysReservationsSection extends StatelessWidget {
     required this.reservations,
     required this.venueId,
     required this.onRetry,
-    this.trend = const [],
   });
 
   final AsyncValue<List<Reservation>> reservations;
@@ -624,29 +525,22 @@ class TodaysReservationsSection extends StatelessWidget {
   /// Re-reads the day list without touching the rest of the screen.
   final VoidCallback onRetry;
 
-  /// Hourly reservation counts for the day, used to draw the compact timeline.
-  final List<HourlyTrend> trend;
-
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SectionLabel(
-          title: 'UPCOMING RESERVATIONS',
+          title: "Today's Reservations",
           trailing: SectionLink(
             label: 'View all',
-            onPressed: () => Navigator.of(
-              context,
-            ).pushReplacementNamed('${AppRoute.service}?tab=reservations'),
+            onPressed: () => Navigator.of(context)
+                .pushReplacementNamed('${AppRoute.service}?tab=reservations'),
           ),
         ),
-        if (trend.isNotEmpty) ...[
-          const SizedBox(height: AppSpacing.sm),
-          _HourlyTimeline(trend: trend),
-        ],
-        const SizedBox(height: AppSpacing.sm),
+        const SizedBox(height: AppSpacing.sm + 2),
         reservations.when(
+          skipLoadingOnRefresh: true,
           loading: () => const _ReservationsLoading(),
           error: (error, _) =>
               _ReservationsError(error: error, onRetry: onRetry),
@@ -659,6 +553,7 @@ class TodaysReservationsSection extends StatelessWidget {
                 list.where((r) => r.status.holdsCovers).length -
                 displayList.length;
             return Container(
+              clipBehavior: Clip.antiAlias,
               decoration: BoxDecoration(
                 color: AppColors.surface,
                 borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
@@ -668,14 +563,24 @@ class TodaysReservationsSection extends StatelessWidget {
                 children: [
                   for (var i = 0; i < displayList.length; i++) ...[
                     if (i > 0)
-                      Divider(height: 1, indent: 16, color: AppColors.border),
+                      Divider(
+                        height: 1,
+                        thickness: 1,
+                        indent: AppSpacing.md,
+                        color: AppColors.border,
+                      ),
                     _ReservationTile(
                       reservation: displayList[i],
                       venueId: venueId,
                     ),
                   ],
                   if (hidden > 0) ...[
-                    Divider(height: 1, indent: 16, color: AppColors.border),
+                    Divider(
+                      height: 1,
+                      thickness: 1,
+                      indent: AppSpacing.md,
+                      color: AppColors.border,
+                    ),
                     _MoreReservationsRow(count: hidden),
                   ],
                 ],
@@ -697,13 +602,15 @@ class _MoreReservationsRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => Navigator.of(
-        context,
-      ).pushReplacementNamed('${AppRoute.service}?tab=reservations'),
+      onTap: () =>
+          Navigator.of(context)
+              .pushReplacementNamed('${AppRoute.service}?tab=reservations'),
       child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.sm + 4,
+        ),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Icon(
               Icons.more_horiz,
@@ -711,15 +618,21 @@ class _MoreReservationsRow extends StatelessWidget {
               color: AppColors.textTertiary,
             ),
             const SizedBox(width: AppSpacing.sm),
-            Flexible(
+            Expanded(
               child: Text(
                 '$count more ${count == 1 ? 'booking' : 'bookings'} today',
                 style: AppTextStyles.labelSmall.copyWith(
                   color: AppColors.primary,
+                  fontSize: 12,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
+            ),
+            const Icon(
+              Icons.chevron_right,
+              size: 18,
+              color: AppColors.textTertiary,
             ),
           ],
         ),
@@ -733,7 +646,7 @@ class _ReservationsLoading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const SectionSkeleton(rows: 3);
+    return const SectionSkeleton(rows: 2, height: 64);
   }
 }
 
@@ -760,13 +673,17 @@ class _ReservationsError extends StatelessWidget {
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   'Unable to load reservations',
                   style: AppTextStyles.bodySmall.copyWith(
                     color: AppColors.danger,
                     fontWeight: FontWeight.w600,
+                    fontSize: 12.5,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 2),
                 Text(
@@ -797,43 +714,41 @@ class _ReservationsError extends StatelessWidget {
   }
 }
 
+/// One line that says the day is clear, and nothing more.
+///
+/// The previous version spent four lines explaining how reservations arrive,
+/// on the screen a busy venue sees last before opening. The absence of work
+/// does not need a paragraph.
 class _EmptyReservations extends StatelessWidget {
   const _EmptyReservations();
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.lg,
-      ),
+      padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         border: Border.all(color: AppColors.border),
       ),
-      child: Column(
+      child: Row(
         children: [
           const Icon(
             Icons.event_available,
-            size: 28,
+            size: 18,
             color: AppColors.textTertiary,
           ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            'No upcoming reservations',
-            style: AppTextStyles.titleMedium.copyWith(
-              color: AppColors.textSecondary,
+          const SizedBox(width: AppSpacing.sm + 4),
+          Expanded(
+            child: Text(
+              'No reservations today',
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w500,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 2),
-          Text(
-            'New bookings appear here as soon as guests reserve through '
-            'the Customer App or you take a phone booking. Share your QR '
-            'code to start receiving reservations.',
-            style: AppTextStyles.caption,
-            textAlign: TextAlign.center,
           ),
         ],
       ),
@@ -851,6 +766,15 @@ class _ReservationTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final time = TimeOfDay.fromDateTime(reservation.startAt);
     final timeStr = time.format(context);
+    // At a large text scale the trailing pill would squeeze the guest name to
+    // an ellipsis, so it moves under the source line and the row keeps its
+    // hierarchy on one thumb-wide column.
+    final inlineChip = MediaQuery.textScalerOf(context).scale(1) < 1.6;
+    final chip = StatusChip(
+      status: reservation.status.wire,
+      label: reservation.status.label,
+      dense: true,
+    );
 
     return InkWell(
       onTap: () => showReservationSheet(context, reservation, venueId: venueId),
@@ -866,24 +790,26 @@ class _ReservationTile extends StatelessWidget {
                   timeStr,
                   style: AppTextStyles.numericMedium.copyWith(
                     fontSize: 15,
+                    height: 1.1,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   reservation.partyLabel,
-                  style: AppTextStyles.bodySmall.copyWith(fontSize: 10),
+                  style: AppTextStyles.caption.copyWith(fontSize: 11),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
             const SizedBox(width: AppSpacing.md),
-            Container(width: 1, height: 32, color: AppColors.border),
+            Container(width: 1, height: 30, color: AppColors.border),
             const SizedBox(width: AppSpacing.md),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     reservation.guestName,
@@ -897,19 +823,21 @@ class _ReservationTile extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     reservation.isPhoneIn ? 'Phone booking' : 'Customer App',
-                    style: AppTextStyles.bodySmall.copyWith(fontSize: 10),
+                    style: AppTextStyles.caption.copyWith(fontSize: 11),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
+                  if (!inlineChip) ...[
+                    const SizedBox(height: AppSpacing.xs + 2),
+                    Align(alignment: Alignment.centerLeft, child: chip),
+                  ],
                 ],
               ),
             ),
-            const SizedBox(width: AppSpacing.sm),
-            StatusChip(
-              status: reservation.status.wire,
-              label: reservation.status.label,
-              dense: true,
-            ),
+            if (inlineChip) ...[
+              const SizedBox(width: AppSpacing.sm),
+              chip,
+            ],
           ],
         ),
       ),
@@ -919,11 +847,17 @@ class _ReservationTile extends StatelessWidget {
 
 /// ─── Needs Attention ───────────────────────────────────────────────────────
 
-/// What the desk should work next, most actionable first.
+/// The decisions the desk owes, shown only when there are any.
+///
+/// The section used to hold a permanent "All caught up" card, which spent a
+/// dashboard row telling an operator that nothing needed doing. It now renders
+/// nothing at all, so the space belongs to work.
 ///
 /// The order *is* the priority: a booking waiting for a confirmation holds a
-/// table, a host request waits for a decision, an unverified venue cannot sell
-/// anything, and unread notifications are informational, so they come last.
+/// table, a host request waits for a decision, and an unverified venue cannot
+/// sell anything. Unread messages are not listed here: the header bell already
+/// carries that count and opens the inbox, and a second copy on Home was one
+/// thing to read twice.
 class NeedsAttentionSection extends StatelessWidget {
   const NeedsAttentionSection({super.key, required this.snapshot});
 
@@ -932,53 +866,17 @@ class NeedsAttentionSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final items = _buildNeedsAttentionList();
+    if (items.isEmpty) return const SizedBox.shrink();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SectionLabel(title: 'NEEDS ATTENTION'),
-        const SizedBox(height: AppSpacing.sm),
-        if (items.isEmpty)
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSpacing.lg),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SectionLabel(title: 'Needs attention'),
+          const SizedBox(height: AppSpacing.sm + 2),
           Container(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            decoration: BoxDecoration(
-              color: AppColors.success.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-              border: Border.all(
-                color: AppColors.success.withValues(alpha: 0.2),
-              ),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    color: AppColors.success.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-                  ),
-                  child: const Icon(
-                    Icons.check_circle_outline,
-                    size: 18,
-                    color: AppColors.success,
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                const Expanded(
-                  child: Text(
-                    'All caught up',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: AppColors.textSecondary,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          )
-        else
-          Container(
+            clipBehavior: Clip.antiAlias,
             decoration: BoxDecoration(
               color: AppColors.surface,
               borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
@@ -988,13 +886,19 @@ class NeedsAttentionSection extends StatelessWidget {
               children: [
                 for (var i = 0; i < items.length; i++) ...[
                   if (i > 0)
-                    Divider(height: 1, indent: 56, color: AppColors.border),
+                    Divider(
+                      height: 1,
+                      thickness: 1,
+                      indent: 56,
+                      color: AppColors.border,
+                    ),
                   _NeedsAttentionTile(item: items[i]),
                 ],
               ],
             ),
           ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -1033,7 +937,7 @@ class NeedsAttentionSection extends StatelessWidget {
     }
 
     // Verification blocks every selling surface, so it outranks a half-filled
-    // profile, and both outrank a notification nobody is waiting on.
+    // profile.
     if (!venue.verified) {
       items.add(
         _NeedsAttentionItem(
@@ -1053,21 +957,6 @@ class NeedsAttentionSection extends StatelessWidget {
           title: 'Profile ${venue.profileCompletion}% complete',
           subtitle: 'Finish your venue profile',
           route: '${AppRoute.business}?tab=profile',
-        ),
-      );
-    }
-
-    final unread = snapshot.unreadNotifications;
-    if (unread > 0) {
-      items.add(
-        _NeedsAttentionItem(
-          icon: Icons.notifications,
-          color: AppColors.info,
-          title: unread == 1
-              ? '1 unread notification'
-              : '$unread unread notifications',
-          subtitle: 'Unread messages',
-          route: '${AppRoute.inbox}?tab=notifications',
         ),
       );
     }
@@ -1117,18 +1006,19 @@ class _NeedsAttentionTile extends StatelessWidget {
         child: Row(
           children: [
             Container(
-              width: 36,
-              height: 36,
+              width: 32,
+              height: 32,
               decoration: BoxDecoration(
                 color: item.color.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
               ),
-              child: Icon(item.icon, color: item.color, size: 18),
+              child: Icon(item.icon, color: item.color, size: 17),
             ),
-            const SizedBox(width: AppSpacing.md),
+            const SizedBox(width: AppSpacing.sm + 4),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     item.title,
@@ -1142,8 +1032,8 @@ class _NeedsAttentionTile extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     item.subtitle,
-                    style: AppTextStyles.bodySmall,
-                    maxLines: 2,
+                    style: AppTextStyles.bodySmall.copyWith(fontSize: 11),
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
@@ -1161,158 +1051,37 @@ class _NeedsAttentionTile extends StatelessWidget {
   }
 }
 
-/// ─── Hourly timeline ───────────────────────────────────────────────────────
-
-/// A compact horizontal bar chart showing reservation density by hour.
-///
-/// The current hour is highlighted with a dot. Hours with no data are shown
-/// as empty slots so the desk can see gaps at a glance. Only the next 6 hours
-/// from the current time are displayed to keep the strip compact.
-class _HourlyTimeline extends StatelessWidget {
-  const _HourlyTimeline({required this.trend});
-
-  final List<HourlyTrend> trend;
-
-  @override
-  Widget build(BuildContext context) {
-    final now = DateTime.now();
-    final currentHour = now.hour;
-
-    // Show the next 6 hours starting from the current hour (or the earliest
-    // data hour if it is earlier than now).
-    final earliestHour = trend.isEmpty
-        ? currentHour
-        : trend.map((e) => e.hour).reduce((a, b) => a < b ? a : b);
-    final startHour = earliestHour < currentHour ? earliestHour : currentHour;
-    final hours = List.generate(6, (i) => startHour + i);
-
-    final maxCount = trend.isEmpty
-        ? 1
-        : trend.map((e) => e.count).reduce((a, b) => a > b ? a : b).clamp(1, 99);
-
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Row(
-        children: [
-          for (final hour in hours) ...[
-            Expanded(
-              child: _TimelineSlot(
-                hour: hour,
-                count: _countForHour(hour),
-                maxCount: maxCount,
-                isCurrent: hour == currentHour,
-              ),
-            ),
-            if (hour != hours.last) const SizedBox(width: 4),
-          ],
-        ],
-      ),
-    );
-  }
-
-  int _countForHour(int hour) {
-    final match = trend.where((e) => e.hour == hour);
-    return match.isEmpty ? 0 : match.first.count;
-  }
-}
-
-class _TimelineSlot extends StatelessWidget {
-  const _TimelineSlot({
-    required this.hour,
-    required this.count,
-    required this.maxCount,
-    required this.isCurrent,
-  });
-
-  final int hour;
-  final int count;
-  final int maxCount;
-  final bool isCurrent;
-
-  @override
-  Widget build(BuildContext context) {
-    final barHeight = count > 0 ? (count / maxCount) * 24.0 : 2.0;
-    final barColor = count > 0 ? AppColors.primary : AppColors.border;
-    final label = '${hour.toString().padLeft(2, '0')}:00';
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (count > 0)
-          Text(
-            '$count',
-            style: AppTextStyles.labelSmall.copyWith(
-              color: AppColors.primary,
-              fontSize: 9,
-              fontWeight: FontWeight.w700,
-            ),
-          )
-        else
-          const SizedBox(height: 10),
-        const SizedBox(height: 2),
-        Container(
-          height: barHeight,
-          decoration: BoxDecoration(
-            color: barColor,
-            borderRadius: BorderRadius.circular(2),
-          ),
-        ),
-        const SizedBox(height: 4),
-        Stack(
-          alignment: Alignment.center,
-          children: [
-            Text(
-              label,
-              style: AppTextStyles.labelSmall.copyWith(
-                color: isCurrent ? AppColors.primary : AppColors.textTertiary,
-                fontSize: 8,
-                fontWeight: isCurrent ? FontWeight.w700 : FontWeight.w500,
-              ),
-            ),
-            if (isCurrent)
-              Positioned(
-                bottom: -4,
-                child: Container(
-                  width: 4,
-                  height: 4,
-                  decoration: const BoxDecoration(
-                    color: AppColors.primary,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
 /// ─── Skeleton ──────────────────────────────────────────────────────────────
 
 /// The Home skeleton.
 ///
 /// It is a scroll view, not a column: the same blocks have to fit a short
 /// landscape window as well as a tall phone, and a skeleton that overflows is
-/// the first thing the desk sees on a slow connection.
+/// the first thing the desk sees on a slow connection. The block heights trace
+/// the real sections so the page never jumps when the data lands.
 class HomeSkeleton extends StatelessWidget {
   const HomeSkeleton({super.key});
 
   @override
   Widget build(BuildContext context) {
-    const radius = AppSpacing.radiusMd;
+    const radius = AppSpacing.radiusLg;
     Widget block(double height, {double? width}) => Container(
       height: height,
       width: width,
       decoration: BoxDecoration(
-        color: AppColors.surfaceElevated,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(radius),
         border: Border.all(color: AppColors.border),
+      ),
+    );
+
+    // Section headings are a thin bar, not a card.
+    Widget label(double width) => Container(
+      height: 11,
+      width: width,
+      decoration: BoxDecoration(
+        color: AppColors.surfaceHigh,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusXs),
       ),
     );
 
@@ -1320,33 +1089,49 @@ class HomeSkeleton extends StatelessWidget {
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.all(AppSpacing.paddingScreen),
       children: [
-        block(184),
+        block(108),
         const SizedBox(height: AppSpacing.lg),
-        block(14, width: 120),
-        const SizedBox(height: AppSpacing.sm),
+        label(118),
+        const SizedBox(height: AppSpacing.sm + 2),
         Row(
           children: [
-            Expanded(child: block(96)),
+            Expanded(child: block(104)),
             const SizedBox(width: AppSpacing.sm),
-            Expanded(child: block(96)),
+            Expanded(child: block(104)),
           ],
         ),
         const SizedBox(height: AppSpacing.sm),
         Row(
           children: [
-            Expanded(child: block(96)),
+            Expanded(child: block(104)),
             const SizedBox(width: AppSpacing.sm),
-            Expanded(child: block(96)),
+            Expanded(child: block(104)),
           ],
         ),
         const SizedBox(height: AppSpacing.lg),
-        block(14, width: 100),
+        label(96),
+        const SizedBox(height: AppSpacing.sm + 2),
+        Row(
+          children: [
+            Expanded(child: block(56)),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(child: block(56)),
+          ],
+        ),
         const SizedBox(height: AppSpacing.sm),
-        block(84),
+        Row(
+          children: [
+            Expanded(child: block(56)),
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(child: block(56)),
+          ],
+        ),
         const SizedBox(height: AppSpacing.lg),
-        block(180),
-        const SizedBox(height: AppSpacing.lg),
-        block(120),
+        label(150),
+        const SizedBox(height: AppSpacing.sm + 2),
+        block(72),
+        const SizedBox(height: AppSpacing.sm),
+        block(72),
       ],
     );
   }

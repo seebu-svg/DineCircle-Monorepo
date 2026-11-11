@@ -8,9 +8,23 @@ import re
 import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).parent
-IMAGE_SIZES = {'portrait_6.webp': (1024, 1024), 'portrait_5.webp': (1024, 1024), 'portrait_4.webp': (1024, 1024), 'portrait_3.webp': (1024, 1024), 'portrait_2.webp': (1024, 1024), 'portrait_1.webp': (1024, 1024), 'venue_rooftop.webp': (1264, 848), 'venue_interior.webp': (1264, 848), 'venue_bar.webp': (1264, 848), 'dish_tacos.webp': (1024, 1024), 'dish_sushi.webp': (1024, 1024), 'dish_steak.webp': (1024, 1024), 'dish_pasta.webp': (1024, 1024), 'dish_dessert.webp': (1024, 1024), 'dish_brunch.webp': (1024, 1024), 'hero_tasting.webp': (1536, 1024)}
+IMAGE_SIZES = {'portrait_6.webp': (1024, 1024), 'portrait_5.webp': (1024, 1024), 'portrait_4.webp': (1024, 1024), 'portrait_3.webp': (1024, 1024), 'portrait_2.webp': (1024, 1024), 'portrait_1.webp': (1024, 1024), 'venue_rooftop.webp': (1264, 848), 'venue_interior.webp': (1264, 848), 'venue_bar.webp': (1264, 848), 'dish_tacos.webp': (1024, 1024), 'dish_sushi.webp': (1024, 1024), 'dish_steak.webp': (1024, 1024), 'dish_pasta.webp': (1024, 1024), 'dish_dessert.webp': (1024, 1024), 'dish_brunch.webp': (1024, 1024), 'hero_tasting.webp': (1536, 1024), 'app_home.webp': (720, 1453), 'app_explore.webp': (720, 1453), 'app_deals.webp': (720, 1453), 'logo.png': (600, 600)}
 CONFIG = json.loads((ROOT / 'seo-config.json').read_text())
 SITE_URL = os.environ.get('DINECIRCLE_SITE_URL', CONFIG.get('site_url', '')).rstrip('/')
+# Social profiles live in seo-config.json so the footer and the Organization
+# sameAs list can never disagree. Empty is a real state, not a placeholder.
+SOCIAL = list(CONFIG.get('social', []))
+# Store listing URLs, also from seo-config.json. An empty value is the honest
+# pre-launch state and makes download.html render a Coming soon badge.
+STORE_LINKS = dict(CONFIG.get('store_links', {'android': '', 'ios': ''}))
+ORG_NAME = 'DineCircle'
+ORG_LOGO = 'assets/images/logo.png'
+ORG_EMAIL = 'hello@dinecircle.app'
+FAQ_PAGES = ('index.html', 'how-it-works.html', 'become-a-partner.html', 'contact.html',
+             'for-restaurants.html', 'for-hosts.html', 'about.html')
+PAGE_TYPE = {'contact.html': 'ContactPage', 'about.html': 'AboutPage',
+             'community-guidelines.html': 'AboutPage', 'privacy.html': 'PrivacyPolicy',
+             'terms.html': 'TermsOfService'}
 if SITE_URL:
     origin = urlsplit(SITE_URL)
     if origin.scheme != 'https' or not origin.hostname or origin.username or origin.password or origin.query or origin.fragment or origin.path:
@@ -19,6 +33,20 @@ if SITE_URL:
 
 def absolute(path):
     return SITE_URL + '/' + ('' if path == 'index.html' else path)
+
+
+def faq_pairs(content):
+    """Read the questions straight out of the rendered markup, so FAQPage
+    JSON-LD can never claim an answer a visitor cannot see on the page."""
+    pairs = []
+    for block in re.findall(r'<details class="faq-item">(.*?)</details>', content, re.S):
+        question = re.search(r'<summary>(.*?)(?:<span class="faq-icon"|</summary>)', block, re.S)
+        answer = re.search(r'<p>(.*?)</p>', block, re.S)
+        if not question or not answer:
+            continue
+        clean = lambda node: unescape(re.sub('<[^>]+>', '', node.group(1))).strip()
+        pairs.append((clean(question), clean(answer)))
+    return pairs
 
 
 def enhance_page(path, content):
@@ -58,14 +86,29 @@ def enhance_page(path, content):
                    f'<meta property="og:url" content="{escape(url, quote=True)}">',
                    f'<meta name="twitter:image" content="{escape(image_url, quote=True)}">']
         website_id = SITE_URL + '/#website'
-        page_node = {'@type': 'WebPage', '@id': url + '#webpage', 'url': url,
+        org_id = SITE_URL + '/#organization'
+        organization = {
+            '@type': 'Organization', '@id': org_id, 'name': ORG_NAME,
+            'url': absolute('index.html'),
+            'logo': {'@type': 'ImageObject', 'url': absolute(ORG_LOGO), 'width': 600, 'height': 600},
+            'email': ORG_EMAIL,
+            'areaServed': {'@type': 'City', 'name': 'Karachi'},
+            'description': ('DineCircle is a free dining discovery platform for Karachi: restaurant menus with '
+                            'PKR prices, deals with clear terms, table bookings and hosted food experiences.'),
+        }
+        if SOCIAL:
+            organization['sameAs'] = SOCIAL
+        page_node = {'@type': PAGE_TYPE.get(path, 'WebPage'), '@id': url + '#webpage', 'url': url,
                      'name': title, 'description': description, 'inLanguage': 'en-PK',
-                     'isPartOf': {'@id': website_id}, 'primaryImageOfPage': {'@type': 'ImageObject', 'url': image_url}}
-        nodes = [page_node]
+                     'isPartOf': {'@id': website_id}, 'about': {'@id': org_id},
+                     'publisher': {'@id': org_id},
+                     'primaryImageOfPage': {'@type': 'ImageObject', 'url': image_url}}
+        nodes = [page_node, organization]
         if path == 'index.html':
             nodes += [{'@type': 'WebSite', '@id': website_id, 'url': absolute('index.html'),
-                       'name': 'DineCircle', 'description': 'Your local guide to discovering where to eat and what’s worth going out for.',
-                       'inLanguage': 'en-PK'}]
+                       'name': ORG_NAME, 'description': 'Great food. Shared moments. Discover Karachi restaurants, '
+                                                        'deals and hosted dining experiences with DineCircle.',
+                       'inLanguage': 'en-PK', 'publisher': {'@id': org_id}}]
         else:
             labels = {'restaurants': 'Restaurants', 'experiences': 'Experiences', 'hosts': 'Hosts'}
             crumbs = [('Home', absolute('index.html'))]
@@ -80,6 +123,24 @@ def enhance_page(path, content):
             nodes.append({'@type': 'BreadcrumbList', '@id': breadcrumb_id, 'itemListElement': [
                 {'@type': 'ListItem', 'position': i, 'name': label, 'item': link}
                 for i, (label, link) in enumerate(crumbs, 1)]})
+        if path in FAQ_PAGES:
+            pairs = faq_pairs(content)
+            if pairs:
+                nodes.append({'@type': 'FAQPage', '@id': url + '#faq', 'mainEntity': [
+                    {'@type': 'Question', 'name': question, 'acceptedAnswer':
+                        {'@type': 'Answer', 'text': answer}}
+                    for question, answer in pairs]})
+        if path == 'download.html':
+            app = {'@type': 'SoftwareApplication', '@id': url + '#app', 'name': 'DineCircle',
+                   'applicationCategory': 'MobileApplication', 'operatingSystem': 'Android, iOS',
+                   'url': url, 'publisher': {'@id': org_id},
+                   'screenshot': [absolute('assets/images/' + shot) for shot in
+                                  ('app_home.webp', 'app_explore.webp', 'app_deals.webp')],
+                   'offers': {'@type': 'Offer', 'price': 0, 'priceCurrency': 'PKR'}}
+            stores = [link for link in STORE_LINKS.values() if link]
+            if stores:
+                app['downloadUrl'] = stores[0]
+            nodes.append(app)
         data = json.dumps({'@context': 'https://schema.org', '@graph': nodes}, ensure_ascii=False).replace('<', '\\u003c')
         extras.append('<script type="application/ld+json">' + data + '</script>')
     return content.replace('</head>', '  ' + '\n  '.join(extras) + '\n</head>')

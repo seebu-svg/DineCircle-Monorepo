@@ -43,19 +43,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         password: _password.text,
       );
 
+      // No navigation here on purpose: this screen is rendered by [AuthGate],
+      // which swaps itself for the workspace as soon as the session becomes
+      // signed in.
       if (!mounted) return;
-
-      final error = ref.read(sessionProvider).error;
-
-      if (error != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(_readableError(error)),
-            backgroundColor: AppColors.danger,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
     } catch (error) {
       if (!mounted) return;
 

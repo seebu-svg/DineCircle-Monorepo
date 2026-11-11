@@ -258,16 +258,22 @@ class FakeMenuRepository extends MenuRepository {
 // ---------------------------------------------------------------------------
 
 class _VenueScope extends VenueScopeController {
+  _VenueScope(this.venue);
+
+  final Venue venue;
+
   @override
   Future<VenueScopeState> build() async =>
-      VenueScopeState(venues: const [_venue], selectedId: _venue.id);
+      VenueScopeState(venues: [venue], selectedId: venue.id);
 }
 
 Widget harness(
   WidgetTester tester, {
   required FakeMenuRepository repo,
   List<MenuSection>? menuData,
-  Size surface = const Size(900, 2400),
+  Venue venue = _venue,
+  double textScale = 1,
+  Size surface = const Size(900, 1600),
 }) {
   tester.view.physicalSize = surface;
   tester.view.devicePixelRatio = 1;
@@ -278,17 +284,57 @@ Widget harness(
 
   return ProviderScope(
     overrides: [
-      venueScopeProvider.overrideWith(_VenueScope.new),
+      venueScopeProvider.overrideWith(() => _VenueScope(venue)),
       currentUserProvider.overrideWithValue(_user),
       isPlatformAdminProvider.overrideWithValue(false),
       menuRepositoryProvider.overrideWithValue(repo),
     ],
     child: MaterialApp(
       theme: AppTheme.dark,
+      builder: (context, child) => MediaQuery(
+        data: MediaQuery.of(
+          context,
+        ).copyWith(textScaler: TextScaler.linear(textScale)),
+        child: child!,
+      ),
       home: const Scaffold(body: MenuTab()),
     ),
   );
 }
+
+// ---------------------------------------------------------------------------
+// Fixtures shared by the tests
+// ---------------------------------------------------------------------------
+
+const _unverifiedVenue = Venue(
+  id: _venueId,
+  name: 'Sea & Salt',
+  city: 'Karachi',
+  cuisines: ['Seafood'],
+  myRole: PartnerRole.owner,
+  verified: false,
+);
+
+/// Two categories: three starters (one 86ed) and one main.
+List<MenuSection> menu() => [
+  section('s1', 'Starters', items: [
+    item('i1', 'Calamari',
+        sectionId: 's1', price: 850, dietaryTags: ['Seafood']),
+    item('i2', 'Bruschetta',
+        sectionId: 's1',
+        price: 650,
+        position: 1,
+        dietaryTags: ['Vegetarian'],
+        description: 'Toasted bread with tomatoes'),
+    item('i3', 'Prawn Skewers',
+        sectionId: 's1', price: 1250, position: 2, isAvailable: false),
+  ]),
+  section('s2', 'Mains', position: 1, items: [
+    item('i4', 'Grilled Salmon', sectionId: 's2', price: 2450),
+  ]),
+];
+
+Finder row(String id) => find.byKey(ValueKey('menu-item-$id'));
 
 // ---------------------------------------------------------------------------
 // Tests
@@ -299,201 +345,349 @@ void main() {
     WidgetsFlutterBinding.ensureInitialized();
   });
 
-  group('Menu tab, rendering', () {
-    testWidgets('shows sections and items with PKR prices', (tester) async {
-      final repo = FakeMenuRepository();
-      final sections = [
-        section('s1', 'Starters', items: [
-          item('i1', 'Calamari',
-              sectionId: 's1', price: 850, dietaryTags: ['Seafood']),
-          item('i2', 'Bruschetta',
-              sectionId: 's1',
-              price: 650,
-              dietaryTags: ['Vegetarian'],
-              description: 'Toasted bread with tomatoes'),
-        ]),
-        section('s2', 'Mains', position: 1, items: [
-          item('i3', 'Grilled Salmon',
-              sectionId: 's2', price: 2450, dietaryTags: ['Spicy']),
-        ]),
-      ];
-
-      await tester.pumpWidget(harness(tester, repo: repo, menuData: sections));
-      await tester.pumpAndSettle();
-
-      // Section names render.
-      expect(find.text('STARTERS'), findsOneWidget);
-      expect(find.text('MAINS'), findsOneWidget);
-
-      // Item names render.
-      expect(find.text('Calamari'), findsOneWidget);
-      expect(find.text('Bruschetta'), findsOneWidget);
-      expect(find.text('Grilled Salmon'), findsOneWidget);
-
-      // Prices in PKR, never $.
-      expect(find.text('Rs 850'), findsOneWidget);
-      expect(find.text('Rs 650'), findsOneWidget);
-      expect(find.text('Rs 2450'), findsOneWidget);
-      expect(find.textContaining(r'$'), findsNothing);
-
-      // Dietary tags render uppercased.
-      expect(find.text('SEAFOOD'), findsOneWidget);
-      expect(find.text('VEGETARIAN'), findsOneWidget);
-      expect(find.text('SPICY'), findsOneWidget);
-    });
-
-    testWidgets('shows live status pill in header', (tester) async {
-      final repo = FakeMenuRepository();
-      await tester.pumpWidget(
-        harness(tester, repo: repo, menuData: [section('s1', 'Starters')]),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.text('Live in Customer App'), findsOneWidget);
-    });
-
-    testWidgets('summary strip shows section and item counts', (tester) async {
-      final repo = FakeMenuRepository();
-      final sections = [
-        section('s1', 'Starters', items: [
-          item('i1', 'A', sectionId: 's1'),
-          item('i2', 'B', sectionId: 's1', isAvailable: false),
-        ]),
-      ];
-
-      await tester.pumpWidget(harness(tester, repo: repo, menuData: sections));
-      await tester.pumpAndSettle();
-
-      // The MenuSummaryStrip shows counts.
-      expect(find.text('1'), findsWidgets); // 1 section
-      expect(find.text('2'), findsWidgets); // 2 items
-    });
-
-    testWidgets('empty state when no sections', (tester) async {
-      final repo = FakeMenuRepository();
-      await tester.pumpWidget(
-        harness(tester, repo: repo, menuData: const []),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.text('No menu yet'), findsOneWidget);
-    });
-
-    testWidgets('error state with retry', (tester) async {
-      final repo = FakeMenuRepository()..menuShouldFail = true;
-      await tester.pumpWidget(harness(tester, repo: repo));
-      await tester.pumpAndSettle();
-
-      // AsyncView shows a 'Try again' button on error.
-      expect(find.text('Try again'), findsOneWidget);
-    });
-  });
-
-  group('Menu tab, availability toggle', () {
-    testWidgets('sold-out switch calls setAvailability', (tester) async {
-      final repo = FakeMenuRepository();
-      final sections = [
-        section('s1', 'Starters', items: [
-          item('i1', 'Calamari', sectionId: 's1', isAvailable: true),
-        ]),
-      ];
-
-      await tester.pumpWidget(harness(tester, repo: repo, menuData: sections));
-      await tester.pumpAndSettle();
-
-      // Find the Switch widget and toggle it off.
-      final switchFinder = find.byType(Switch);
-      expect(switchFinder, findsOneWidget);
-
-      await tester.tap(switchFinder);
-      await tester.pumpAndSettle();
-
-      expect(repo.setAvailabilityCalls, 1);
-      expect(repo.lastAvailabilityItemIds, ['i1']);
-      expect(repo.lastAvailabilityValue, false);
-    });
-  });
-
-  group('Menu tab, section jump chips', () {
-    testWidgets('jump chips render for each section', (tester) async {
-      final repo = FakeMenuRepository();
-      final sections = [
-        section('s1', 'Starters'),
-        section('s2', 'Mains'),
-        section('s3', 'Desserts'),
-      ];
-
-      await tester.pumpWidget(harness(tester, repo: repo, menuData: sections));
-      await tester.pumpAndSettle();
-
-      // SectionJumpChips renders each section name.
-      expect(find.text('Starters'), findsWidgets);
-      expect(find.text('Mains'), findsWidgets);
-      expect(find.text('Desserts'), findsWidgets);
-    });
-  });
-
-  group('Menu tab, action buttons', () {
-    testWidgets('header shows Preview, Reorder, Section buttons',
+  group('menu header', () {
+    testWidgets('names the restaurant, its state and the counts',
         (tester) async {
-      final repo = FakeMenuRepository();
       await tester.pumpWidget(
-        harness(tester, repo: repo, menuData: [section('s1', 'Starters')]),
+        harness(tester, repo: FakeMenuRepository(), menuData: menu()),
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Preview'), findsOneWidget);
-      expect(find.text('Reorder'), findsOneWidget);
-      expect(find.text('Section'), findsOneWidget);
+      expect(find.text('Menu Management'), findsOneWidget);
+      expect(find.text('Sea & Salt'), findsOneWidget);
+      expect(find.text('Seafood · Karachi'), findsOneWidget);
+      expect(find.text('Live'), findsOneWidget);
+
+      // One summary line, folded from the live list: four dishes, three of
+      // them sellable, one 86ed.
+      expect(find.text('4 dishes'), findsOneWidget);
+      expect(find.text('3 available'), findsOneWidget);
+      expect(find.text('1 sold out'), findsOneWidget);
+    });
+
+    testWidgets('an unverified venue explains why guests see nothing',
+        (tester) async {
+      await tester.pumpWidget(
+        harness(
+          tester,
+          repo: FakeMenuRepository(),
+          menuData: menu(),
+          venue: _unverifiedVenue,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Draft'), findsOneWidget);
+      expect(find.textContaining('not verified'), findsOneWidget);
+    });
+
+    testWidgets('an empty menu is a draft with one way out', (tester) async {
+      await tester.pumpWidget(
+        harness(tester, repo: FakeMenuRepository(), menuData: const []),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Draft'), findsOneWidget);
+      expect(find.textContaining('no dishes on the menu'), findsOneWidget);
+      expect(find.text('No menu yet'), findsOneWidget);
+      expect(find.text('New category'), findsOneWidget);
     });
   });
 
-  group('CollapsibleSectionCard', () {
-    testWidgets('shows hidden badge for inactive section', (tester) async {
-      final repo = FakeMenuRepository();
+  group('categories', () {
+    testWidgets('opens on the first category, not the whole menu',
+        (tester) async {
+      await tester.pumpWidget(
+        harness(tester, repo: FakeMenuRepository(), menuData: menu()),
+      );
+      await tester.pumpAndSettle();
+
+      expect(row('i1'), findsOneWidget);
+      expect(row('i2'), findsOneWidget);
+      // The main course is one chip away, not already in the scroll.
+      expect(row('i4'), findsNothing);
+      expect(find.byKey(const ValueKey('menu-cat-s2')), findsOneWidget);
+    });
+
+    testWidgets('choosing a category swaps the dishes', (tester) async {
+      await tester.pumpWidget(
+        harness(tester, repo: FakeMenuRepository(), menuData: menu()),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const ValueKey('menu-cat-s2')));
+      await tester.pumpAndSettle();
+
+      expect(row('i4'), findsOneWidget);
+      expect(row('i1'), findsNothing);
+    });
+
+    testWidgets('All shows every category at once', (tester) async {
+      await tester.pumpWidget(
+        harness(tester, repo: FakeMenuRepository(), menuData: menu()),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const ValueKey('menu-cat-all')));
+      await tester.pumpAndSettle();
+
+      expect(row('i1'), findsOneWidget);
+      expect(row('i4'), findsOneWidget);
+    });
+
+    testWidgets('a hidden category is marked in the rail', (tester) async {
       final sections = [
         section('s1', 'Starters', isActive: false),
+        section('s2', 'Mains', position: 1),
       ];
-
-      await tester.pumpWidget(harness(tester, repo: repo, menuData: sections));
+      await tester.pumpWidget(
+        harness(tester, repo: FakeMenuRepository(), menuData: sections),
+      );
       await tester.pumpAndSettle();
 
-      expect(find.text('HIDDEN'), findsOneWidget);
+      expect(find.byIcon(Icons.visibility_off), findsOneWidget);
+      expect(find.text('Hidden'), findsOneWidget);
+    });
+  });
+
+  group('dish rows', () {
+    testWidgets('carry the description, dietary tag and PKR price',
+        (tester) async {
+      await tester.pumpWidget(
+        harness(tester, repo: FakeMenuRepository(), menuData: menu()),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Bruschetta'), findsOneWidget);
+      expect(find.text('Toasted bread with tomatoes'), findsOneWidget);
+      expect(find.text('Vegetarian'), findsOneWidget);
+      // `currencySymbol('PKR')` is "Rs. " and `_grouped` adds a separator from
+      // four digits, so the rendered string keeps both.
+      expect(find.text('Rs. 650'), findsOneWidget);
+      expect(find.textContaining(r'$'), findsNothing);
     });
 
-    testWidgets('shows sold out badge for unavailable item', (tester) async {
-      final repo = FakeMenuRepository();
+    testWidgets('a sold-out dish says so and its switch is off',
+        (tester) async {
       final sections = [
         section('s1', 'Starters', items: [
           item('i1', 'Calamari', sectionId: 's1', isAvailable: false),
         ]),
       ];
-
-      await tester.pumpWidget(harness(tester, repo: repo, menuData: sections));
+      await tester.pumpWidget(
+        harness(tester, repo: FakeMenuRepository(), menuData: sections),
+      );
       await tester.pumpAndSettle();
 
-      expect(find.text('SOLD OUT'), findsOneWidget);
+      expect(find.text('Sold out'), findsOneWidget);
+      final toggle = tester.widget<Switch>(find.byType(Switch));
+      expect(toggle.value, isFalse);
     });
-  });
 
-  group('Menu tab, position badges', () {
-    testWidgets('items show numbered position badges', (tester) async {
+    testWidgets('the switch 86s the dish', (tester) async {
       final repo = FakeMenuRepository();
       final sections = [
         section('s1', 'Starters', items: [
-          item('i1', 'First', sectionId: 's1', position: 0),
-          item('i2', 'Second', sectionId: 's1', position: 1),
-          item('i3', 'Third', sectionId: 's1', position: 2),
+          item('i1', 'Calamari', sectionId: 's1'),
         ]),
       ];
-
-      await tester.pumpWidget(harness(tester, repo: repo, menuData: sections));
+      await tester.pumpWidget(
+        harness(tester, repo: repo, menuData: sections),
+      );
       await tester.pumpAndSettle();
 
-      // Position badges: 1, 2, 3
-      expect(find.text('1'), findsWidgets);
-      expect(find.text('2'), findsWidgets);
-      expect(find.text('3'), findsWidgets);
+      await tester.tap(find.byType(Switch));
+      await tester.pumpAndSettle();
+
+      expect(repo.setAvailabilityCalls, 1);
+      expect(repo.lastAvailabilityItemIds, ['i1']);
+      expect(repo.lastAvailabilityValue, isFalse);
+    });
+
+    testWidgets('deleting a dish asks first', (tester) async {
+      final repo = FakeMenuRepository();
+      final sections = [
+        section('s1', 'Starters', items: [
+          item('i1', 'Calamari', sectionId: 's1'),
+        ]),
+      ];
+      await tester.pumpWidget(
+        harness(tester, repo: repo, menuData: sections),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byTooltip('Calamari actions'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Delete'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Delete Calamari?'), findsOneWidget);
+      expect(repo.deleteItemCalls, 0);
+
+      await tester.tap(find.widgetWithText(FilledButton, 'Delete'));
+      await tester.pumpAndSettle();
+
+      expect(repo.deleteItemCalls, 1);
+      expect(repo.lastDeletedItemId, 'i1');
+    });
+
+    testWidgets('tapping a row opens the edit form', (tester) async {
+      await tester.pumpWidget(
+        harness(tester, repo: FakeMenuRepository(), menuData: menu()),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(row('i1'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Edit Menu Item'), findsOneWidget);
+    });
+  });
+
+  group('search and filters', () {
+    testWidgets('a search that finds nothing offers the rest of the menu',
+        (tester) async {
+      await tester.pumpWidget(
+        harness(tester, repo: FakeMenuRepository(), menuData: menu()),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+        find.byKey(const ValueKey('menu-search')),
+        'Salmon',
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('No dishes match'), findsOneWidget);
+
+      await tester.tap(find.widgetWithText(OutlinedButton, 'Search all dishes'));
+      await tester.pumpAndSettle();
+
+      expect(row('i4'), findsOneWidget);
+    });
+
+    testWidgets('the availability filter narrows the list to sold-out dishes',
+        (tester) async {
+      await tester.pumpWidget(
+        harness(tester, repo: FakeMenuRepository(), menuData: menu()),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const ValueKey('menu-filter')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('menu-filter-soldOut')));
+      await tester.pumpAndSettle();
+
+      expect(row('i3'), findsOneWidget);
+      expect(row('i1'), findsNothing);
+      expect(find.textContaining('1 of 3 dishes'), findsOneWidget);
+    });
+
+    testWidgets('Clear puts the whole category back', (tester) async {
+      await tester.pumpWidget(
+        harness(tester, repo: FakeMenuRepository(), menuData: menu()),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const ValueKey('menu-filter')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('menu-filter-soldOut')));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.widgetWithText(TextButton, 'Clear'));
+      await tester.pumpAndSettle();
+
+      expect(row('i1'), findsOneWidget);
+      expect(row('i3'), findsOneWidget);
+    });
+  });
+
+  group('adding dishes', () {
+    testWidgets('the primary action adds into the category on screen',
+        (tester) async {
+      await tester.pumpWidget(
+        harness(tester, repo: FakeMenuRepository(), menuData: menu()),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const ValueKey('menu-cat-s2')));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const ValueKey('menu-add')));
+      await tester.pumpAndSettle();
+
+      // The sheet opens on the category that was showing, not the first one.
+      expect(find.text('Add Menu Item'), findsWidgets);
+    });
+
+    testWidgets('a menu with no categories sends Add dish to the category form',
+        (tester) async {
+      await tester.pumpWidget(
+        harness(tester, repo: FakeMenuRepository(), menuData: const []),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const ValueKey('menu-add')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('New section'), findsOneWidget);
+    });
+
+    testWidgets('an empty category offers its first dish', (tester) async {
+      final sections = [
+        section('s1', 'Starters'),
+        section('s2', 'Mains', position: 1, items: [
+          item('i4', 'Grilled Salmon', sectionId: 's2'),
+        ]),
+      ];
+      await tester.pumpWidget(
+        harness(tester, repo: FakeMenuRepository(), menuData: sections),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('No dishes in Starters yet'), findsOneWidget);
+    });
+  });
+
+  group('states and layout', () {
+    testWidgets('offers no separate guest preview or second QR', (tester) async {
+      await tester.pumpWidget(
+        harness(tester, repo: FakeMenuRepository(), menuData: menu()),
+      );
+      await tester.pumpAndSettle();
+
+      // The partner prints one QR, on the Business QR screen, and scanning it
+      // opens the restaurant page with this menu inside. A second,
+      // menu-only preview affordance would be a duplicate by design.
+      expect(find.byKey(const ValueKey('menu-preview')), findsNothing);
+      expect(find.byTooltip('Guest preview'), findsNothing);
+      expect(find.byKey(const ValueKey('menu-add')), findsOneWidget);
+    });
+
+    testWidgets('a failed read offers a retry', (tester) async {
+      final repo = FakeMenuRepository()..menuShouldFail = true;
+      await tester.pumpWidget(harness(tester, repo: repo));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Try again'), findsOneWidget);
+    });
+
+    testWidgets('a small phone at 2x text does not overflow', (tester) async {
+      await tester.pumpWidget(
+        harness(
+          tester,
+          repo: FakeMenuRepository(),
+          menuData: menu(),
+          surface: const Size(320, 640),
+          textScale: 2,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('Menu Management'), findsOneWidget);
+      expect(find.byKey(const ValueKey('menu-add')), findsOneWidget);
+      expect(find.byKey(const ValueKey('menu-search')), findsOneWidget);
     });
   });
 }

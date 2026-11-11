@@ -41,13 +41,21 @@ class PartnerNotification {
 
   /// Categories the desk can jump straight from the inbox; anything else opens
   /// the notification on its own.
+  ///
+  /// Sub-screens are addressed through the `?tab=` query, not an invented path
+  /// segment: `generateRoute` resolves the root and the section screen reads the
+  /// query, so `/experiences/requests` silently landed on Home while
+  /// `/experiences?tab=requests` actually opens the queue. `event` is the
+  /// category the server writes for collaboration proposals and approval
+  /// decisions alike, which is the Proposals tab in both directions.
   String get deepLink => switch (category) {
-    'reservation' || 'booking' => '/service/reservations',
-    'event_request' || 'request' => '/experiences/requests',
-    'deal' => '/business/deals',
-    'payout' || 'earnings' => '/business/subscription',
-    'review' => '/guests/reviews',
-    _ => '/inbox/notifications',
+    'reservation' || 'booking' => '/service?tab=reservations',
+    'event_request' || 'request' => '/experiences?tab=requests',
+    'event' => '/experiences?tab=proposals',
+    'deal' => '/business?tab=deals',
+    'payout' || 'earnings' => '/business?tab=subscription',
+    'review' => '/inbox?tab=reviews',
+    _ => '/inbox?tab=notifications',
   };
 }
 

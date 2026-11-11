@@ -33,6 +33,7 @@ class SectionTabs extends StatefulWidget {
     required this.tabs,
     this.initialTab,
     this.actions,
+    this.scrollable,
   });
 
   final List<SectionTab> tabs;
@@ -40,6 +41,13 @@ class SectionTabs extends StatefulWidget {
 
   /// Optional per-tab actions rendered in a trailing slot of the tab bar row.
   final Widget Function(BuildContext context, int index)? actions;
+
+  /// Forces the scrollable shape regardless of tab count.
+  ///
+  /// Three long labels at a 2x text scale do not fit a phone width even though
+  /// three tabs normally do, so a section that promises exactly three
+  /// destinations asks for the rail explicitly. Null keeps the old rule.
+  final bool? scrollable;
 
   @override
   State<SectionTabs> createState() => _SectionTabsState();
@@ -88,7 +96,7 @@ class _SectionTabsState extends State<SectionTabs>
               Expanded(
                 child: TabBar(
                   controller: _controller,
-                  isScrollable: widget.tabs.length > 4,
+                  isScrollable: widget.scrollable ?? widget.tabs.length > 4,
                   tabAlignment: TabAlignment.start,
                   dividerColor: Colors.transparent,
                   labelColor: AppColors.primary,

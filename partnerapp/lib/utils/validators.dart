@@ -99,14 +99,32 @@ class Validators {
     if (trimmed.isEmpty) return required ? '$field is required' : null;
     final parsed = double.tryParse(trimmed.replaceAll(',', ''));
     if (parsed == null) return '$field must be a number';
-    if (parsed < min) return '$field must be greater than ${min - 0.01}';
-    if (parsed > max) return '$field cannot be above $max';
+    if (parsed < min) {
+      return '$field must be greater than ${_whole(min - 0.01)}';
+    }
+    if (parsed > max) return '$field cannot be above ${_whole(max)}';
     return null;
   }
 
+  /// 100000, not `100000.0`: a price ceiling reads as rupees, and a partner
+  /// told their Rs. 150,000 dish price "cannot be above 100000.0" is reading a
+  /// float rather than a limit.
+  static String _whole(double value) =>
+      value == value.roundToDouble() ? value.toStringAsFixed(0) : '$value';
+
+  /// A percentage, not a money amount.
+  ///
+  /// Written out rather than delegated to [money]: money reports its ceiling
+  /// with its own decimals, so a partner saving 101% was told "cannot be above
+  /// 100.0", which reads like a price rather than a discount.
   static String? percent(String? value, {String field = 'Discount'}) {
-    final error = money(value, field: field, min: 0.01, max: 100);
-    return error ?? (double.tryParse(value?.trim() ?? '')! > 100 ? '$field cannot exceed 100%' : null);
+    final trimmed = value?.trim() ?? '';
+    if (trimmed.isEmpty) return '$field is required';
+    final parsed = double.tryParse(trimmed.replaceAll(',', ''));
+    if (parsed == null) return '$field must be a number';
+    if (parsed < 1) return '$field must be at least 1%';
+    if (parsed > 100) return '$field cannot exceed 100%';
+    return null;
   }
 
   static String? time(String? value, {String field = 'Time'}) {

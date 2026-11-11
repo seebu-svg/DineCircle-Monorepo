@@ -32,7 +32,6 @@ class SettingsScreen extends ConsumerWidget {
     final user = ref.watch(currentUserProvider);
     return AppShell(
       active: PrimaryDestination.home,
-      title: 'Settings',
       child: ListView(
         padding: const EdgeInsets.only(bottom: AppSpacing.xl),
         children: [

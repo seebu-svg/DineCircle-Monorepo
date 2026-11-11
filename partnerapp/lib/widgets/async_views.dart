@@ -164,20 +164,33 @@ class LoadingSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bars = <Widget>[
+      if (showHeader) ...[
+        _Bar(height: 22, width: 180),
+        const SizedBox(height: AppSpacing.md),
+      ],
+      for (var i = 0; i < count; i++) ...[
+        _Bar(height: itemHeight),
+        const SizedBox(height: AppSpacing.sm),
+      ],
+    ];
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.md),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          if (showHeader) ...[
-            _Bar(height: 22, width: 180),
-            const SizedBox(height: AppSpacing.md),
-          ],
-          for (var i = 0; i < count; i++) ...[
-            _Bar(height: itemHeight),
-            const SizedBox(height: AppSpacing.sm),
-          ],
-        ],
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final column = Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
+            children: bars,
+          );
+          // Inside a list the height is unbounded and the bars are the content.
+          if (!constraints.hasBoundedHeight) return column;
+          // In a short pane — a phone whose photo header took the top half, or
+          // 2x text on a 320dp screen — the bars are taller than the space
+          // they stand in. They scroll instead of overflowing: a skeleton that
+          // trips a layout error is worse than no skeleton at all.
+          return SingleChildScrollView(child: column);
+        },
       ),
     );
   }

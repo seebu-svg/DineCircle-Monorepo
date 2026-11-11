@@ -65,6 +65,8 @@ class BusinessRepository {
     DateTime? endsAt,
     int? maxRedemptions,
     DealStatus? status,
+    String? terms,
+    String? imageUrl,
   }) async {
     final envelope = await _api.envelopePatch(
       '${base(venueId)}/deals/$dealId',
@@ -78,7 +80,24 @@ class BusinessRepository {
         if (endsAt != null) 'endsAt': endsAt.toUtc().toIso8601String(),
         'maxRedemptions': ?maxRedemptions,
         if (status != null) 'status': status.wire,
+        if (terms != null) 'terms': terms.trim(),
+        if (imageUrl != null) 'imageUrl': imageUrl.trim(),
       },
+    );
+    final deal = envelope.single('deal', Deal.fromJson);
+    if (deal == null) throw StateError('Deal payload missing');
+    return deal;
+  }
+
+  /// Counts one guest use of a live deal.
+  ///
+  /// The server does the cap check inside the same UPDATE that increments, so
+  /// the returned row is the truth even when two screens post at once. A full
+  /// cap, a paused deal or a passed end date comes back `409` with the reason.
+  Future<Deal> redeemDeal(String venueId, String dealId) async {
+    final envelope = await _api.envelopePost(
+      '${base(venueId)}/deals/$dealId/redeem',
+      body: const {},
     );
     final deal = envelope.single('deal', Deal.fromJson);
     if (deal == null) throw StateError('Deal payload missing');

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="DineCircle Admin">
+  <defs>
+    <linearGradient id="arc" x1="8" y1="4" x2="40" y2="44" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FDBA74"/>
+      <stop offset="1" stop-color="#F97316"/>
+    </linearGradient>
+  </defs>
+  <rect width="48" height="48" rx="11" fill="#202124"/>
+  <path d="M24 9a15 15 0 1 0 15 15" fill="none" stroke="url(#arc)" stroke-width="5.5" stroke-linecap="round"/>
+  <path d="M20 17v4a4 4 0 0 0 8 0v-4M24 17v4.5M24 25v7" fill="none" stroke="#FFF8F2" stroke-width="2.5" stroke-linecap="round"/>
+</svg>

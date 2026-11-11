@@ -20,6 +20,7 @@ class CardImageAssets {
   // ── Quick Actions ─────────────────────────────────────────────────────────
   static const String editMenu = 'assets/images/dish_pasta.png';
   static const String createDeal = 'assets/images/dish_brunch.png';
+  static const String createExperience = 'assets/images/hero_tasting.png';
   static const String qrCode = 'assets/images/venue_rooftop.png';
   static const String reservationsBoard = 'assets/images/dish_sushi.png';
 
@@ -75,30 +76,39 @@ class ImageBackgroundCard extends StatelessWidget {
           borderRadius: radius,
           border: border ?? Border.all(color: AppColors.border),
         ),
+        // The Stack takes its size from [child] and the photograph is stretched
+        // behind it with Positioned.fill. `StackFit.expand` is not usable here:
+        // this card is often placed in a scrollable, where the height passed in
+        // is unbounded, so an expanding Stack is handed an infinite constraint,
+        // never gets a size, and the entire card silently collapses to nothing
+        // (the KPI grid and quick-action tiles rendered blank for exactly that
+        // reason).
         child: Stack(
-          fit: StackFit.expand,
           children: [
             // ── Background layer ──────────────────────────────────────────
-            if (hasImage)
-              Image.asset(
-                imageAsset!,
-                fit: BoxFit.cover,
-                errorBuilder: (_, _, _) => _fallbackBackground(),
-              )
-            else
-              _fallbackBackground(),
+            Positioned.fill(
+              child: hasImage
+                  ? Image.asset(
+                      imageAsset!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, _, _) => _fallbackBackground(),
+                    )
+                  : _fallbackBackground(),
+            ),
 
             // ── Dark scrim overlay ────────────────────────────────────────
             if (hasImage)
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.black.withValues(alpha: overlayOpacity * 0.7),
-                      Colors.black.withValues(alpha: overlayOpacity),
-                    ],
+              Positioned.fill(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.black.withValues(alpha: overlayOpacity * 0.7),
+                        Colors.black.withValues(alpha: overlayOpacity),
+                      ],
+                    ),
                   ),
                 ),
               ),

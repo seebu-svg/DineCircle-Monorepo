@@ -19,17 +19,22 @@ import 'home_widgets.dart';
 /// Home reads as an operating brief rather than a menu of counters.
 ///
 /// Order:
-/// 1. Venue hero - brand, open/closed, subscription, service pulse
-/// 2. Today's Overview - 4 KPI tiles, each tapping through to its section
-/// 3. Quick Actions - Menu, Deal, QR Code, Reservations
-/// 4. Upcoming Reservations - the next three active bookings
-/// 5. Active Deals - what the desk can offer a guest right now
-/// 6. Upcoming Experiences - the next two dinners this venue hosts
-/// 7. Needs Attention - actionable items first, unread notifications last
-/// 8. Recent Activity - the last three notifications
+/// 1. Restaurant header - logo, venue name, date, verification and hours
+/// 2. Today's Overview - reservations, tables, active deals, experiences
+/// 3. Quick Actions - Reservations, Edit Menu, Create Deal, Show QR
+/// 4. Today's Reservations - the next three active bookings
+/// 5. Experiences - upcoming dinners and open host proposals in one card
+/// 6. Needs Attention - present only when the desk owes a decision
+///
+/// What Home deliberately does not carry: monthly gross, net and refunds (they
+/// live in Insights, where the commission and the period selector are), the
+/// full deals list (Deals), the notifications feed (the header bell and the
+/// inbox) and a permanent "all caught up" card. Each of those was a second
+/// copy of a surface that already exists, and together they pushed the booking
+/// board off the first screen of the busiest page in the app.
 ///
 /// Every async section owns its loading and error state, so one failed read
-/// never blanks the screen.
+/// never blanks the screen or evicts a neighbouring section.
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
@@ -42,7 +47,6 @@ class HomeScreen extends ConsumerWidget {
 
     return AppShell(
       active: PrimaryDestination.home,
-      title: 'Home',
       // No notifications action here: the shell header already carries the
       // bell with the live unread badge, and two bells a thumb-width apart
       // both going to the same inbox is one control too many.
@@ -81,8 +85,19 @@ class _HomeBodyState extends ConsumerState<HomeBody>
   DashboardSnapshot get data => widget.data;
   String get venueId => widget.venueId;
 
-  ({String venue, String date}) get _key =>
+  /// Reservations are keyed by the *server's* service day, so a desk in another
+  /// timezone still reads the right board.
+  ({String venue, String date}) get _reservationsKey =>
       (venue: venueId, date: data.today.date);
+
+  /// The two proposal reads Home shows: what hosts have asked this venue, and
+  /// what this venue has asked hosts. Keeping the same family keys here means
+  /// the timer refreshes exactly what the sections watch, with no third read.
+  ({String venue, String status}) get _requestsKey =>
+      (venue: venueId, status: 'requested');
+
+  ({String venue, String? direction}) get _proposalsKey =>
+      (venue: venueId, direction: 'outgoing');
 
   @override
   void initState() {
@@ -119,33 +134,34 @@ class _HomeBodyState extends ConsumerState<HomeBody>
   /// so the UI never flashes a loading spinner on a timer.
   void _silentRefresh() {
     ref.invalidate(dashboardProvider(venueId));
-    ref.invalidate(todayReservationsProvider(_key));
-    ref.invalidate(dealsProvider((venue: venueId, status: 'active')));
-    ref.invalidate(notificationsProvider(false));
+    ref.invalidate(todayReservationsProvider(_reservationsKey));
+    ref.invalidate(experiencesProvider(null));
+    ref.invalidate(eventRequestsProvider(_requestsKey));
+    ref.invalidate(collabProposalsProvider(_proposalsKey));
   }
 
   /// The same family keys the sections watch, so a pull refreshes exactly what
   /// is on screen. `dashboardProvider` and today's reservations are awaited
-  /// because the spinner should live until the identity block and the booking
-  /// rail are real; the secondary rails resolve on their own skeletons.
+  /// because the spinner should live until the header and the booking rail are
+  /// real; the evening card resolves on its own skeleton.
   Future<void> _refresh() async {
     ref.invalidate(dashboardProvider(venueId));
-    ref.invalidate(todayReservationsProvider(_key));
+    ref.invalidate(todayReservationsProvider(_reservationsKey));
     ref.invalidate(subscriptionProvider(venueId));
-    ref.invalidate(dealsProvider((venue: venueId, status: 'active')));
     ref.invalidate(experiencesProvider(null));
-    ref.invalidate(notificationsProvider(false));
+    ref.invalidate(eventRequestsProvider(_requestsKey));
+    ref.invalidate(collabProposalsProvider(_proposalsKey));
     try {
       await ref.read(dashboardProvider(venueId).future);
     } catch (_) {}
     try {
-      await ref.read(todayReservationsProvider(_key).future);
+      await ref.read(todayReservationsProvider(_reservationsKey).future);
     } catch (_) {}
   }
 
   @override
   Widget build(BuildContext context) {
-    final reservations = ref.watch(todayReservationsProvider(_key));
+    final reservations = ref.watch(todayReservationsProvider(_reservationsKey));
 
     return RefreshIndicator(
       onRefresh: _refresh,
@@ -153,47 +169,35 @@ class _HomeBodyState extends ConsumerState<HomeBody>
         // A day with no rows still has to pull: without always-scrollable
         // physics the empty Home cannot be refreshed at all.
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: AppLayout.screenPadding(context).copyWith(bottom: AppSpacing.xl),
+        padding: AppLayout.screenPadding(context)
+            .copyWith(bottom: AppSpacing.xl),
         children: [
-          // ── Brand hero + service pulse ──────────────────────────────────
+          // ── Restaurant header ───────────────────────────────────────────
           HomeHero(snapshot: data),
 
           // ── Today's Overview - 4 KPI tiles ──────────────────────────────
           const SizedBox(height: AppSpacing.lg),
           TodaysOverview(snapshot: data),
 
-          // ── Revenue & performance ───────────────────────────────────────
-          const SizedBox(height: AppSpacing.lg),
-          RevenueStrip(earnings: data.earnings),
-
           // ── Quick Actions ───────────────────────────────────────────────
           const SizedBox(height: AppSpacing.lg),
           const QuickActionsSection(),
 
-          // ── Upcoming Reservations ───────────────────────────────────────
+          // ── Today's Reservations ────────────────────────────────────────
           const SizedBox(height: AppSpacing.lg),
           TodaysReservationsSection(
             reservations: reservations,
             venueId: venueId,
-            onRetry: () => ref.invalidate(todayReservationsProvider(_key)),
-            trend: data.today.trend,
+            onRetry: () =>
+                ref.invalidate(todayReservationsProvider(_reservationsKey)),
           ),
 
-          // ── Active Deals ────────────────────────────────────────────────
+          // ── Experiences - dinners and proposals in one card ─────────────
           const SizedBox(height: AppSpacing.lg),
-          ActiveDealsRail(venueId: venueId),
+          ExperiencesSection(venueId: venueId),
 
-          // ── Upcoming Experiences ────────────────────────────────────────
-          const SizedBox(height: AppSpacing.lg),
-          UpcomingExperiencesStrip(venueId: venueId),
-
-          // ── Needs Attention ─────────────────────────────────────────────
-          const SizedBox(height: AppSpacing.lg),
+          // ── Needs Attention - renders nothing when nothing is owed ──────
           NeedsAttentionSection(snapshot: data),
-
-          // ── Recent Activity ─────────────────────────────────────────────
-          const SizedBox(height: AppSpacing.lg),
-          const RecentActivitySection(),
         ],
       ),
     );

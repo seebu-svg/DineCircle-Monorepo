@@ -4,8 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:partnerapp/api/api_client.dart';
 import 'package:partnerapp/models/account.dart';
-import 'package:partnerapp/models/comms.dart';
-import 'package:partnerapp/models/deals.dart';
+import 'package:partnerapp/models/collab.dart';
 import 'package:partnerapp/models/experience.dart';
 import 'package:partnerapp/models/operations.dart';
 import 'package:partnerapp/models/subscription.dart';
@@ -13,10 +12,10 @@ import 'package:partnerapp/models/venue.dart';
 import 'package:partnerapp/providers/app_providers.dart';
 import 'package:partnerapp/providers/module_providers.dart';
 import 'package:partnerapp/providers/venue_scope_provider.dart';
-import 'package:partnerapp/repositories/business_repository.dart';
 import 'package:partnerapp/repositories/operations_repository.dart';
 import 'package:partnerapp/screens/home/home_hero.dart';
 import 'package:partnerapp/screens/home/home_screen.dart';
+import 'package:partnerapp/screens/home/home_widgets.dart';
 import 'package:partnerapp/theme/app_theme.dart';
 import 'package:partnerapp/widgets/media_image.dart';
 
@@ -33,7 +32,7 @@ class _VenueScope extends VenueScopeController {
       VenueScopeState(venues: [venue], selectedId: venue.id);
 }
 
-/// The venue the hero reads: identity, brand marks and the weekly hours that
+/// The venue the header reads: identity, brand marks and the weekly hours that
 /// decide the open/closed pill.
 const _venue = Venue(
   id: 'v1',
@@ -56,7 +55,7 @@ const _openAllWeek = OpeningHours({
   'sun': DayHours(windows: [HoursWindow(open: '00:00', close: '23:59')]),
 });
 
-/// A venue that has not subscribed yet: the hero then shows no plan it was
+/// A venue that has not subscribed yet: the header then shows no plan it was
 /// never told about, and unrelated assertions keep a stable screen.
 const _noSubscription = VenueSubscription(
   plan: null,
@@ -84,14 +83,13 @@ DashboardSnapshot snapshot({
   int completed = 0,
   int cancelled = 0,
   int noShow = 0,
-  int scans = 0,
-  bool scansAvailable = true,
+  int tables = 0,
+  int capacity = 0,
   bool verified = true,
   int profileCompletion = 100,
   int activeDeals = 0,
   int upcomingEvents = 0,
   int pendingRequests = 0,
-  int unread = 0,
 }) => DashboardSnapshot(
   venue: DashboardVenueHeader(
     id: 'v1',
@@ -114,8 +112,8 @@ DashboardSnapshot snapshot({
       noShow: noShow,
     ),
     covers: 0,
-    capacity: 0,
-    tables: 0,
+    capacity: capacity,
+    tables: tables,
     occupancy: 0,
   ),
   events: ExperienceSummary(
@@ -124,10 +122,10 @@ DashboardSnapshot snapshot({
     pendingRequests: pendingRequests,
   ),
   deals: DealSummary(active: activeDeals, drafts: 0),
-  scans: QrScanSummary(today: scans, week: scans, month: scans),
+  scans: QrScanSummary(),
   earnings: const MonthEarnings(),
-  unreadNotifications: unread,
-  scansAvailable: scansAvailable,
+  unreadNotifications: 0,
+  scansAvailable: true,
 );
 
 Reservation reservation(
@@ -142,25 +140,6 @@ Reservation reservation(
   partySize: 2,
   startAt: DateTime(2026, 11, 4, hour),
   status: status,
-);
-
-Deal deal(
-  String id,
-  String title, {
-  DealKind kind = DealKind.percent,
-  double value = 20,
-  DealStatus status = DealStatus.active,
-  int redemptions = 3,
-}) => Deal(
-  id: id,
-  restaurantId: 'v1',
-  title: title,
-  kind: kind,
-  value: value,
-  status: status,
-  startsAt: DateTime.now().subtract(const Duration(days: 1)),
-  endsAt: DateTime.now().add(const Duration(days: 9)),
-  redemptions: redemptions,
 );
 
 PartnerExperience experience(
@@ -184,18 +163,40 @@ PartnerExperience experience(
   type: ExperienceType.dinner,
 );
 
-PartnerNotification notification(
+/// A host's proposal at this venue (`…/event-requests`).
+ExperienceRequest hostRequest(
   String id,
   String title, {
-  String category = 'booking',
-  bool read = true,
-}) => PartnerNotification(
+  String hostName = 'Imran Host',
+  ExperienceStatus status = ExperienceStatus.requested,
+}) => ExperienceRequest(
   id: id,
   title: title,
-  body: 'Detail for $title',
-  category: category,
-  read: read,
-  notificationTime: DateTime.now().subtract(const Duration(hours: 2)),
+  hostId: 'host-$id',
+  hostName: hostName,
+  startAt: DateTime.now().add(const Duration(days: 6)),
+  seatsTotal: 20,
+  seatsBooked: 4,
+  seatsLeft: 16,
+  pricePerSeat: 3500,
+  status: status,
+  type: ExperienceType.dinner,
+);
+
+/// One side of the collaboration inbox (`…/collab-proposals`).
+CollabProposal invitation(
+  String id,
+  String title, {
+  ProposalDirection direction = ProposalDirection.outgoing,
+  ProposalStatus status = ProposalStatus.invited,
+  String hostName = 'Sara Host',
+}) => CollabProposal(
+  id: id,
+  title: title,
+  direction: direction,
+  status: status,
+  host: ProposalHost(id: 'host-$id', name: hostName),
+  createdAt: DateTime.now().subtract(const Duration(days: 2)),
 );
 
 /// A repository that answers the one call the detail sheet makes.
@@ -223,7 +224,7 @@ class _Operations extends OperationsRepository {
 }
 
 /// The Home screen is one long scroll view: the sections under test (the third
-/// booking row, the Needs Attention list) sit well below the fold of a phone.
+/// booking row, the Needs attention list) sit well below the fold of a phone.
 /// The harness therefore lays the screen out on a tall surface, so every
 /// section is really built and can really be asserted on. The layout group
 /// below re-lays the same screen out on a small one.
@@ -233,10 +234,11 @@ Widget harness(
   Venue venue = _venue,
   List<Reservation> reservations = const [],
   Future<List<Reservation>> Function()? reservationsReader,
-  List<Deal> deals = const [],
-  Future<List<Deal>> Function()? dealsReader,
   List<PartnerExperience> experiences = const [],
-  List<PartnerNotification> notifications = const [],
+  Future<List<PartnerExperience>> Function()? experiencesReader,
+  List<ExperienceRequest> hostRequests = const [],
+  List<CollabProposal> proposals = const [],
+  Future<List<CollabProposal>> Function()? proposalsReader,
   VenueSubscription subscription = _noSubscription,
   List<String>? routes,
   OperationsRepository? operations,
@@ -266,18 +268,19 @@ Widget harness(
       todayReservationsProvider.overrideWith(
         (ref, key) => reservationsReader?.call() ?? Future.value(reservations),
       ),
-      // The hero, deals rail, experiences strip and activity feed each own a
-      // provider. Empty fakes by default keep every other assertion stable.
       subscriptionProvider.overrideWith((ref, venueId) async => subscription),
-      dealsProvider.overrideWith(
-        (ref, key) => dealsReader?.call() ?? Future.value(deals),
+      // The Experiences card owns three reads: the event feed, the host
+      // requests this venue received and the invitations it sent.
+      experiencesProvider.overrideWith(
+        (ref, status) =>
+            experiencesReader?.call() ?? Future.value(experiences),
       ),
-      experiencesProvider.overrideWith((ref, status) async => experiences),
-      notificationsProvider.overrideWith(
-        (ref, unreadOnly) async => NotificationPage(
-          items: notifications,
-          unread: notifications.where((item) => !item.read).length,
-        ),
+      eventRequestsProvider.overrideWith(
+        (ref, key) async =>
+            key.status == 'requested' ? hostRequests : const <ExperienceRequest>[],
+      ),
+      collabProposalsProvider.overrideWith(
+        (ref, key) => proposalsReader?.call() ?? Future.value(proposals),
       ),
     ],
     child: MaterialApp(
@@ -296,9 +299,7 @@ Widget harness(
 
 void main() {
   group('overview', () {
-    testWidgets('shows live counters and the verification state', (
-      tester,
-    ) async {
+    testWidgets('shows the four operational counters', (tester) async {
       await tester.pumpWidget(
         harness(
           tester,
@@ -309,7 +310,8 @@ void main() {
             completed: 4,
             cancelled: 5,
             noShow: 6,
-            scans: 7,
+            tables: 12,
+            capacity: 40,
             activeDeals: 8,
             upcomingEvents: 9,
           ),
@@ -317,27 +319,48 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Bookings that will be served today, cancellations and no-shows are
-      // not reservations.
+      // Bookings that will be served today; cancellations and no-shows are not
+      // reservations.
       expect(find.text('10'), findsOneWidget);
       expect(find.text('2 to confirm'), findsOneWidget);
-      expect(find.text('7'), findsOneWidget);
+      expect(find.text('12'), findsOneWidget);
+      expect(find.text('of 40 seats'), findsOneWidget);
       expect(find.text('8'), findsOneWidget);
       expect(find.text('9'), findsOneWidget);
       expect(find.text('Verified'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('an unmeasured metric reads as unavailable, never as zero', (
+    testWidgets('keeps financial panels and notification feeds off Home', (
       tester,
     ) async {
       await tester.pumpWidget(
-        harness(tester, data: snapshot(scansAvailable: false)),
+        harness(
+          tester,
+          data: snapshot(pending: 1, activeDeals: 2, upcomingEvents: 3),
+        ),
       );
       await tester.pumpAndSettle();
 
-      expect(find.text(': '), findsOneWidget);
-      expect(find.text('Unavailable'), findsOneWidget);
+      // Money belongs to Insights, deals management to Deals, the feed to the
+      // inbox the header bell already opens.
+      expect(find.textContaining('Gross'), findsNothing);
+      expect(find.textContaining('Refunds'), findsNothing);
+      expect(find.textContaining('Net'), findsNothing);
+      expect(find.text('QR Scans'), findsNothing);
+      expect(find.text('Recent activity'), findsNothing);
+      expect(find.text('Active deals'), findsNothing);
+    });
+
+    testWidgets('an unconfigured table plan says so instead of a dead zero', (
+      tester,
+    ) async {
+      await tester.pumpWidget(harness(tester));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Not set up'), findsOneWidget);
+      expect(find.text('None live'), findsOneWidget);
+      expect(find.text('None upcoming'), findsOneWidget);
     });
   });
 
@@ -380,12 +403,15 @@ void main() {
       expect(later, lessThan(confirmed));
     });
 
-    testWidgets('an empty day shows a compact empty state', (tester) async {
+    testWidgets('an empty day shows one compact line', (tester) async {
       await tester.pumpWidget(harness(tester, reservations: const []));
       await tester.pumpAndSettle();
 
-      expect(find.text('No upcoming reservations'), findsOneWidget);
+      expect(find.text('No reservations today'), findsOneWidget);
       expect(find.text('Retry'), findsNothing);
+      // The empty state is a row, not a paragraph: it never explains how
+      // reservations are created on the screen a busy venue opens at service.
+      expect(find.textContaining('Share your QR'), findsNothing);
     });
 
     testWidgets('a failed read offers an inline retry that re-reads', (
@@ -399,7 +425,9 @@ void main() {
           reservationsReader: () async {
             reads++;
             if (failing) throw StateError('offline');
-            return [reservation('r1', 'Early Pending', ReservationStatus.pending, 19)];
+            return [
+              reservation('r1', 'Early Pending', ReservationStatus.pending, 19),
+            ];
           },
         ),
       );
@@ -419,7 +447,7 @@ void main() {
   });
 
   group('needs attention', () {
-    testWidgets('puts the actionable items before the notifications', (
+    testWidgets('lists the decisions the desk owes, most urgent first', (
       tester,
     ) async {
       await tester.pumpWidget(
@@ -428,7 +456,6 @@ void main() {
           data: snapshot(
             pending: 2,
             pendingRequests: 1,
-            unread: 5,
             verified: false,
           ),
         ),
@@ -438,19 +465,36 @@ void main() {
       expect(find.text('2 reservations to confirm'), findsOneWidget);
       expect(find.text('1 host request to review'), findsOneWidget);
       expect(find.text('Venue not verified'), findsOneWidget);
-      // Three slots, and a notification is the least urgent of them.
-      expect(find.text('5 unread notifications'), findsNothing);
+
+      final bookings = tester.getTopLeft(find.text('2 reservations to confirm')).dy;
+      final hosts = tester.getTopLeft(find.text('1 host request to review')).dy;
+      final verified = tester.getTopLeft(find.text('Venue not verified')).dy;
+      expect(bookings, lessThan(hosts));
+      expect(hosts, lessThan(verified));
     });
 
-    testWidgets('a quiet venue says so', (tester) async {
+    testWidgets('renders nothing at all when nothing is owed', (tester) async {
       await tester.pumpWidget(harness(tester, data: snapshot()));
       await tester.pumpAndSettle();
 
-      expect(find.text('All caught up'), findsOneWidget);
+      // No permanent "all caught up" card: the row is returned to the board.
+      expect(find.text('Needs attention'), findsNothing);
+      expect(find.text('All caught up'), findsNothing);
     });
   });
 
   group('quick actions', () {
+    testWidgets('Reservations tile lands on the day board', (tester) async {
+      final routes = <String>[];
+      await tester.pumpWidget(harness(tester, routes: routes));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const ValueKey('home-quick-reservations')));
+      await tester.pumpAndSettle();
+
+      expect(routes, contains('/service?tab=reservations'));
+    });
+
     testWidgets('Menu tile lands on its destination', (tester) async {
       final routes = <String>[];
       await tester.pumpWidget(harness(tester, routes: routes));
@@ -462,7 +506,7 @@ void main() {
       expect(routes, contains('/business?tab=menu'));
     });
 
-    testWidgets('Add Deal tile lands on its destination', (tester) async {
+    testWidgets('Create Deal tile lands on its destination', (tester) async {
       final routes = <String>[];
       await tester.pumpWidget(harness(tester, routes: routes));
       await tester.pumpAndSettle();
@@ -484,15 +528,19 @@ void main() {
       expect(routes, contains('/business?tab=qr'));
     });
 
-    testWidgets('Reservations tile lands on its destination', (tester) async {
-      final routes = <String>[];
-      await tester.pumpWidget(harness(tester, routes: routes));
+    testWidgets('carries the four actions the desk needs, and no others', (
+      tester,
+    ) async {
+      await tester.pumpWidget(harness(tester));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byKey(const ValueKey('home-quick-reservations')));
-      await tester.pumpAndSettle();
-
-      expect(routes, contains('/service?tab=reservations'));
+      expect(find.text('Reservations'), findsNWidgets(2));
+      expect(find.text('Edit Menu'), findsOneWidget);
+      expect(find.text('Create Deal'), findsOneWidget);
+      expect(find.text('Show QR'), findsOneWidget);
+      // Creating an experience lives in the Experiences section, where the
+      // evening book can explain what an empty one needs.
+      expect(find.text('Create Experience'), findsNothing);
     });
   });
 
@@ -507,7 +555,7 @@ void main() {
         harness(
           tester,
           surface: const Size(320, 640),
-          data: snapshot(pending: 2, scans: 7),
+          data: snapshot(pending: 2, tables: 6, activeDeals: 1),
           reservations: [
             reservation('r1', 'Early Pending', ReservationStatus.pending, 19),
           ],
@@ -516,20 +564,13 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(tester.takeException(), isNull);
-      // The hero is tall enough at 2.0× to push the overview past the first
-      // viewport; scrolling it in proves it lays out too.
       await tester.scrollUntilVisible(
-        find.text("TODAY'S OVERVIEW"),
+        find.text("Today's Overview"),
         240,
         scrollable: find.byType(Scrollable).first,
       );
       expect(tester.takeException(), isNull);
-      expect(find.text("TODAY'S OVERVIEW"), findsOneWidget);
-
-      // The sections below the fold (reservations, needs-attention) are laid
-      // out lazily by the ListView viewport. Scrolling them into view at 2.0×
-      // on a 320 dp surface exercises the same Rows the overview already
-      // passed, so the initial check is the meaningful one.
+      expect(find.text("Today's Overview"), findsOneWidget);
     });
 
     testWidgets('pull to refresh re-reads the dashboard', (tester) async {
@@ -544,6 +585,65 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(dashboardReads, greaterThan(before));
+    });
+
+    testWidgets('a phone shows the numbers, not a blank band under the label', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        harness(
+          tester,
+          surface: const Size(412, 915),
+          data: snapshot(
+            pending: 2,
+            tables: 8,
+            activeDeals: 3,
+            upcomingEvents: 1,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+
+      // The regression this holds shut: a KPI tile whose shell could not size
+      // itself inside a scroll view collapsed to nothing, and Home read as a
+      // header, one label, and a wall of black. Every tile has to carry real
+      // geometry on a phone.
+      // Scoped to the overview: 'Reservations' and 'Experiences' also name a
+      // quick action and a section, and getRect only accepts one match.
+      for (final label in [
+        'Reservations',
+        'Tables',
+        'Active Deals',
+        'Experiences',
+      ]) {
+        final rect = tester.getRect(
+          find.descendant(
+            of: find.byType(TodaysOverview),
+            matching: find.text(label),
+          ),
+        );
+        expect(rect.width, greaterThan(40), reason: label);
+        expect(rect.height, greaterThan(8), reason: label);
+      }
+      for (final key in [
+        'home-quick-reservations',
+        'home-quick-menu',
+        'home-quick-deal',
+        'home-quick-qr',
+      ]) {
+        final tile = find.byKey(ValueKey(key));
+        expect(tile, findsOneWidget, reason: key);
+        final rect = tester.getRect(tile);
+        expect(rect.width, greaterThan(100), reason: key);
+        // The desk operates this with one thumb, standing up, in a dining room.
+        expect(rect.height, greaterThanOrEqualTo(44), reason: key);
+      }
+
+      // And the header spends well under a third of the screen on branding, so
+      // the first numbers are on screen the moment the dashboard answers.
+      expect(tester.getRect(find.byType(HomeHero)).height, lessThan(200));
+      expect(tester.getRect(find.text("Today's Overview")).top, lessThan(300));
     });
   });
 
@@ -583,7 +683,7 @@ void main() {
     });
   });
 
-  group('brand hero', () {
+  group('restaurant header', () {
     testWidgets('shows the venue identity, trading hours and the plan', (
       tester,
     ) async {
@@ -616,11 +716,9 @@ void main() {
       expect(find.text('Pro · Monthly'), findsOneWidget);
       expect(find.text('Verified'), findsOneWidget);
 
-      // Cover and logo are both real media reads, and the pulse strip sits at
-      // the hero's foot.
-      expect(find.byType(MediaImage), findsNWidgets(2));
-      expect(find.byType(ServicePulseStrip), findsOneWidget);
-      expect(find.text('COVERS TODAY'), findsOneWidget);
+      // One brand mark, and no second service pulse repeating the KPI counters.
+      expect(find.byType(MediaImage), findsOneWidget);
+      expect(find.text('COVERS TODAY'), findsNothing);
       expect(tester.takeException(), isNull);
     });
 
@@ -636,60 +734,10 @@ void main() {
     });
   });
 
-  group('active deals', () {
-    testWidgets('a live deal shows its value in rupees and opens the deals', (
+  group('experiences', () {
+    testWidgets('summarises dinners and open proposals in one card', (
       tester,
     ) async {
-      final routes = <String>[];
-      await tester.pumpWidget(
-        harness(
-          tester,
-          routes: routes,
-          deals: [
-            deal('d1', 'Weekend Feast', value: 25),
-            deal('d2', 'Family Platter', kind: DealKind.fixed, value: 1500),
-            deal('d3', 'Draft Offer', status: DealStatus.draft),
-          ],
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.text('Weekend Feast'), findsOneWidget);
-      expect(find.text('25% off'), findsOneWidget);
-      // Money deals quote in PKR, the currency the partner surface uses.
-      expect(find.text('Rs 1500 off'), findsOneWidget);
-      // A draft is not something the desk can offer a guest.
-      expect(find.text('Draft Offer'), findsNothing);
-
-      await tester.ensureVisible(find.text('Weekend Feast'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Weekend Feast'));
-      await tester.pumpAndSettle();
-
-      expect(routes, contains('/business?tab=deals'));
-    });
-
-    testWidgets('a failed deals read leaves the rest of Home standing', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        harness(
-          tester,
-          data: snapshot(pending: 1),
-          dealsReader: () async => throw StateError('offline'),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.text('Unable to load deals'), findsOneWidget);
-      // The overview above the failure never blanks.
-      expect(find.text("TODAY'S OVERVIEW"), findsOneWidget);
-      expect(find.text('1 to confirm'), findsOneWidget);
-    });
-  });
-
-  group('upcoming experiences', () {
-    testWidgets('shows the next dinner with its seat count', (tester) async {
       await tester.pumpWidget(
         harness(
           tester,
@@ -698,66 +746,131 @@ void main() {
             // Another venue's dinner is not this venue's business.
             experience('e2', 'Someone Else', restaurantId: 'v2'),
             // A dinner already in the past is not upcoming.
-            experience(
-              'e3',
-              'Last Month',
-              ahead: const Duration(days: -30),
-            ),
+            experience('e3', 'Last Month', ahead: const Duration(days: -30)),
           ],
+          hostRequests: [hostRequest('r1', 'Coastal Supper')],
+          proposals: [invitation('p1', 'Late-night tasting')],
         ),
       );
       await tester.pumpAndSettle();
 
+      expect(
+        find.descendant(
+          of: find.byKey(const ValueKey('home-exp-count-upcoming')),
+          matching: find.text('1'),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(const ValueKey('home-exp-count-to-review')),
+          matching: find.text('1'),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(const ValueKey('home-exp-count-awaiting')),
+          matching: find.text('1'),
+        ),
+        findsOneWidget,
+      );
+
+      // Two rows only: the decision the desk owes, then the next dinner.
+      expect(find.text('Coastal Supper'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(const ValueKey('home-exp-request-r1')),
+          matching: find.text('Your decision'),
+        ),
+        findsOneWidget,
+      );
       expect(find.text('Chef Table'), findsOneWidget);
       expect(find.textContaining('18/24 seats'), findsOneWidget);
       expect(find.text('Someone Else'), findsNothing);
       expect(find.text('Last Month'), findsNothing);
+      // The invitation is counted, but Home does not list it: the inbox does.
+      expect(find.text('Late-night tasting'), findsNothing);
     });
-  });
 
-  group('recent activity', () {
-    testWidgets('lists the latest three and opens the inbox', (tester) async {
+    testWidgets('a host request opens the requests inbox', (tester) async {
       final routes = <String>[];
       await tester.pumpWidget(
         harness(
           tester,
           routes: routes,
-          notifications: [
-            notification('n1', 'Booking confirmed', read: false),
-            notification('n2', 'Deal redeemed', category: 'deal'),
-            notification('n3', 'New review', category: 'review'),
-            notification('n4', 'Older notice'),
-          ],
+          hostRequests: [hostRequest('r1', 'Coastal Supper')],
         ),
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Booking confirmed'), findsOneWidget);
-      expect(find.text('Deal redeemed'), findsOneWidget);
-      expect(find.text('New review'), findsOneWidget);
-      expect(find.text('Older notice'), findsNothing);
-
-      await tester.ensureVisible(find.text('Booking confirmed'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Booking confirmed'));
+      await tester.tap(find.byKey(const ValueKey('home-exp-request-r1')));
       await tester.pumpAndSettle();
 
-      expect(routes, contains('/inbox?tab=notifications'));
+      expect(routes, contains('/experiences?tab=requests'));
     });
-  });
 
-  group('empty rails', () {
-    testWidgets('each empty section points at the action that fills it', (
-      tester,
-    ) async {
+    testWidgets('the counters open the surface that owns them', (tester) async {
+      final routes = <String>[];
+      await tester.pumpWidget(
+        harness(tester, routes: routes, proposals: [invitation('p1', 'Tasting')]),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const ValueKey('home-exp-count-awaiting')));
+      await tester.pumpAndSettle();
+
+      expect(routes, contains('/experiences?tab=proposals'));
+    });
+
+    testWidgets('an empty book shows one honest state', (tester) async {
       await tester.pumpWidget(harness(tester));
       await tester.pumpAndSettle();
 
-      expect(find.text('No live deal right now'), findsOneWidget);
-      expect(find.text('Create a deal'), findsOneWidget);
-      expect(find.text('No upcoming experience'), findsOneWidget);
-      expect(find.text('No recent activity'), findsOneWidget);
-      expect(find.text('Open inbox'), findsOneWidget);
+      expect(find.text('No experiences yet'), findsOneWidget);
+      expect(find.text('Create experience'), findsOneWidget);
+    });
+
+    testWidgets('a failed dinner read keeps the proposals on screen', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        harness(
+          tester,
+          hostRequests: [hostRequest('r1', 'Coastal Supper')],
+          experiencesReader: () => Future.error(Exception('offline')),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Coastal Supper'), findsOneWidget);
+      // The half that failed reads as unknown, and says so.
+      expect(
+        find.descendant(
+          of: find.byKey(const ValueKey('home-exp-count-upcoming')),
+          matching: find.text('-'),
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('Some experiences could not load.'), findsOneWidget);
+      expect(find.text('Retry'), findsOneWidget);
+    });
+
+    testWidgets('View all opens the evening book', (tester) async {
+      final routes = <String>[];
+      await tester.pumpWidget(harness(tester, routes: routes));
+      await tester.pumpAndSettle();
+
+      final link = find.descendant(
+        of: find.byKey(const ValueKey('home-experiences')),
+        matching: find.text('View all'),
+      );
+      expect(link, findsOneWidget);
+
+      await tester.tap(link);
+      await tester.pumpAndSettle();
+
+      expect(routes, contains('/experiences?tab=experiences'));
     });
   });
 }

@@ -113,7 +113,7 @@ class QrStudioCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 5),
                 Text(
-                  'Discover our menu on DineCircle',
+                  'Menu, deals and more on DineCircle',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: style.ink.withValues(alpha: .65),

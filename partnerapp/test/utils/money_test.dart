@@ -17,7 +17,14 @@ void main() {
 
     test('honours an explicit currency symbol', () {
       expect(formatMoney(10, currency: 'EUR'), '€10.00');
-      expect(formatMoney(10, currency: 'PKR'), 'Rs 10.00');
+      expect(formatMoney(10, currency: 'PKR'), 'Rs. 10.00');
+    });
+
+    test('menu prices group from four digits, the way partners read them', () {
+      expect(formatMoney(1250, currency: 'PKR', decimals: 0), 'Rs. 1,250');
+      expect(formatMoney(999, currency: 'PKR', decimals: 0), 'Rs. 999');
+      expect(formatMoney(12500, currency: 'PKR', decimals: 0), 'Rs. 12,500');
+      expect(formatMoney(1234567, currency: 'PKR', decimals: 0), 'Rs. 1,234,567');
     });
 
     test('an unknown code falls back to the ISO code so the symbol is never wrong', () {

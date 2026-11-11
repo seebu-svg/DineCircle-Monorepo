@@ -41,7 +41,6 @@ class BusinessSectionScreen extends ConsumerWidget {
 
     return AppShell(
       active: PrimaryDestination.business,
-      title: 'Business',
       child: _tabFor(requestedTab),
     );
   }

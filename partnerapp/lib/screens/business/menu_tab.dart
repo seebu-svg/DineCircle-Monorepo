@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../models/catalog.dart';
+import '../../models/venue.dart';
 import '../../providers/app_providers.dart';
 import '../../providers/module_providers.dart';
 import '../../providers/venue_scope_provider.dart';
@@ -11,31 +12,39 @@ import '../../theme/app_text_styles.dart';
 import '../../utils/validators.dart';
 import '../../widgets/async_views.dart';
 import '../../widgets/image_upload_field.dart';
-import '../../widgets/premium_feedback.dart';
 import '../../widgets/role_gate_builder.dart';
-import 'guest_menu_preview.dart';
 import 'menu_reorder_sheet.dart';
 import 'menu_widgets.dart';
 
-/// Preset dietary tags that match the customer app's dietary-filter chips.
-/// Stored lower-case and hyphenated so the two apps always agree.
-const List<String> kPresetDietaryTags = [
-  'Vegetarian',
-  'Vegan',
-  'Spicy',
-  'Gluten-free',
-  'Contains nuts',
-  'Dairy-free',
-  'Halal',
-  'Seafood',
+/// Preset dietary tags, offered as chips in the dish sheet.
+///
+/// The value stored is the canonical key the Customer App styles and filters
+/// on (`contains-nuts`, `gluten-free`); the label is what a partner reads.
+/// Storing the label instead leaves guests with a neutral chip for the same
+/// dish, because `contains nuts` is not `contains-nuts`.
+const List<(String key, String label)> kPresetDietaryTags = [
+  ('vegetarian', 'Vegetarian'),
+  ('vegan', 'Vegan'),
+  ('spicy', 'Spicy'),
+  ('seafood', 'Seafood'),
+  ('gluten-free', 'Gluten free'),
+  ('contains-nuts', 'Contains nuts'),
+  ('dairy-free', 'Dairy free'),
+  ('halal', 'Halal'),
 ];
 
-/// The venue menu: sections, dishes and the 86-list availability toggle.
+/// The keys of [kPresetDietaryTags], for deciding whether a stored tag is one
+/// of the presets or genuine free text that belongs in the custom field.
+final Set<String> kPresetDietaryTagKeys = {
+  for (final (key, _) in kPresetDietaryTags) key,
+};
+
+/// The venue menu: categories, dishes and the 86 availability switch.
 ///
-/// Editing is manager-gated ([Capability.manageMenu]); a staff member still sees
-/// the full list read-only. Availability is the one everyday action staff care
-/// about, so a sold-out toggle is offered inline wherever an item is shown,
-/// routed through the bulk `…/menu/availability` endpoint the server exposes.
+/// Every menu write on the server needs the manager role, including the
+/// availability route, so the whole editing surface is gated on
+/// [Capability.manageMenu] rather than only the toolbar. A staff member gets
+/// the same list read-only, with no control that would come back forbidden.
 class MenuTab extends ConsumerStatefulWidget {
   const MenuTab({super.key});
 
@@ -45,22 +54,180 @@ class MenuTab extends ConsumerStatefulWidget {
 
 class _MenuTabState extends ConsumerState<MenuTab> {
   final ScrollController _scrollController = ScrollController();
-  final Map<String, GlobalKey> _sectionKeys = {};
+  final TextEditingController _search = TextEditingController();
+
+  String _query = '';
+  MenuAvailabilityFilter _availability = MenuAvailabilityFilter.all;
+
+  /// The category chip that reads as selected. Null means the *All* chip.
+  String? _categoryId;
+
+  /// Until the partner taps a chip, the menu opens on the first category. A
+  /// screen that starts as every dish of every category in one scroll is the
+  /// page this design set out to replace.
+  bool _categoryPicked = false;
+
+  /// Item ids with a write in flight. The switch repaints only after the
+  /// provider refresh, so without this a double tap fires two PATCHes.
+  final Set<String> _pendingWrites = {};
 
   @override
   void dispose() {
+    _search.dispose();
     _scrollController.dispose();
     super.dispose();
   }
 
-  void _jumpToSection(String sectionId) {
-    final key = _sectionKeys[sectionId];
-    if (key == null || key.currentContext == null) return;
-    Scrollable.ensureVisible(
-      key.currentContext!,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-      alignment: 0.05,
+  bool get _filtering =>
+      _query.trim().isNotEmpty ||
+      _availability != MenuAvailabilityFilter.all;
+
+  /// The category the list is showing, resolved against what still exists, so
+  /// deleting the selected category falls back to the first one rather than to
+  /// a blank screen.
+  String? _selectedCategoryId(List<MenuSection> sections) {
+    if (sections.isEmpty) return null;
+    if (!_categoryPicked) return sections.first.id;
+    if (_categoryId == null) return null;
+    return sections.any((section) => section.id == _categoryId)
+        ? _categoryId
+        : sections.first.id;
+  }
+
+  void _selectCategory(String? sectionId) {
+    setState(() {
+      _categoryPicked = true;
+      _categoryId = sectionId;
+    });
+    _scrollToTop();
+  }
+
+  void _setAvailability(MenuAvailabilityFilter filter) {
+    if (filter == _availability) return;
+    setState(() => _availability = filter);
+    _scrollToTop();
+  }
+
+  void _onQueryChanged(String value) => setState(() => _query = value);
+
+  void _clearFilters() {
+    setState(() {
+      _search.clear();
+      _query = '';
+      _availability = MenuAvailabilityFilter.all;
+    });
+  }
+
+  /// A dish that lives in another category is one tap away instead of a dead
+  /// "no results" under whichever category the partner happened to be on.
+  void _searchAllCategories() {
+    setState(() {
+      _categoryPicked = true;
+      _categoryId = null;
+    });
+    _scrollToTop();
+  }
+
+  void _scrollToTop() {
+    if (_scrollController.hasClients) _scrollController.jumpTo(0);
+  }
+
+  bool _matchesQuery(MenuItem item, String query) =>
+      query.isEmpty ||
+      item.name.toLowerCase().contains(query) ||
+      item.description.toLowerCase().contains(query);
+
+  bool _matchesAvailability(MenuItem item) => switch (_availability) {
+    MenuAvailabilityFilter.all => true,
+    MenuAvailabilityFilter.available => item.isAvailable,
+    MenuAvailabilityFilter.soldOut => !item.isAvailable,
+    MenuAvailabilityFilter.missingPhoto => item.photoUrl.isEmpty,
+  };
+
+  /// The categories the list renders, with their dishes narrowed by the search
+  /// and the availability filter.
+  ///
+  /// A filtered list drops the categories it has nothing left for; an
+  /// unfiltered one keeps every category, including a new empty one, so a
+  /// partner can see where the next dish has to go.
+  List<MenuSection> _visibleSections(
+    List<MenuSection> all,
+    String? selectedId,
+  ) {
+    final query = _query.trim().toLowerCase();
+    final scope = selectedId == null
+        ? all
+        : all.where((section) => section.id == selectedId);
+    final view = <MenuSection>[];
+    for (final section in scope) {
+      final items = section.sortedItems
+          .where(
+            (item) =>
+                _matchesQuery(item, query) && _matchesAvailability(item),
+          )
+          .toList();
+      if (items.isEmpty && _filtering) continue;
+      view.add(
+        items.length == section.items.length
+            ? section
+            : section.copyWith(items: items),
+      );
+    }
+    return view;
+  }
+
+  /// How many dishes the query would find if the category chip were ignored.
+  int _matchesOutside(List<MenuSection> all, String selectedId) {
+    final query = _query.trim().toLowerCase();
+    var count = 0;
+    for (final section in all) {
+      if (section.id == selectedId) continue;
+      count += section.items
+          .where(
+            (item) =>
+                _matchesQuery(item, query) && _matchesAvailability(item),
+          )
+          .length;
+    }
+    return count;
+  }
+
+  /// Derives the header status from what the public route can actually serve.
+  ///
+  /// A menu is live for a guest when the venue is verified and at least one
+  /// active category holds an available dish. Anything else is a draft, and
+  /// the reason is shown on the pill so the partner knows what to fix.
+  (MenuPublishState, String) _publishStatus(
+    List<MenuSection> sections, {
+    required bool venueVerified,
+  }) {
+    final totalItems = sections.fold<int>(
+      0,
+      (sum, section) => sum + section.items.length,
+    );
+    if (totalItems == 0) {
+      return (MenuPublishState.draft, 'Draft: no dishes on the menu yet');
+    }
+    if (!venueVerified) {
+      return (
+        MenuPublishState.draft,
+        'Draft: the venue is not verified, so guests see no menu',
+      );
+    }
+    final visibleDishes = sections
+        .where((section) => section.isActive)
+        .fold<int>(0, (sum, section) => sum + section.availableCount);
+    if (visibleDishes == 0) {
+      return (
+        MenuPublishState.draft,
+        'Draft: every dish is sold out or in a hidden category',
+      );
+    }
+    final hiddenCategories = sections.where((s) => !s.isActive).length;
+    return (
+      MenuPublishState.live,
+      'Live: $visibleDishes dishes visible to guests'
+      '${hiddenCategories == 0 ? '' : ' · $hiddenCategories hidden'}',
     );
   }
 
@@ -76,10 +243,66 @@ class _MenuTabState extends ConsumerState<MenuTab> {
   @override
   Widget build(BuildContext context) {
     final venueId = ref.watch(selectedVenueIdProvider);
+    final venue = ref.watch(selectedVenueProvider);
     final menu = ref.watch(menuProvider(venueId));
+    // The server requires the manager role on every menu write, the
+    // availability PATCH included, so one flag decides the whole editing
+    // surface. Staff get the same list read-only rather than a switch that
+    // would come back 403 and roll itself straight back again.
+    final canEdit = ref.watch(roleGateProvider).can(Capability.manageMenu);
+    return menu.when(
+      skipLoadingOnRefresh: true,
+      skipLoadingOnReload: true,
+      loading: () => const MenuSkeleton(),
+      error: (error, _) => RefreshIndicator(
+        onRefresh: _refresh,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(AppSpacing.paddingScreen),
+          children: [
+            const SizedBox(height: AppSpacing.xl),
+            ErrorView(
+              error: error,
+              onRetry: () => ref.invalidate(menuProvider(venueId)),
+            ),
+          ],
+        ),
+      ),
+      data: (all) => _buildMenu(context, venueId, venue, all, canEdit),
+    );
+  }
+
+  Future<void> _refresh() async {
+    final venueId = ref.read(selectedVenueIdProvider);
+    ref.invalidate(menuProvider(venueId));
+    await ref
+        .read(menuProvider(venueId).future)
+        .catchError((_) => const <MenuSection>[]);
+  }
+
+  /// Header, actions, search and categories stay put; only the dishes scroll.
+  ///
+  /// That is what keeps a category with forty dishes browsable on a phone: the
+  /// rail that switches categories never scrolls out of reach, and the search
+  /// field is always one tap away from a waiter holding the device.
+  Widget _buildMenu(
+    BuildContext context,
+    String venueId,
+    Venue? venue,
+    List<MenuSection> all,
+    bool canEdit,
+  ) {
+    final (publishState, publishDetail) = _publishStatus(
+      all,
+      venueVerified: venue?.verified ?? false,
+    );
+    final selectedId = _selectedCategoryId(all);
+    final view = _visibleSections(all, selectedId);
+    final venueName = (venue?.name ?? '').trim();
+
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Enhanced header with title and action toolbar.
         Padding(
           padding: const EdgeInsets.fromLTRB(
             AppSpacing.paddingScreen,
@@ -87,270 +310,446 @@ class _MenuTabState extends ConsumerState<MenuTab> {
             AppSpacing.paddingScreen,
             AppSpacing.sm,
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Title row with live status
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      'Menu Management',
-                      style: AppTextStyles.titleLarge.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                  ),
-                  // Live status badge
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.sm,
-                      vertical: 5,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.success.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
-                      border: Border.all(
-                        color: AppColors.success.withValues(alpha: 0.3),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          width: 6,
-                          height: 6,
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: AppColors.success,
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          'Live',
-                          style: AppTextStyles.labelSmall.copyWith(
-                            color: AppColors.success,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.md),
-              // Action toolbar
-              RoleGateBuilder(
-                capability: Capability.manageMenu,
-                builder: (context, allowed, _) => Row(
-                  children: [
-                    // Preview button
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: allowed
-                            ? () => _showGuestPreview(context, ref, venueId)
-                            : null,
-                        icon: const Icon(Icons.qr_code_2, size: 18),
-                        label: const Text('Preview'),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: AppColors.textPrimary,
-                          side: BorderSide(color: AppColors.border),
-                          padding: const EdgeInsets.symmetric(
-                            vertical: AppSpacing.sm,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.sm),
-                    // Reorder button
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: allowed
-                            ? () async {
-                                final sections = await ref.read(
-                                  menuProvider(venueId).future,
-                                ).catchError((_) => <MenuSection>[]);
-                                if (!context.mounted) return;
-                                await showReorderSheet(
-                                  context,
-                                  venueId: venueId,
-                                  mode: ReorderMode.sections,
-                                  sections: sections,
-                                );
-                                _showPublishConfirm();
-                              }
-                            : null,
-                        icon: const Icon(Icons.swap_vert, size: 18),
-                        label: const Text('Reorder'),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: AppColors.textPrimary,
-                          side: BorderSide(color: AppColors.border),
-                          padding: const EdgeInsets.symmetric(
-                            vertical: AppSpacing.sm,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.sm),
-                    // Add section button
-                    OutlinedButton(
-                      onPressed: allowed
-                          ? () => _editSection(context, ref, venueId, null)
-                          : null,
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.primary,
-                        side: BorderSide(color: AppColors.primary.withValues(alpha: 0.4)),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: AppSpacing.md,
-                          vertical: AppSpacing.sm,
-                        ),
-                      ),
-                      child: const Icon(Icons.create_new_folder_outlined, size: 20),
-                    ),
-                    const SizedBox(width: AppSpacing.sm),
-                    // Add item button (primary action)
-                    FilledButton.icon(
-                      onPressed: allowed
-                          ? () async {
-                              final sections = await ref.read(
-                                menuProvider(venueId).future,
-                              ).catchError((_) => <MenuSection>[]);
-                              if (!context.mounted) return;
-                              if (sections.isEmpty) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Create a section first before adding items'),
-                                    duration: Duration(seconds: 2),
-                                  ),
-                                );
-                                return;
-                              }
-                              _editItem(context, ref, venueId, sections.first, null);
-                            }
-                          : null,
-                      icon: const Icon(Icons.add, size: 18),
-                      label: const Text('Add Item'),
-                      style: FilledButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: AppSpacing.md,
-                          vertical: AppSpacing.sm,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+          child: MenuHeaderCard(
+            venue: venue,
+            name: venueName.isEmpty ? 'Your restaurant' : venueName,
+            identity: _identityLine(venue),
+            sections: all,
+            state: publishState,
+            statusDetail: publishDetail,
+            availability: _availability,
+            onFilter: _setAvailability,
           ),
         ),
+        Padding(
+          // The icon buttons carry their own 8dp of padding, so the row lines
+          // up with the cards above it at a slightly tighter inset.
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.paddingScreen - 8,
+          ),
+          child: MenuActionBar(
+            canEdit: canEdit,
+            canReorderSections: all.length > 1,
+            onAddItem: () => _addItem(context, ref, venueId, all),
+            onAddCategory: () => _editSection(context, ref, venueId, null),
+            onReorderSections: () => _reorderSections(context, ref, venueId),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.paddingScreen,
+            AppSpacing.sm,
+            AppSpacing.paddingScreen,
+            0,
+          ),
+          child: MenuSearchRow(
+            searchController: _search,
+            onSearchChanged: _onQueryChanged,
+            availability: _availability,
+            onAvailabilityChanged: _setAvailability,
+          ),
+        ),
+        if (all.isNotEmpty) ...[
+          const SizedBox(height: AppSpacing.sm + 2),
+          MenuCategoryRail(
+            sections: all,
+            selectedId: selectedId,
+            totalItems: all.fold(0, (sum, s) => sum + s.items.length),
+            onSelect: _selectCategory,
+          ),
+        ],
+        const SizedBox(height: AppSpacing.sm),
         Expanded(
-          child: AsyncView<List<MenuSection>>(
-            value: menu,
-            onRetry: () => ref.invalidate(menuProvider(venueId)),
-            emptyState: EmptyState(
-              title: 'No menu yet',
-              message: 'Add a section, then dishes to it. The guest-facing menu '
-                  'is built from these sections in order.',
-              icon: Icons.restaurant_menu_outlined,
-              action: RoleGateBuilder(
-                capability: Capability.manageMenu,
-                builder: (context, allowed, _) => FilledButton.icon(
-                  onPressed: allowed
-                      ? () => _editSection(context, ref, venueId, null)
-                      : null,
-                  icon: const Icon(Icons.add),
-                  label: const Text('New section'),
-                ),
-              ),
-            ),
-            builder: (context, sections) {
-              // Ensure every section has a GlobalKey for jump-to.
-              for (final s in sections) {
-                _sectionKeys.putIfAbsent(s.id, () => GlobalKey());
-              }
-              return RefreshIndicator(
-                onRefresh: () async => ref.invalidate(menuProvider(venueId)),
-                child: ListView(
-                  controller: _scrollController,
-                  padding: const EdgeInsets.only(
-                    bottom: AppSpacing.xl,
-                    left: AppSpacing.paddingScreen,
-                    right: AppSpacing.paddingScreen,
-                  ),
-                  children: [
-                    MenuSummaryStrip(sections: sections),
-                    const SizedBox(height: AppSpacing.md),
-                    SectionJumpChips(
-                      sections: sections,
-                      onJump: _jumpToSection,
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    for (final section in sections) ...[
-                      KeyedSubtree(
-                        key: _sectionKeys[section.id],
-                        child: CollapsibleSectionCard(
-                          section: section,
-                          onEditSection: () =>
-                              _editSection(context, ref, venueId, section),
-                          onDeleteSection: () =>
-                              _deleteSection(context, ref, venueId, section),
-                          onAddItem: () =>
-                              _editItem(context, ref, venueId, section, null),
-                          onReorderItems: () async {
-                            await showReorderSheet(
-                              context,
-                              venueId: venueId,
-                              mode: ReorderMode.items,
-                              section: section,
-                            );
-                            _showPublishConfirm();
-                          },
-                          onEditItem: (item) =>
-                              _editItem(context, ref, venueId, section, item),
-                          onDeleteItem: (item) =>
-                              _deleteItem(context, ref, venueId, item),
-                          onToggleItem: (item, available) =>
-                              _toggleAvailability(ref, venueId, item, available),
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.md),
-                    ],
-                    const NotTrackedTile(
-                      metric: 'Modifiers and featured items',
-                      reason:
-                          'The DineCircle platform does not currently expose '
-                          'modifiers or featured-item flags to partners. These '
-                          'are managed on the guest app side.',
-                    ),
-                  ],
-                ),
-              );
-            },
+          child: RefreshIndicator(
+            onRefresh: _refresh,
+            child: all.isEmpty
+                ? _emptyMenu(context, venueId)
+                : _menuList(context, venueId, all, view, selectedId, canEdit),
           ),
         ),
       ],
     );
   }
 
-  Future<void> _showGuestPreview(
+  Widget _emptyMenu(BuildContext context, String venueId) {
+    return ListView(
+      controller: _scrollController,
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.paddingScreen,
+        AppSpacing.lg,
+        AppSpacing.paddingScreen,
+        AppSpacing.xl,
+      ),
+      children: [
+        EmptyState(
+          title: 'No menu yet',
+          message: 'Add a category, then dishes to it. Guests see this menu in '
+              'the order you build it.',
+          icon: Icons.restaurant_menu_outlined,
+          compact: true,
+          action: RoleGateBuilder(
+            capability: Capability.manageMenu,
+            builder: (context, allowed, _) => FilledButton.icon(
+              onPressed: allowed
+                  ? () => _editSection(context, ref, venueId, null)
+                  : null,
+              icon: const Icon(Icons.add, size: 18),
+              label: const Text('New category'),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _menuList(
+    BuildContext context,
+    String venueId,
+    List<MenuSection> all,
+    List<MenuSection> view,
+    String? selectedId,
+    bool canEdit,
+  ) {
+    return ListView(
+      controller: _scrollController,
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.paddingScreen,
+        AppSpacing.xs,
+        AppSpacing.paddingScreen,
+        AppSpacing.xl,
+      ),
+      children: [
+        if (_filtering) ...[
+          MenuFilterSummary(
+            caption: _filterCaption(all, view, selectedId),
+            onClear: _clearFilters,
+          ),
+          const SizedBox(height: AppSpacing.sm),
+        ],
+        if (view.isEmpty)
+          _noMatches(all, selectedId)
+        else
+          for (var i = 0; i < view.length; i++) ...[
+            if (i > 0) const SizedBox(height: AppSpacing.lg),
+            MenuSectionGroup(
+              section: view[i],
+              canEdit: canEdit,
+              onAddItem: () => _editItem(
+                context,
+                ref,
+                venueId,
+                _canonical(venueId, view[i]),
+                null,
+              ),
+              onReorderItems: () => _reorderItems(
+                context,
+                ref,
+                venueId,
+                _canonical(venueId, view[i]),
+              ),
+              onEditSection: () =>
+                  _editSection(context, ref, venueId, view[i]),
+              onDeleteSection: () =>
+                  _deleteSection(context, ref, venueId, view[i]),
+              onEditItem: (item) =>
+                  _editItem(context, ref, venueId, view[i], item),
+              onDuplicateItem: (item) =>
+                  _duplicateItem(context, ref, venueId, view[i], item),
+              onMoveItem: (item) =>
+                  _moveItem(context, ref, venueId, view[i], item),
+              onDeleteItem: (item) =>
+                  _deleteItem(context, ref, venueId, item),
+              onToggleItem: (item, available) => _toggleAvailability(
+                context,
+                ref,
+                venueId,
+                item,
+                available,
+              ),
+            ),
+          ],
+      ],
+    );
+  }
+
+  Widget _noMatches(List<MenuSection> all, String? selectedId) {
+    final query = _query.trim();
+    final elsewhere =
+        selectedId != null && _matchesOutside(all, selectedId) > 0;
+    return EmptyState(
+      title: 'No dishes match',
+      message: query.isEmpty
+          ? 'Nothing in this menu is ${_availability.label.toLowerCase()} '
+                'right now.'
+          : 'No dish in this menu matches "$query".',
+      icon: Icons.search_off,
+      compact: true,
+      action: Wrap(
+        spacing: AppSpacing.sm,
+        runSpacing: AppSpacing.sm,
+        alignment: WrapAlignment.center,
+        children: [
+          if (elsewhere)
+            OutlinedButton(
+              onPressed: _searchAllCategories,
+              child: const Text('Search all dishes'),
+            ),
+          TextButton(
+            onPressed: _clearFilters,
+            child: const Text('Clear filters'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// "Sold out · 3 of 24 dishes" while a filter is on, and nothing when it is
+  /// not, so an unfiltered list never reads as a subset of itself.
+  String _filterCaption(
+    List<MenuSection> all,
+    List<MenuSection> view,
+    String? selectedId,
+  ) {
+    int dishes(List<MenuSection> sections) =>
+        sections.fold(0, (sum, section) => sum + section.items.length);
+    final scope = selectedId == null
+        ? all
+        : all.where((section) => section.id == selectedId).toList();
+    final shown = dishes(view);
+    final total = dishes(scope);
+    final query = _query.trim();
+    return <String>[
+      if (query.isNotEmpty) 'Searching "$query"',
+      if (_availability != MenuAvailabilityFilter.all) _availability.label,
+      '$shown of $total ${total == 1 ? 'dish' : 'dishes'}',
+    ].join(' · ');
+  }
+
+  /// "Seafood · Karachi", whichever of those the venue actually has.
+  String _identityLine(Venue? venue) {
+    if (venue == null) return '';
+    return <String>[
+      ...venue.cuisines.take(2),
+      if (venue.city.trim().isNotEmpty) venue.city.trim(),
+    ].join(' · ');
+  }
+
+  /// The live, unfiltered copy of a category.
+  ///
+  /// Filtering narrows the items for display, but any write that counts or
+  /// renumbers dishes has to run against the full list: reordering the three
+  /// visible dishes of a hidden-photo filter would otherwise renumber the
+  /// dishes that are not on screen.
+  MenuSection _canonical(String venueId, MenuSection section) {
+    final all =
+        ref.read(menuProvider(venueId)).valueOrNull ?? const <MenuSection>[];
+    return all.firstWhere(
+      (s) => s.id == section.id,
+      orElse: () => section,
+    );
+  }
+
+  /// Primary action. A dish cannot exist without a category, and the server
+  /// rejects an item posted without a `sectionId` this restaurant owns, so an
+  /// empty menu is sent to the category form instead of a sheet that could
+  /// never save.
+  void _addItem(
+    BuildContext context,
+    WidgetRef ref,
+    String venueId,
+    List<MenuSection> sections,
+  ) {
+    if (sections.isEmpty) {
+      showToast(context, 'Add a category first, then dishes to it');
+      _editSection(context, ref, venueId, null);
+      return;
+    }
+    // A dish is added to the category the partner is looking at, not to
+    // whichever category happens to sort first, and never to a category that
+    // has just been deleted from under the chip.
+    final selectedId = _selectedCategoryId(sections);
+    final target = selectedId == null
+        ? sections.first
+        : sections.firstWhere(
+            (section) => section.id == selectedId,
+            orElse: () => sections.first,
+          );
+    _editItem(context, ref, venueId, target, null);
+  }
+
+  Future<void> _reorderSections(
     BuildContext context,
     WidgetRef ref,
     String venueId,
   ) async {
-    final menu = await ref.read(menuProvider(venueId).future);
+    final sections = await ref
+        .read(menuProvider(venueId).future)
+        .catchError((_) => <MenuSection>[]);
     if (!context.mounted) return;
-    showModalBottomSheet<void>(
+    if (sections.length < 2) {
+      showToast(context, 'There is only one category to order');
+      return;
+    }
+    await showReorderSheet(
+      context,
+      venueId: venueId,
+      mode: ReorderMode.sections,
+      sections: sections,
+    );
+    _showPublishConfirm();
+  }
+
+  Future<void> _reorderItems(
+    BuildContext context,
+    WidgetRef ref,
+    String venueId,
+    MenuSection section,
+  ) async {
+    if (section.items.length < 2) {
+      showToast(context, '${section.name} has one dish to order');
+      return;
+    }
+    await showReorderSheet(
+      context,
+      venueId: venueId,
+      mode: ReorderMode.items,
+      section: section,
+    );
+    _showPublishConfirm();
+  }
+
+  /// Copies a dish into the same category at the end of its list.
+  ///
+  /// Price, description, photo and dietary tags all come across, because a
+  /// partner duplicating a dish is almost always cloning the whole record and
+  /// changing one field. The server caps a name at 120 characters, so the
+  /// suffix is taken off the name rather than cutting "copy" short.
+  Future<void> _duplicateItem(
+    BuildContext context,
+    WidgetRef ref,
+    String venueId,
+    MenuSection section,
+    MenuItem item,
+  ) async {
+    if (!_pendingWrites.add(item.id)) return;
+    try {
+      final target = _canonical(venueId, section);
+      await ref.read(menuRepositoryProvider).createItem(
+        venueId,
+        sectionId: target.id,
+        name: _copyName(item.name),
+        price: item.price,
+        description: item.description,
+        position: target.items.length,
+        isAvailable: item.isAvailable,
+        dietaryTags: item.dietaryTags,
+        photoUrl: item.photoUrl,
+      );
+      _showPublishConfirm();
+    } catch (error) {
+      if (context.mounted) {
+        reportError(context, error, prefix: 'Could not duplicate dish:');
+      }
+    } finally {
+      ref.invalidate(menuProvider(venueId));
+      _pendingWrites.remove(item.id);
+    }
+  }
+
+  static String _copyName(String name) {
+    const suffix = ' copy';
+    // `itemSchema.name` is `z.string().min(1).max(120)` on the server; past
+    // that the create would come back 422 after the sheet had closed.
+    const limit = 120;
+    if (name.length + suffix.length <= limit) return '$name$suffix';
+    return '${name.substring(0, limit - suffix.length)}$suffix';
+  }
+
+  /// Moves a dish to another category.
+  ///
+  /// The server only accepts a `sectionId` belonging to the same restaurant
+  /// (422 otherwise), and the position the dish held in its old group means
+  /// nothing in the new one, so it lands at the end and is reordered from
+  /// there.
+  Future<void> _moveItem(
+    BuildContext context,
+    WidgetRef ref,
+    String venueId,
+    MenuSection section,
+    MenuItem item,
+  ) async {
+    final all =
+        ref.read(menuProvider(venueId)).valueOrNull ?? const <MenuSection>[];
+    final options = all.where((s) => s.id != section.id).toList();
+    if (options.isEmpty) {
+      showToast(context, 'This menu has no other category to move to');
+      return;
+    }
+    final destination = await showModalBottomSheet<MenuSection>(
       context: context,
-      isScrollControlled: true,
-      builder: (_) => GuestMenuPreviewSheet(
-        venueId: venueId,
-        sections: menu,
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Padding(
+              padding: EdgeInsets.fromLTRB(
+                AppSpacing.md,
+                AppSpacing.md,
+                AppSpacing.md,
+                AppSpacing.xs,
+              ),
+              child: Text('Move to category'),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.md,
+                0,
+                AppSpacing.md,
+                AppSpacing.sm,
+              ),
+              child: Text(
+                '${item.name} · currently in ${section.name}',
+                style: AppTextStyles.caption.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            for (final option in options)
+              ListTile(
+                leading: const Icon(Icons.folder_outlined),
+                title: Text(
+                  option.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                subtitle: Text('${option.items.length} dishes'),
+                onTap: () => Navigator.of(sheetContext).pop(option),
+              ),
+          ],
+        ),
       ),
     );
+    if (destination == null) return;
+    try {
+      await ref.read(menuRepositoryProvider).updateItem(
+        venueId,
+        item.id,
+        sectionId: destination.id,
+        position: _canonical(venueId, destination).items.length,
+      );
+      _showPublishConfirm();
+    } catch (error) {
+      if (context.mounted) {
+        reportError(context, error, prefix: 'Could not move dish:');
+      }
+    } finally {
+      ref.invalidate(menuProvider(venueId));
+    }
   }
 
   Future<void> _editSection(
@@ -462,22 +861,34 @@ class _MenuTabState extends ConsumerState<MenuTab> {
     }
   }
 
+  /// 86 / un-86 a dish.
+  ///
+  /// A rejected PATCH is reported and the list reloaded, so the switch always
+  /// ends on what the server holds. Swallowing the error used to leave the
+  /// toggle painted sold-out while the row stayed available, which is exactly
+  /// how a kitchen that is out of a dish keeps taking orders for it.
   Future<void> _toggleAvailability(
+    BuildContext context,
     WidgetRef ref,
     String venueId,
     MenuItem item,
     bool available,
   ) async {
+    if (!_pendingWrites.add(item.id)) return;
     try {
       final updated = await ref
           .read(menuRepositoryProvider)
           .setAvailability(venueId, [item.id], isAvailable: available);
-      ref.invalidate(menuProvider(venueId));
       if (updated.isEmpty) {
         debugPrint('Availability unchanged for ${item.id}');
       }
-    } catch (_) {
+    } catch (error) {
+      if (context.mounted) {
+        reportError(context, error, prefix: 'Could not update availability:');
+      }
+    } finally {
       ref.invalidate(menuProvider(venueId));
+      _pendingWrites.remove(item.id);
     }
   }
 }
@@ -644,19 +1055,16 @@ class _ItemSheetState extends ConsumerState<_ItemSheet> {
     // Seed preset chips and custom text from existing tags.
     final existing = i?.dietaryTags ?? const <String>[];
     for (final tag in existing) {
-      final match = kPresetDietaryTags.firstWhere(
-        (p) => p.toLowerCase() == tag.toLowerCase(),
-        orElse: () => '',
-      );
-      if (match.isNotEmpty) {
-        _selectedPresetTags.add(match);
+      final key = dietaryTagKey(tag);
+      if (kPresetDietaryTagKeys.contains(key)) {
+        _selectedPresetTags.add(key);
       } else {
-        // Non-preset tag goes into the custom text field.
-        if (_customTags.text.isEmpty) {
-          _customTags.text = tag;
-        } else {
-          _customTags.text = '${_customTags.text}, $tag';
-        }
+        // A stored key is shown as a label in the free-text field; the key
+        // form is what goes back out, so nobody has to read `contains-nuts`.
+        final label = dietaryTagLabel(tag);
+        _customTags.text = _customTags.text.isEmpty
+            ? label
+            : '${_customTags.text}, $label';
       }
     }
   }
@@ -669,10 +1077,16 @@ class _ItemSheetState extends ConsumerState<_ItemSheet> {
     super.dispose();
   }
 
+  /// Tags to send: the selected presets, already canonical keys, plus whatever
+  /// the partner typed, normalised into the same key space.
+  ///
+  /// The Customer App styles and filters dishes on `contains-nuts`, so saving
+  /// the label `Contains nuts` instead leaves a guest with a neutral chip on
+  /// the very same dish. One key space is what keeps the two apps agreeing.
   List<String> get _mergedTags {
     final custom = _customTags.text
         .split(',')
-        .map((e) => e.trim())
+        .map(dietaryTagKey)
         .where((e) => e.isNotEmpty);
     final merged = <String>{..._selectedPresetTags, ...custom};
     return merged.take(Validators.dietaryTagsMax).toList();
@@ -837,7 +1251,7 @@ class _ItemSheetState extends ConsumerState<_ItemSheet> {
                             keyboardType: TextInputType.number,
                             decoration: const InputDecoration(
                               labelText: 'Price *',
-                              prefixText: 'Rs ',
+                              prefixText: 'Rs. ',
                               hintText: '1450',
                             ),
                             validator: (v) =>
@@ -905,16 +1319,16 @@ class _ItemSheetState extends ConsumerState<_ItemSheet> {
                       spacing: AppSpacing.xs,
                       runSpacing: AppSpacing.xs,
                       children: [
-                        for (final tag in kPresetDietaryTags)
+                        for (final (key, label) in kPresetDietaryTags)
                           _CompactTagChip(
-                            label: tag,
-                            selected: _selectedPresetTags.contains(tag),
+                            label: label,
+                            selected: _selectedPresetTags.contains(key),
                             onSelected: (selected) {
                               setState(() {
                                 if (selected) {
-                                  _selectedPresetTags.add(tag);
+                                  _selectedPresetTags.add(key);
                                 } else {
-                                  _selectedPresetTags.remove(tag);
+                                  _selectedPresetTags.remove(key);
                                 }
                               });
                             },

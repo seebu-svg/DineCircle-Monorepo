@@ -28,7 +28,6 @@ class ServiceSectionScreen extends ConsumerWidget {
     final tab = routeQuery(context)['tab'];
     return AppShell(
       active: PrimaryDestination.business,
-      title: 'Service',
       child: SectionTabs(
         initialTab: tab,
         tabs: const [

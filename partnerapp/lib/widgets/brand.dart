@@ -133,13 +133,22 @@ class BrandLockup extends StatelessWidget {
 ///
 /// Fits beside the venue switcher on phones without pushing the title off
 /// screen. On desktop the sidebar uses [BrandLockup] instead.
+///
+/// [compact] drops the wordmark and keeps the badge. The header uses it on a
+/// phone, where the wordmark plus the venue chip left no room for the venue
+/// name and the switcher ellipsised to three letters. The badge is the brand
+/// on its own, and the wordmark is still one tap away in the account menu.
 class BrandMark extends StatelessWidget {
-  const BrandMark({super.key});
+  const BrandMark({super.key, this.compact = false});
+
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: compact
+          ? const EdgeInsets.all(4)
+          : const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
         color: AppColors.surface.withValues(alpha: 0.5),
@@ -148,8 +157,10 @@ class BrandMark extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           const BrandBadge(height: 30),
-          const SizedBox(width: 8),
-          const BrandWordmark(height: 18),
+          if (!compact) ...[
+            const SizedBox(width: 8),
+            const BrandWordmark(height: 18),
+          ],
         ],
       ),
     );

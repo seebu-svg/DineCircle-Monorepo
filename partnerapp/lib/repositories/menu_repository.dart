@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import '../api/api_client.dart';
 import '../models/catalog.dart';
 
@@ -158,27 +160,65 @@ class MenuRepository {
 
   // ── Reorder helpers ───────────────────────────────────────────────────────
 
-  /// PATCHes each section whose position changed, in order. Stops at the first
-  /// failure so the caller can invalidate and surface the error.
+  /// Writes the new category order as one PATCH per section that moved.
+  ///
+  /// The API exposes no bulk reorder route, so an order is N writes and can
+  /// fail half way. When it does, the positions already committed are put back
+  /// to what they were when this call started and the original error is
+  /// rethrown: a menu left in an order that is neither the old one nor the new
+  /// one is worse than a drag that simply did not take. Rollback is best
+  /// effort, because the caller surfaces the first failure and reloads the
+  /// list from the server either way.
   Future<void> reorderSections(
     String venueId,
     List<MenuSection> ordered,
   ) async {
-    for (var i = 0; i < ordered.length; i++) {
-      if (ordered[i].position == i) continue;
-      await updateSection(venueId, ordered[i].id, position: i);
+    final committed = <(String id, int position)>[];
+    try {
+      for (var i = 0; i < ordered.length; i++) {
+        final section = ordered[i];
+        if (section.position == i) continue;
+        await updateSection(venueId, section.id, position: i);
+        committed.add((section.id, section.position));
+      }
+    } catch (error) {
+      for (final (id, position) in committed.reversed) {
+        try {
+          await updateSection(venueId, id, position: position);
+        } catch (rollbackError) {
+          debugPrint(
+            'Section reorder rollback failed for $id: $rollbackError',
+          );
+        }
+      }
+      rethrow;
     }
   }
 
-  /// PATCHes each item whose position changed, in order. Stops at the first
-  /// failure so the caller can invalidate and surface the error.
+  /// Writes the new dish order as one PATCH per item that moved, rolling back
+  /// the ones that already landed if a later write fails. See
+  /// [reorderSections] for why the rollback exists and why it is best effort.
   Future<void> reorderItems(
     String venueId,
     List<MenuItem> ordered,
   ) async {
-    for (var i = 0; i < ordered.length; i++) {
-      if (ordered[i].position == i) continue;
-      await updateItem(venueId, ordered[i].id, position: i);
+    final committed = <(String id, int position)>[];
+    try {
+      for (var i = 0; i < ordered.length; i++) {
+        final item = ordered[i];
+        if (item.position == i) continue;
+        await updateItem(venueId, item.id, position: i);
+        committed.add((item.id, item.position));
+      }
+    } catch (error) {
+      for (final (id, position) in committed.reversed) {
+        try {
+          await updateItem(venueId, id, position: position);
+        } catch (rollbackError) {
+          debugPrint('Item reorder rollback failed for $id: $rollbackError');
+        }
+      }
+      rethrow;
     }
   }
 

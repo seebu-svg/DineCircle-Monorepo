@@ -73,7 +73,7 @@ class VenueSubscription {
     'Unlimited deals and promotions',
     'Reservation management with calendar',
     'Insights dashboard with trend charts',
-    'QR code for guest-facing menu',
+    'QR code for your public restaurant page',
     'Host experience approvals',
     'Priority partner support',
   ];

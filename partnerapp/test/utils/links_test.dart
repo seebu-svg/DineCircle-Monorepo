@@ -3,25 +3,29 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:partnerapp/utils/links.dart';
 
 /// The venue QR encodes this string, so it has to be an absolute `https` link a
-/// guest's own camera can open, and it has to fail closed (empty) rather than
-/// produce `https://dinecircle.app/menu/` when the id is missing.
+/// guest's own camera can open, it has to land on the restaurant profile rather
+/// than a menu-only page, and it has to fail closed (empty) rather than produce
+/// `https://dinecircle.app/venues/` when the id is missing.
 void main() {
   group('venuePublicUrl', () {
-    test('points at the public web menu page', () {
+    test('points at the public restaurant profile', () {
       expect(
         venuePublicUrl('ven_123'),
-        'https://dinecircle.app/menu/ven_123',
+        'https://dinecircle.app/venues/ven_123',
       );
     });
 
     test('trims the id before encoding it', () {
-      expect(venuePublicUrl('  ven_123  '), 'https://dinecircle.app/menu/ven_123');
+      expect(
+        venuePublicUrl('  ven_123  '),
+        'https://dinecircle.app/venues/ven_123',
+      );
     });
 
     test('percent-encodes ids that are not URL safe', () {
       expect(
         venuePublicUrl('a b/c'),
-        'https://dinecircle.app/menu/a%20b%2Fc',
+        'https://dinecircle.app/venues/a%20b%2Fc',
       );
     });
 
@@ -34,7 +38,10 @@ void main() {
       final uri = Uri.parse(venuePublicUrl('ven_123'));
       expect(uri.scheme, 'https');
       expect(uri.host, 'dinecircle.app');
-      expect(uri.path, '/menu/ven_123');
+      expect(uri.path, '/venues/ven_123');
+      // The guest app's parser reads the id off `/venues/<uuid>` and opens the
+      // restaurant profile, so the path segment is part of the contract.
+      expect(uri.pathSegments, ['venues', 'ven_123']);
     });
   });
 }

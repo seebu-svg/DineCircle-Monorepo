@@ -59,24 +59,27 @@ class DateRange {
   static List<DateRange> presets([DateTime? now]) {
     final end = now ?? DateTime.now();
     final today = ServiceDate.startOfDay(end);
-    final endOfDay = today.add(const Duration(days: 1));
+    // Midnights, not `+ Duration(days: 1)`: across a daylight-saving change a
+    // 24-hour add lands at 23:00 or 01:00, which would move the window's last
+    // hour of bookings into or out of the range.
+    final endOfDay = ServiceDate.addDays(today, 1);
     return [
       DateRange(
         id: '7d',
         label: 'Last 7 days',
-        from: today.subtract(const Duration(days: 6)),
+        from: ServiceDate.addDays(today, -6),
         to: endOfDay,
       ),
       DateRange(
         id: '30d',
         label: 'Last 30 days',
-        from: today.subtract(const Duration(days: 29)),
+        from: ServiceDate.addDays(today, -29),
         to: endOfDay,
       ),
       DateRange(
         id: '90d',
         label: 'Last 90 days',
-        from: today.subtract(const Duration(days: 89)),
+        from: ServiceDate.addDays(today, -89),
         to: endOfDay,
       ),
       DateRange(

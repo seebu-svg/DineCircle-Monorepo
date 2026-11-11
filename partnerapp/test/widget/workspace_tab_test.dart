@@ -9,13 +9,16 @@ import 'package:partnerapp/providers/module_providers.dart';
 import 'package:partnerapp/providers/venue_scope_provider.dart';
 import 'package:partnerapp/repositories/venue_repository.dart';
 import 'package:partnerapp/screens/business/workspace_tab.dart';
+import 'package:partnerapp/screens/business/workspace_widgets.dart';
 import 'package:partnerapp/theme/app_theme.dart';
 
-/// The workspace is a navigation surface, so the two things a rebuild can
-/// silently break are duplicated destinations and a layout that only survives
-/// at the designer's screen size. These tests hold both: every shortcut and
-/// every row appears exactly once, and the whole page still lays out at 320dp
-/// under 2.0 text scaling. Reads are overridden, so nothing here needs a server.
+/// The workspace is a navigation surface, so the three things a rebuild can
+/// silently break are duplicated destinations, dead rows, and a layout that only
+/// survives at the designer's screen size. These tests hold all three: every row
+/// opens its existing route, nothing is listed twice, and the page still lays
+/// out at 320dp under 2.0 text scaling. Reads are overridden, so nothing here
+/// needs a server.
+
 final _venue = Venue(
   id: 'v1',
   name: 'Sea & Salt',
@@ -43,52 +46,74 @@ Widget _harness({
   String selectedId = 'v1',
   bool noVenue = false,
   double textScale = 1,
-}) =>
-    ProviderScope(
-      overrides: [
-        // An empty scope is the only way to reach the "no venue" state, since
-        // VenueScopeState.selected falls back to the first venue otherwise.
-        venueScopeProvider.overrideWith(
-          () => _Scope(noVenue ? const [] : [_venue], noVenue ? '' : selectedId),
-        ),
-        venueDetailProvider.overrideWith(
-          (ref, venueId) async => VenueDetail(
-            venue: _venue,
-            counts: const VenueCounts(
-              branches: 2,
-              tables: 14,
-              menuItems: 48,
-              upcomingEvents: 6,
-              pendingReservations: 3,
-            ),
+  List<String>? routes,
+}) {
+  final captured = routes ?? <String>[];
+  return ProviderScope(
+    overrides: [
+      // An empty scope is the only way to reach the "no venue" state, since
+      // VenueScopeState.selected falls back to the first venue otherwise.
+      venueScopeProvider.overrideWith(
+        () => _Scope(noVenue ? const [] : [_venue], noVenue ? '' : selectedId),
+      ),
+      venueDetailProvider.overrideWith(
+        (ref, venueId) async => VenueDetail(
+          venue: _venue,
+          counts: const VenueCounts(
+            branches: 2,
+            tables: 14,
+            menuItems: 48,
+            upcomingEvents: 6,
+            pendingReservations: 3,
           ),
         ),
-        subscriptionProvider.overrideWith((ref, venueId) async {
-          if (failSubscription) throw StateError('offline');
-          return subscription ??
-              VenueSubscription(
-                plan: SubscriptionPlan.monthly,
-                status: SubscriptionStatus.active,
-                pricePkr: 5000,
-                periodEnd: DateTime(2026, 12, 31),
-                autoRenew: true,
-              );
-        }),
-      ],
-      child: MaterialApp(
-        theme: AppTheme.dark,
-        home: const Scaffold(body: WorkspaceTab()),
-        builder: (context, child) => MediaQuery(
-          data: MediaQuery.of(
-            context,
-          ).copyWith(textScaler: TextScaler.linear(textScale)),
-          child: child!,
-        ),
       ),
-    );
+      subscriptionProvider.overrideWith((ref, venueId) async {
+        if (failSubscription) throw StateError('offline');
+        return subscription ??
+            VenueSubscription(
+              plan: SubscriptionPlan.monthly,
+              status: SubscriptionStatus.active,
+              pricePkr: 5000,
+              periodEnd: DateTime(2026, 12, 31),
+              autoRenew: true,
+            );
+      }),
+    ],
+    child: MaterialApp(
+      theme: AppTheme.dark,
+      onGenerateRoute: (settings) {
+        captured.add(settings.name ?? '');
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const Scaffold(body: Text('target')),
+        );
+      },
+      home: const Scaffold(body: WorkspaceTab()),
+      builder: (context, child) => MediaQuery(
+        data: MediaQuery.of(
+          context,
+        ).copyWith(textScaler: TextScaler.linear(textScale)),
+        child: child!,
+      ),
+    ),
+  );
+}
+
+/// Opens a row, records the route and comes back, so one test can walk the
+/// whole page without leaving the workspace. The pushed page has no AppBar, so
+/// it is popped directly rather than through `pageBack`.
+Future<void> openAndBack(WidgetTester tester, Finder target) async {
+  await tester.ensureVisible(target);
+  await tester.pumpAndSettle();
+  await tester.tap(target);
+  await tester.pumpAndSettle();
+  Navigator.of(tester.element(find.text('target'))).pop();
+  await tester.pumpAndSettle();
+}
 
 void main() {
-  testWidgets('identity, shortcuts and lists render with no duplicate route', (
+  testWidgets('identity, shortcuts and groups render with no duplicate row', (
     tester,
   ) async {
     await tester.pumpWidget(_harness());
@@ -96,48 +121,103 @@ void main() {
 
     expect(tester.takeException(), isNull);
 
-    // Identity card: name plus role and city, and the verification state. A
-    // venue with no configured hours admits it instead of claiming "Closed".
+    // Header: the purpose, not another copy of the shell's "Business" title.
+    expect(find.text('Restaurant hub'), findsOneWidget);
+    expect(
+      find.text('Manage your restaurant, settings and account.'),
+      findsOneWidget,
+    );
+
+    // Identity card: name, location and both facts about the venue. A venue
+    // with no configured hours admits it instead of claiming "Closed".
     expect(find.text('Sea & Salt'), findsOneWidget);
-    expect(find.text('Owner, Karachi'), findsOneWidget);
+    expect(find.text('Karachi'), findsOneWidget);
     expect(find.text('Verified'), findsOneWidget);
     expect(find.text('Hours not set'), findsOneWidget);
 
     // Exactly three shortcuts.
     expect(find.text('Restaurant Profile'), findsOneWidget);
-    expect(find.text('QR Codes'), findsOneWidget);
+    expect(find.text('QR Code'), findsOneWidget);
     expect(find.text('Subscription'), findsOneWidget);
 
-    // Section labels, then the destinations that are not already shortcuts.
-    expect(find.text('QUICK ACCESS'), findsOneWidget);
-    expect(find.text('RESTAURANT MANAGEMENT'), findsOneWidget);
-    expect(find.text('BUSINESS OPERATIONS'), findsOneWidget);
-    expect(find.text('ACCOUNT AND SUPPORT'), findsOneWidget);
-    expect(find.text('Menu Configuration'), findsOneWidget);
-    expect(find.text('Booking Policies'), findsOneWidget);
+    // Human-readable group titles, then the destinations in each group.
+    expect(find.text('Quick access'), findsOneWidget);
+    expect(find.text('Restaurant settings'), findsOneWidget);
+    expect(find.text('Business operations'), findsOneWidget);
+    expect(find.text('Account and support'), findsOneWidget);
     expect(find.text('Operating Hours'), findsOneWidget);
+    expect(find.text('Booking Policies'), findsOneWidget);
     expect(find.text('Amenities and Facilities'), findsOneWidget);
+    expect(find.text('Menu Configuration'), findsOneWidget);
     expect(find.text('Reservations Management'), findsOneWidget);
     expect(find.text('Dining Experiences'), findsOneWidget);
-    expect(find.text('Check-in'), findsOneWidget);
-    expect(find.text('Account settings'), findsOneWidget);
+    expect(find.text('Guest Check-in'), findsOneWidget);
+    expect(find.text('Partner Pro'), findsOneWidget);
     expect(find.text('Help and Support'), findsOneWidget);
+    expect(find.text('Account Settings'), findsOneWidget);
 
-    // Requirement: the shortcut strip and the lists must not repeat each other,
-    // because two rows that open the same screen read as a bug, not a feature.
-    expect(find.text('Menu Configuration'), findsOneWidget);
-    expect(find.text('QR Codes'), findsOneWidget);
+    // Requirement: the shortcut strip and the groups must not repeat each
+    // other, because two rows that open the same screen read as a bug.
+    expect(find.text('Menus'), findsNothing);
+    expect(find.text('QR Management'), findsNothing);
+    expect(find.text('Insights'), findsNothing);
+    expect(find.text('Deals'), findsNothing);
+  });
+
+  testWidgets('the identity card is the profile door', (tester) async {
+    final routes = <String>[];
+    await tester.pumpWidget(_harness(routes: routes));
+    await tester.pumpAndSettle();
+
+    await openAndBack(tester, find.byType(WorkspaceIdentityCard));
+    expect(routes, contains('/business?tab=profile'));
+  });
+
+  testWidgets('every shortcut and group row opens its existing destination', (
+    tester,
+  ) async {
+    final routes = <String>[];
+    await tester.pumpWidget(_harness(routes: routes));
+    await tester.pumpAndSettle();
+
+    await openAndBack(tester, find.text('QR Code'));
+    await openAndBack(tester, find.text('Operating Hours'));
+    await openAndBack(tester, find.text('Booking Policies'));
+    await openAndBack(tester, find.text('Amenities and Facilities'));
+    await openAndBack(tester, find.text('Menu Configuration'));
+    await openAndBack(tester, find.text('Reservations Management'));
+    await openAndBack(tester, find.text('Dining Experiences'));
+    await openAndBack(tester, find.text('Guest Check-in'));
+    await openAndBack(tester, find.text('Help and Support'));
+    await openAndBack(tester, find.text('Account Settings'));
+
+    expect(routes, [
+      '/business?tab=qr',
+      '/service?tab=tables',
+      '/business?tab=profile&section=policies',
+      '/business?tab=profile&section=amenities',
+      '/business?tab=menu',
+      '/service?tab=reservations',
+      '/experiences?tab=experiences',
+      '/service?tab=checkin',
+      '/inbox?tab=support',
+      '/settings',
+    ]);
   });
 
   testWidgets('subscription card states plan, price and renewal date', (
     tester,
   ) async {
-    await tester.pumpWidget(_harness());
+    final routes = <String>[];
+    await tester.pumpWidget(_harness(routes: routes));
     await tester.pumpAndSettle();
 
     expect(find.text('Monthly plan, PKR 5,000'), findsOneWidget);
     expect(find.text('Renews on 2026-12-31'), findsOneWidget);
-    expect(find.text('Manage Subscription'), findsOneWidget);
+    expect(find.text('Active'), findsOneWidget);
+
+    await openAndBack(tester, find.byType(WorkspaceSubscriptionCard));
+    expect(routes, contains('/business?tab=subscription'));
   });
 
   testWidgets('a cancelled plan names the end date, not a renewal', (
@@ -168,6 +248,8 @@ void main() {
 
     expect(tester.takeException(), isNull);
     // The hub's job is navigation, so one slow endpoint cannot hide it.
+    expect(find.text('Details unavailable'), findsOneWidget);
+    expect(find.text('Retry'), findsOneWidget);
     expect(find.text('Menu Configuration'), findsOneWidget);
     expect(find.text('Reservations Management'), findsOneWidget);
   });
@@ -179,7 +261,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('No venue selected'), findsOneWidget);
-    expect(find.text('Menu Configuration'), findsNothing);
+    expect(find.text('Restaurant hub'), findsNothing);
   });
 
   testWidgets('lays out at 320dp under 2.0 text scaling, top to bottom', (
@@ -196,15 +278,19 @@ void main() {
 
     // The lower groups only lay out once scrolled into view, which is exactly
     // where a narrow screen with large text would overflow.
-    for (var step = 0; step < 6; step++) {
+    for (var step = 0; step < 8; step++) {
       await tester.drag(find.byType(ListView), const Offset(0, -300));
       await tester.pump();
-      expect(tester.takeException(), isNull, reason: 'overflow at scroll step $step');
+      expect(
+        tester.takeException(),
+        isNull,
+        reason: 'overflow at scroll step $step',
+      );
     }
 
     await tester.drag(find.byType(ListView), const Offset(0, -3000));
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
-    expect(find.text('Manage Subscription'), findsOneWidget);
+    expect(find.text('Account Settings'), findsOneWidget);
   });
 }

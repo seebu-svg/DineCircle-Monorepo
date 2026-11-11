@@ -140,6 +140,63 @@ class Reservation {
   }
 }
 
+/// One date window of table reservations, plus the server's own total.
+///
+/// The day board reads a page and stops, because it renders what it got. A
+/// trend chart cannot: it has to know whether the rows it received describe the
+/// whole window or only the first page of it. [total] is the count the server
+/// reports for the same `from`/`to`, so a partial read can say so instead of
+/// drawing an axis that quietly leaves reservations out.
+class ReservationWindow {
+  const ReservationWindow({
+    required this.reservations,
+    required this.total,
+  });
+
+  final List<Reservation> reservations;
+
+  /// Every reservation in the window on the server, whatever its status.
+  final int total;
+
+  /// True when the page ceiling cut the window short.
+  bool get truncated => reservations.length < total;
+
+  /// The same window with rows that fall outside `[from, to)` removed.
+  ///
+  /// The partner route compares `to` inclusively, while Insights asks for a
+  /// half-open window that ends at midnight after the last day. A booking made
+  /// for exactly that midnight comes back in the answer, but it belongs to the
+  /// next day: the chart stops at today and cannot place it, so the KPI would
+  /// count a booking the chart leaves out. Trimming the rows and [total]
+  /// together keeps every card on this page describing the same window, no
+  /// matter which way the server compares its bounds.
+  ReservationWindow clampedTo(DateTime from, DateTime to) {
+    final kept = reservations
+        .where((row) => !row.startAt.isBefore(from) && row.startAt.isBefore(to))
+        .toList(growable: false);
+    if (kept.length == reservations.length) return this;
+    final trimmedTotal = total - (reservations.length - kept.length);
+    return ReservationWindow(
+      reservations: kept,
+      total: trimmedTotal < kept.length ? kept.length : trimmedTotal,
+    );
+  }
+
+  /// Bookings the venue actually serves: anything but a cancellation or a
+  /// no-show, the same rule [ReservationCounters.booked] follows on Home.
+  List<Reservation> get kept => reservations
+      .where(
+        (row) =>
+            row.status != ReservationStatus.cancelled &&
+            row.status != ReservationStatus.noShow,
+      )
+      .toList(growable: false);
+
+  int get keptCount => kept.length;
+
+  int get lostCount => reservations.length - keptCount;
+}
+
 /// Booking status for experience tickets (`/partner/bookings`).
 enum BookingStatus {
   pending('pending', 'Pending'),

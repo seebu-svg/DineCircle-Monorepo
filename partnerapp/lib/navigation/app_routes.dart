@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../screens/auth/login_screen.dart';
+import '../screens/auth/auth_gate.dart';
 import '../screens/auth/partner_gate_screen.dart';
 import '../screens/business/business_section_screen.dart';
 import '../screens/home/home_screen.dart';
@@ -54,16 +54,32 @@ class AppRoute {
 /// hub without inventing parallel screens for the same data.
 enum PrimaryDestination {
   home(AppRoute.today, 'Home', Icons.home_outlined, Icons.home),
-  menu(AppRoute.menu, 'Menu', Icons.restaurant_menu_outlined,
-      Icons.restaurant_menu),
-  deals(AppRoute.deals, 'Deals', Icons.local_offer_outlined,
-      Icons.local_offer),
-  insights(AppRoute.insights, 'Insights', Icons.query_stats_outlined,
-      Icons.query_stats),
-  business(AppRoute.business, 'Business', Icons.storefront_outlined,
-      Icons.storefront);
+  menu(
+    AppRoute.menu,
+    'Menu',
+    Icons.restaurant_menu_outlined,
+    Icons.restaurant_menu,
+  ),
+  deals(AppRoute.deals, 'Deals', Icons.local_offer_outlined, Icons.local_offer),
+  insights(
+    AppRoute.insights,
+    'Insights',
+    Icons.query_stats_outlined,
+    Icons.query_stats,
+  ),
+  business(
+    AppRoute.business,
+    'Business',
+    Icons.storefront_outlined,
+    Icons.storefront,
+  );
 
-  const PrimaryDestination(this.route, this.label, this.icon, this.selectedIcon);
+  const PrimaryDestination(
+    this.route,
+    this.label,
+    this.icon,
+    this.selectedIcon,
+  );
 
   final String route;
   final String label;
@@ -171,6 +187,13 @@ const List<SecondaryDestination> workspaceModules = [
     icon: Icons.pending_actions_outlined,
     group: 'Experiences',
     tab: 'requests',
+  ),
+  SecondaryDestination(
+    route: AppRoute.experiences,
+    label: 'Host proposals',
+    icon: Icons.handshake_outlined,
+    group: 'Experiences',
+    tab: 'proposals',
   ),
   SecondaryDestination(
     route: AppRoute.experiences,
@@ -282,6 +305,13 @@ const List<SecondaryDestination> secondaryDestinations = [
     icon: Icons.pending_actions_outlined,
     group: 'Experiences',
     tab: 'requests',
+  ),
+  SecondaryDestination(
+    route: AppRoute.experiences,
+    label: 'Host proposals',
+    icon: Icons.handshake_outlined,
+    group: 'Experiences',
+    tab: 'proposals',
   ),
   SecondaryDestination(
     route: AppRoute.experiences,
@@ -400,7 +430,10 @@ Map<String, String> routeQuery(BuildContext context) {
 /// A single [MaterialApp] route table plus the detail routes that carry ids.
 Map<String, WidgetBuilder> get appRoutes => {
   AppRoute.onboarding: (_) => const OnboardingCarousel(),
-  AppRoute.login: (_) => const LoginScreen(),
+  // Routed to the gate rather than a bare login screen: a successful sign-in
+  // mutates the session, and only the gate reacts to that by swapping itself
+  // for the workspace. A standalone LoginScreen would sit there signed in.
+  AppRoute.login: (_) => const AuthGate(),
   AppRoute.partnerGate: (_) => const PartnerGateScreen(),
   AppRoute.registration: (_) => const RegistrationWizard(),
   AppRoute.verification: (_) => const VerificationStatusScreen(),
@@ -427,10 +460,7 @@ Route<dynamic>? generateRoute(RouteSettings settings) {
   // fallback only fires for a hand-typed or stale deep link; land the operator
   // on the dashboard (which redirects to sign-in when there is no venue)
   // rather than crashing on an unresolvable route.
-  return _FadeThroughRoute(
-    builder ?? (_) => const HomeScreen(),
-    settings,
-  );
+  return _FadeThroughRoute(builder ?? (_) => const HomeScreen(), settings);
 }
 
 /// A short fade-through page transition (180ms) shared by every generated

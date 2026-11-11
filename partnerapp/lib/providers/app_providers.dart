@@ -163,7 +163,10 @@ class SessionController extends AsyncNotifier<SessionState> {
   ];
 
   Future<void> signIn({required String email, required String password}) async {
-    state = const AsyncValue.loading();
+    // Deliberately no `state = AsyncValue.loading()` here. The login form owns
+    // its busy flag, and broadcasting loading makes [AuthGate] replace the form
+    // with the splash mid-request, which disposes it: the typed credentials
+    // vanish and the error snackbar never shows because the widget is gone.
     state = await AsyncValue.guard(() async {
       final session = await ref
           .read(authRepositoryProvider)
@@ -179,7 +182,12 @@ class SessionController extends AsyncNotifier<SessionState> {
       );
     });
     if (state.hasError) {
+      // Drop back to signed-out so the gate keeps the login form on screen,
+      // then rethrow. Swallowing the error here made a rejected sign-in look
+      // like a dead tap: the form stayed put and no message was ever shown.
+      final failure = state.error!;
       state = AsyncData(const SessionState.signedOut());
+      throw failure;
     }
   }
 

@@ -10,6 +10,8 @@ import 'package:partnerapp/providers/module_providers.dart';
 import 'package:partnerapp/providers/venue_scope_provider.dart';
 import 'package:partnerapp/screens/business/qr_tab.dart';
 import 'package:partnerapp/theme/app_theme.dart';
+import 'package:partnerapp/utils/links.dart';
+import 'package:partnerapp/widgets/qr_code_view.dart';
 
 /// The QR screen is the printed artefact of the whole app: if the code does not
 /// render, or the deal codes do not show, a desk has nothing to laminate. Both
@@ -67,7 +69,14 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(tester.takeException(), isNull);
+    // Exactly one code on the screen: the venue's own public profile.
     expect(find.byType(QrImageView), findsOneWidget);
+    expect(
+      tester.widget<QrCodeView>(find.byType(QrCodeView)).data,
+      venuePublicUrl('v1'),
+    );
+    expect(venuePublicUrl('v1'), 'https://dinecircle.app/venues/v1');
+    expect(find.text('Restaurant QR'), findsOneWidget);
     // The venue URL is encoded into the QR code pixels, not rendered as text.
     expect(find.text('Sea & Salt'), findsAtLeastNWidgets(2));
   });

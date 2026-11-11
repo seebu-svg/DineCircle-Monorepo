@@ -100,6 +100,13 @@ enum MenuStyle {
       MenuStyle.values.map((m) => m.wire).toList(growable: false);
 }
 
+/// The serving style in desk words.
+///
+/// A function rather than `MenuStyle.parse(wire).label` at the call site,
+/// because `flutter/material.dart` exports its own `MenuStyle` and every screen
+/// that shows this field imports Material too.
+String menuStyleLabel(String? wire) => MenuStyle.parse(wire).label;
+
 /// An experience the venue operates (`GET /partner/events`).
 ///
 /// The list payload is the only read surface for venue-owned events, there is
@@ -118,6 +125,9 @@ class PartnerExperience {
     required this.status,
     required this.type,
     this.restaurantId = '',
+    this.hostId = '',
+    this.tagline = '',
+    this.coverImage = '',
   });
 
   factory PartnerExperience.fromJson(Map<String, dynamic> json) =>
@@ -133,6 +143,9 @@ class PartnerExperience {
         pricePerSeat: asDouble(json['pricePerSeat']),
         status: ExperienceStatus.parse(asString(json['status'])),
         type: ExperienceType.parse(asString(json['type'])),
+        hostId: asString(json['hostId']),
+        tagline: asString(json['tagline']),
+        coverImage: asString(json['coverImage']),
       );
 
   final String id;
@@ -146,6 +159,15 @@ class PartnerExperience {
   final double pricePerSeat;
   final ExperienceStatus status;
   final ExperienceType type;
+  final String hostId;
+
+  /// One line the guest reads first. Sent on create/edit; the list read began
+  /// returning it alongside the cover so a card can label itself.
+  final String tagline;
+
+  /// Stored media value (`/public/venue-images/<id>`, an absolute URL, or a
+  /// bundled asset path). Empty means the card falls back to its format art.
+  final String coverImage;
 
   int get seatsRemaining =>
       seatsLeft > 0 ? seatsLeft : _positive(seatsTotal - seatsBooked);
@@ -164,6 +186,8 @@ class PartnerExperience {
     ExperienceStatus? status,
     ExperienceType? type,
     int? seatsLeft,
+    String? tagline,
+    String? coverImage,
   }) => PartnerExperience(
     id: id,
     title: title ?? this.title,
@@ -176,11 +200,50 @@ class PartnerExperience {
     pricePerSeat: pricePerSeat ?? this.pricePerSeat,
     status: status ?? this.status,
     type: type ?? this.type,
+    hostId: hostId,
+    tagline: tagline ?? this.tagline,
+    coverImage: coverImage ?? this.coverImage,
   );
+}
+
+/// One course on the menu the venue is being asked to approve.
+///
+/// The approval list never carried the menu, so a venue approved an experience
+/// having seen a title, a date and a price. The detail endpoint returns the
+/// same rows the diner sees, in running order.
+class RequestCourse {
+  const RequestCourse({
+    required this.id,
+    required this.name,
+    this.position = 0,
+    this.description = '',
+    this.pairing = '',
+    this.isSignature = false,
+  });
+
+  factory RequestCourse.fromJson(Map<String, dynamic> json) => RequestCourse(
+    id: asString(json['id']),
+    name: asString(json['name']),
+    position: asInt(json['position']),
+    description: asString(json['description']),
+    pairing: asString(json['pairing']),
+    isSignature: asBool(json['isSignature']),
+  );
+
+  final String id;
+  final String name;
+  final int position;
+  final String description;
+  final String pairing;
+  final bool isSignature;
 }
 
 /// A host's proposal awaiting this venue's decision
 /// (`GET …/event-requests`).
+///
+/// The list payload answers the coarse rows; the detail endpoint
+/// (`GET …/event-requests/:eventId`) fills in the menu, gallery, audience,
+/// inclusions and the host's note, which is what the decision sheet renders.
 class ExperienceRequest {
   const ExperienceRequest({
     required this.id,
@@ -200,6 +263,23 @@ class ExperienceRequest {
     this.declineReason = '',
     this.approvedAt,
     this.createdAt,
+    this.audience = '',
+    this.menuStyle = '',
+    this.endAt,
+    this.hostNote = '',
+    this.dressCode = '',
+    this.language = '',
+    this.durationMinutes = 0,
+    this.requiresApproval = false,
+    this.isReapproval = false,
+    this.cancellationReason = '',
+    this.gallery = const [],
+    this.included = const [],
+    this.tags = const [],
+    this.menu = const [],
+    this.approvalStaleAt,
+    this.cancelledAt,
+    this.host = const ProposalHostRef(),
   });
 
   factory ExperienceRequest.fromJson(Map<String, dynamic> json) =>
@@ -210,7 +290,9 @@ class ExperienceRequest {
         description: asString(json['description']),
         hostId: asString(json['hostId']),
         hostName: asString(json['hostName']),
+        host: ProposalHostRef.fromJson(json['host']),
         startAt: asDateOr(json['startAt'], DateTime.now()),
+        endAt: asDate(json['endAt']),
         seatsTotal: asInt(json['seatsTotal']),
         seatsBooked: asInt(json['seatsBooked']),
         seatsLeft: asInt(json['seatsLeft']),
@@ -218,8 +300,25 @@ class ExperienceRequest {
         type: ExperienceType.parse(asString(json['type'])),
         status: ExperienceStatus.parse(asString(json['status'])),
         coverImage: asString(json['coverImage']),
+        gallery: asStringList(json['gallery']),
+        audience: asString(json['audience']),
+        menuStyle: asString(json['menuStyle']),
+        included: asStringList(json['included']),
+        tags: asStringList(json['tags']),
+        hostNote: asString(json['hostNote']),
+        dressCode: asString(json['dressCode']),
+        language: asString(json['language']),
+        durationMinutes: asInt(json['durationMinutes']),
+        menu: asMapList(json['menu'])
+            .map(RequestCourse.fromJson)
+            .toList(growable: false),
         declineReason: asString(json['declineReason']),
         approvedAt: asDate(json['approvedAt']),
+        approvalStaleAt: asDate(json['approvalStaleAt']),
+        requiresApproval: asBool(json['requiresApproval']),
+        isReapproval: asBool(json['isReapproval']),
+        cancelledAt: asDate(json['cancelledAt']),
+        cancellationReason: asString(json['cancellationReason']),
         createdAt: asDate(json['createdAt']),
       );
 
@@ -229,7 +328,9 @@ class ExperienceRequest {
   final String description;
   final String hostId;
   final String hostName;
+  final ProposalHostRef host;
   final DateTime startAt;
+  final DateTime? endAt;
   final int seatsTotal;
   final int seatsBooked;
   final int seatsLeft;
@@ -237,11 +338,43 @@ class ExperienceRequest {
   final ExperienceType type;
   final ExperienceStatus status;
   final String coverImage;
+  final List<String> gallery;
+  final String audience;
+  final String menuStyle;
+  final List<String> included;
+  final List<String> tags;
+  final String hostNote;
+  final String dressCode;
+  final String language;
+  final int durationMinutes;
+  final List<RequestCourse> menu;
   final String declineReason;
   final DateTime? approvedAt;
+  final DateTime? approvalStaleAt;
+  final bool requiresApproval;
+  final bool isReapproval;
+  final DateTime? cancelledAt;
+  final String cancellationReason;
   final DateTime? createdAt;
 
   bool get isAwaitingDecision => status == ExperienceStatus.requested;
+
+  /// The host changed the experience after this venue approved it, so the row
+  /// is back in the queue. `isReapproval` is computed server-side from the two
+  /// stamps; the comparison is kept here as a fallback for an older payload
+  /// that ships the timestamps without the flag.
+  bool get changedSinceApproval =>
+      isReapproval ||
+      (approvalStaleAt != null &&
+          (approvedAt == null || approvalStaleAt!.isAfter(approvedAt!)));
+
+  /// True once the detail read has run, so the sheet can tell "no menu" from
+  /// "menu not loaded yet".
+  bool get hasFullDetail =>
+      menu.isNotEmpty ||
+      gallery.isNotEmpty ||
+      included.isNotEmpty ||
+      hostNote.isNotEmpty;
 
   String get capacityLabel => '$seatsBooked / $seatsTotal seats booked';
 
@@ -249,5 +382,69 @@ class ExperienceRequest {
       '${pricePerSeat.toStringAsFixed(2)} per seat · '
       '$seatsLeft left';
 }
+
+/// The host's public identity as the request payload carries it.
+class ProposalHostRef {
+  const ProposalHostRef({
+    this.id = '',
+    this.name = '',
+    this.handle = '',
+    this.avatarUrl = '',
+  });
+
+  factory ProposalHostRef.fromJson(Object? value) {
+    final json = asMap(value);
+    return ProposalHostRef(
+      id: asString(json['id']),
+      name: asString(json['name']),
+      handle: asString(json['handle']),
+      avatarUrl: asString(json['avatarUrl']),
+    );
+  }
+
+  final String id;
+  final String name;
+  final String handle;
+  final String avatarUrl;
+
+  String get initials {
+    final source = name.trim().isEmpty ? '?' : name.trim();
+    return source[0].toUpperCase();
+  }
+}
+
+/// Receipt for a venue-driven lifecycle transition
+/// (`POST /partner/events/:id/cancel|complete|reopen`).
+///
+/// These routes answer a partial row (`{ eventId, status }` or `{ event: ...}`),
+/// not a re-serialised experience, so callers refetch the list instead of
+/// splicing a fake object into it.
+class ExperienceTransition {
+  const ExperienceTransition({
+    required this.eventId,
+    required this.status,
+  });
+
+  factory ExperienceTransition.fromJson(Object? value) {
+    final wrapper = asMap(value);
+    final json = wrapper.containsKey('event')
+        ? asMap(wrapper['event'])
+        : wrapper;
+    return ExperienceTransition(
+      eventId: asString(json['id']).isNotEmpty
+          ? asString(json['id'])
+          : asString(json['eventId']),
+      status: asString(json['status']),
+    );
+  }
+
+  final String eventId;
+  final String status;
+
+  bool get isCancelled => status == 'cancelled';
+  bool get isCompleted => status == 'completed';
+  bool get isReopened => status == 'confirmed';
+}
+
 
 int _positive(int value) => value < 0 ? 0 : value;

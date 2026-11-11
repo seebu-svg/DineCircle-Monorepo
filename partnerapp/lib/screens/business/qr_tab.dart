@@ -320,7 +320,7 @@ class _QrHeader extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Digital QR Studio',
+                'Restaurant QR',
                 style: AppTextStyles.headlineMedium.copyWith(
                   color: AppColors.textPrimary,
                   fontWeight: FontWeight.w700,
@@ -328,7 +328,8 @@ class _QrHeader extends StatelessWidget {
               ),
               const SizedBox(height: 6),
               Text(
-                'Your restaurant, one scan away.',
+                'One code that opens your restaurant page: '
+                'menu, deals and details.',
                 style: AppTextStyles.bodySmall.copyWith(
                   color: AppColors.textSecondary,
                 ),
@@ -428,7 +429,7 @@ class _QrPreviewPanel extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'Ready for tables, counters and printed displays',
+            'Guests scan this one code to open your restaurant page.',
             textAlign: TextAlign.center,
             style: AppTextStyles.bodySmall.copyWith(
               color: AppColors.textSecondary,

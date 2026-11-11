@@ -8,14 +8,14 @@ a dashboard action or a command you run locally.
 
 | Piece | State |
 | --- | --- |
-| Express API (`DineCircle-master/server`) | Code hardened and typecheck-clean. **Not deployed**: `https://dinecircle-api.onrender.com/api/health` returns 404. |
-| Customer app (`DineCircle-master`) | Release keystore wired, config unified, analyze clean. Blocked on step 1. |
-| Partner app (`partnerapp`) | Release keystore generated, Business workspace redesigned, analyze clean. Blocked on step 1. |
-| Marketing site (`website`) | 29 pages built with canonical URLs, sitemap, robots, hosting rules. **No host**: `https://dinecircle.app` does not resolve. |
+| Express API (`DineCircle-master/server`) | **LIVE on Render** (`dinecircle-api.onrender.com`, Docker, free, Singapore). `/api/health` 200 with `database:"unified dinecircle"` and ~65 ms latency; `/api/restaurants` 401 unauth; unknown `Origin` 403; phone `POST /api/auth/signin` 403 in production. |
+| Customer app (`DineCircle-master`) | Release keystore wired, analyze clean. `dart-defines.json` retargeted to the Render URL; release APK still needs rebuilding against it. |
+| Partner app (`partnerapp`) | Release keystore generated, Business workspace redesigned, analyze clean. `dart-defines.json` already on the Render URL; APK rebuild pending. |
+| Marketing site (`website`) | 29 pages built with canonical URLs, sitemap, robots, hosting rules. **No host**: `https://dinecircle.app` returns no HTTP response (it only resolves to a tailnet address on this machine). |
 
-Both `dart-defines.json` files already point at
-`https://dinecircle-api.onrender.com`, which is the URL the Render blueprint in
-step 1 produces. They are gitignored, so each build machine needs its own copy.
+Both `dart-defines.json` files now point at
+`https://dinecircle-api.onrender.com`, the URL the Render blueprint in step 1
+produced. They are gitignored, so each build machine needs its own copy.
 
 ## 1. Deploy the API
 

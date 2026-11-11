@@ -122,6 +122,15 @@ enum Capability {
   manageProfile,
   manageMenu,
   manageDeals,
+
+  /// Honouring a live offer at the table: counting one redemption.
+  ///
+  /// Separate from [manageDeals] because the server ranks them differently.
+  /// Editing an offer is a manager action, but the person who applies the
+  /// discount is whoever is on the floor, and `POST …/deals/:id/redeem` accepts
+  /// staff. Gating the counter on management would push venues to tally
+  /// redemptions on paper.
+  recordRedemptions,
   approveRequests,
   createExperiences,
   viewEarnings,
@@ -141,6 +150,7 @@ extension CapabilityLabel on Capability {
     Capability.manageProfile => 'Profile editing',
     Capability.manageMenu => 'Menu editing',
     Capability.manageDeals => 'Deal management',
+    Capability.recordRedemptions => 'Recording a redemption',
     Capability.approveRequests => 'Approving host requests',
     Capability.createExperiences => 'Creating experiences',
     Capability.viewEarnings => 'Earnings',
@@ -160,6 +170,7 @@ const Map<Capability, PartnerRole> _minimumRole = {
   Capability.manageProfile: PartnerRole.manager,
   Capability.manageMenu: PartnerRole.manager,
   Capability.manageDeals: PartnerRole.manager,
+  Capability.recordRedemptions: PartnerRole.staff,
   Capability.approveRequests: PartnerRole.manager,
   Capability.createExperiences: PartnerRole.manager,
   Capability.viewEarnings: PartnerRole.manager,

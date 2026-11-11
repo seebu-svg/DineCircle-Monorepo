@@ -24,7 +24,6 @@ class InboxSectionScreen extends ConsumerWidget {
     final tab = routeQuery(context)['tab'];
     return AppShell(
       active: PrimaryDestination.business,
-      title: 'Inbox',
       child: SectionTabs(
         initialTab: tab,
         tabs: const [

@@ -95,16 +95,23 @@ class MenuSection {
   List<MenuItem> get sortedItems =>
       [...items]..sort((a, b) => a.position.compareTo(b.position));
 
-  MenuSection copyWith({String? name, bool? isActive, int? position}) =>
-      MenuSection(
-        id: id,
-        restaurantId: restaurantId,
-        branchId: branchId,
-        name: name ?? this.name,
-        position: position ?? this.position,
-        isActive: isActive ?? this.isActive,
-        items: items,
-      );
+  /// `items` lets a screen show a narrowed subset (search, an availability
+  /// filter) under the same category header, position and name. The server has
+  /// no such concept, so this copy exists only in memory and is never sent.
+  MenuSection copyWith({
+    String? name,
+    bool? isActive,
+    int? position,
+    List<MenuItem>? items,
+  }) => MenuSection(
+    id: id,
+    restaurantId: restaurantId,
+    branchId: branchId,
+    name: name ?? this.name,
+    position: position ?? this.position,
+    isActive: isActive ?? this.isActive,
+    items: items ?? this.items,
+  );
 }
 
 /// A priced dining package (`special_menus`, created through `/partner/menus`).

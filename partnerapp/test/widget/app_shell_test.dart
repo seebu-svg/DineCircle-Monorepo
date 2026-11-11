@@ -12,11 +12,21 @@ import 'package:partnerapp/widgets/app_shell.dart';
 import 'package:partnerapp/widgets/brand.dart';
 
 class _VenueScope extends VenueScopeController {
+  _VenueScope({this.name = 'Sea & Salt'});
+
+  /// The selected venue's name, overridable to exercise long names.
+  final String name;
+
   @override
-  Future<VenueScopeState> build() async => const VenueScopeState(
+  Future<VenueScopeState> build() async => VenueScopeState(
     venues: [
-      Venue(id: 'v1', name: 'Sea & Salt', city: 'Karachi', myRole: PartnerRole.owner),
-      Venue(id: 'v2', name: 'The Fold', city: 'Lahore', myRole: PartnerRole.manager),
+      Venue(id: 'v1', name: name, city: 'Karachi', myRole: PartnerRole.owner),
+      const Venue(
+        id: 'v2',
+        name: 'The Fold',
+        city: 'Lahore',
+        myRole: PartnerRole.manager,
+      ),
     ],
     selectedId: 'v1',
   );
@@ -29,32 +39,34 @@ class _Badge extends NotificationBadgeController {
 
 const _user = PartnerUser(id: 'u1', name: 'Ada Owner', role: 'restaurant_owner');
 
-Widget _harness(Size logicalSize) => ProviderScope(
-  overrides: [
-    venueScopeProvider.overrideWith(_VenueScope.new),
-    notificationBadgeProvider.overrideWith(_Badge.new),
-    isOfflineProvider.overrideWithValue(false),
-    currentUserProvider.overrideWithValue(_user),
-    isPlatformAdminProvider.overrideWithValue(false),
-  ],
-  child: MaterialApp(
-    // The real surface is sized to the widest case; this override is what
-    // AppLayout actually reads, so the branch decision is exact while the
-    // layout engine always has room (never a spurious overflow from lying
-    // bigger than the viewport).
-    builder: (context, child) => MediaQuery(
-      data: MediaQuery.of(context).copyWith(size: logicalSize),
-      child: child!,
-    ),
-    home: AppShell(
-      active: PrimaryDestination.business,
-      title: 'Business',
-      child: ListView(
-        children: const [SizedBox(height: 400, child: Center(child: Text('Body')))],
+Widget _harness(Size logicalSize, {String venueName = 'Sea & Salt'}) =>
+    ProviderScope(
+      overrides: [
+        venueScopeProvider.overrideWith(() => _VenueScope(name: venueName)),
+        notificationBadgeProvider.overrideWith(_Badge.new),
+        isOfflineProvider.overrideWithValue(false),
+        currentUserProvider.overrideWithValue(_user),
+        isPlatformAdminProvider.overrideWithValue(false),
+      ],
+      child: MaterialApp(
+        // The real surface is sized to the widest case; this override is what
+        // AppLayout actually reads, so the branch decision is exact while the
+        // layout engine always has room (never a spurious overflow from lying
+        // bigger than the viewport).
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context).copyWith(size: logicalSize),
+          child: child!,
+        ),
+        home: AppShell(
+          active: PrimaryDestination.business,
+          child: ListView(
+            children: const [
+              SizedBox(height: 400, child: Center(child: Text('Body'))),
+            ],
+          ),
+        ),
       ),
-    ),
-  ),
-);
+    );
 
 /// Sizes the real test surface to the largest breakpoint so no branch can
 /// overflow the viewport, then drives [AppLayout] purely through the
@@ -63,11 +75,12 @@ Future<void> _pumpAt(
   WidgetTester tester,
   Size logicalSize, {
   Size realSurface = const Size(1440, 1000),
+  String venueName = 'Sea & Salt',
 }) async {
   final binding = TestWidgetsFlutterBinding.ensureInitialized();
   await binding.setSurfaceSize(realSurface);
   addTearDown(() => binding.setSurfaceSize(null));
-  await tester.pumpWidget(_harness(logicalSize));
+  await tester.pumpWidget(_harness(logicalSize, venueName: venueName));
   await tester.pump();
   await tester.pumpAndSettle();
 }
@@ -83,6 +96,11 @@ void main() {
     }
     expect(find.text('DineCircle'), findsNothing); // sidebar brand absent
     expect(find.byType(BrandLockup), findsNothing); // brand widget absent
+    // The bar names the selected restaurant and nothing else: the account
+    // holds two venues here, yet no picker is offered.
+    expect(find.text('Sea & Salt'), findsOneWidget);
+    expect(find.byTooltip('Switch venue'), findsNothing);
+    expect(find.byIcon(Icons.expand_more), findsNothing);
     expect(tester.takeException(), isNull);
   });
 
@@ -101,6 +119,7 @@ void main() {
     );
 
     expect(find.byType(NavigationBar), findsOneWidget);
+    expect(find.text('Sea & Salt'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -119,7 +138,30 @@ void main() {
 
     expect(find.byType(NavigationBar), findsNothing);
     expect(find.byType(BrandLockup), findsOneWidget);
-    expect(find.text('Business'), findsOneWidget);
+    expect(find.text('Sea & Salt'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('a long restaurant name ellipsises instead of overflowing', (
+    tester,
+  ) async {
+    const longName =
+        'The Karachi Harbour Supper Club and Rooftop Grill House';
+    await _pumpAt(
+      tester,
+      const Size(320, 900),
+      realSurface: const Size(320, 900),
+      venueName: longName,
+    );
+
+    // The full name stays the widget's text (and its tooltip); only the paint
+    // is clipped, so nothing is lost from the semantics tree.
+    final text = tester.widget<Text>(
+      find.byKey(const ValueKey('shell-restaurant-name')),
+    );
+    expect(text.data, longName);
+    expect(text.maxLines, 1);
+    expect(text.overflow, TextOverflow.ellipsis);
     expect(tester.takeException(), isNull);
   });
 

@@ -36,6 +36,7 @@ tmp-live/
 .tmp/
 .temp/
 .tmpx/
+*/nohup.out
 
 # Python bytecode
 __pycache__/
@@ -44,6 +45,17 @@ __pycache__/
 # QA and testing artifacts (root level)
 .qa/
 .qa_live/
+.qa_insights/
+.iso-check/
+
+# Local Postgres sandbox data directory
+.pgsandbox/
+
+# Scratch process output
+nohup.out
+
+# Generated website build markers
+*.svg.target
 
 # Supabase CLI
 .supabase-cli-home/

@@ -44,14 +44,12 @@ class AppShell extends ConsumerWidget {
   const AppShell({
     super.key,
     required this.active,
-    required this.title,
     required this.child,
     this.actions = const [],
   });
 
   /// Which of the five primary destinations this screen belongs to.
   final PrimaryDestination active;
-  final String title;
   final Widget child;
 
   /// Extra header actions for the current screen (a "New deal" button, …).
@@ -60,7 +58,7 @@ class AppShell extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final size = AppLayout.windowSize(context);
-    final header = _ShellHeader(title: title, actions: actions);
+    final header = _ShellHeader(actions: actions);
 
     if (size == WindowSize.expanded) {
       return Scaffold(
@@ -99,48 +97,40 @@ class AppShell extends ConsumerWidget {
   }
 }
 
-/// A custom top bar used instead of a Material [AppBar] so the venue switcher,
-/// the live notification badge and the screen actions share one row at every
-/// breakpoint, including the desktop sidebar layout which has no Scaffold app
-/// bar.
+/// A custom top bar used instead of a Material [AppBar] so the restaurant
+/// identity, the live notification badge and the screen actions share one row
+/// at every breakpoint, including the desktop sidebar layout which has no
+/// Scaffold app bar.
+///
+/// A partner operates one restaurant, so the bar names it and offers no venue
+/// switcher. The page itself is identified by the selected bottom-nav
+/// destination and by the screen's own heading, which keeps this row to a
+/// single line of identity.
 class _ShellHeader extends ConsumerWidget implements PreferredSizeWidget {
-  const _ShellHeader({required this.title, this.actions = const []});
+  const _ShellHeader({this.actions = const []});
 
-  final String title;
   final List<ShellAction> actions;
 
   @override
-  Size get preferredSize => const Size.fromHeight(64);
+  Size get preferredSize => const Size.fromHeight(56);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final selected = ref.watch(venueScopeProvider).valueOrNull?.selected;
 
-    // A phone at 320dp, or any surface at ~2.0 text scale, cannot fit the
-    // switcher plus inline actions without ellipsis-mashing everything; the
-    // overline already names the venue, so the switcher yields and the
-    // actions fold into one overflow button.
+    // A phone at 320dp, or any surface at ~1.8 text scale, cannot fit inline
+    // actions beside the name, so they fold into one overflow button rather
+    // than ellipsis-mashing the identity.
     final width = MediaQuery.sizeOf(context).width;
     final textScale = MediaQuery.textScalerOf(context).scale(1);
     final tight = width < 360 || textScale >= 1.8;
-    final showSwitcher = !tight && selected != null;
+    // A phone row cannot carry badge *and* wordmark *and* name *and* the two
+    // chrome buttons, so on narrow surfaces the mark falls back to the badge
+    // and the word it was squeezing gets its width back.
+    final compactMark = width < 480;
 
-    // The switcher names the venue on this same row, so the overline carries
-    // only the role rather than printing the venue twice. When the switcher
-    // has yielded (a tight phone) this line is the only place the venue is
-    // named, so it takes the name back.
-    final String? overline;
-    if (selected == null) {
-      overline = null;
-    } else if (showSwitcher) {
-      overline = selected.myRole.label;
-    } else {
-      overline = '${selected.name} · ${selected.myRole.label}';
-    }
-
-    // Two lines at 1.5x+ text need more than the one-line 64; the bar grows
-    // instead of ellipsis-clipping the title at large scale.
-    final headerHeight = textScale >= 1.5 ? 88.0 : 64.0;
+    // The name is one line; the bar only has to grow when that line does.
+    final headerHeight = (20.0 + 17.0 * textScale * 1.2).clamp(56.0, 96.0);
 
     return DecoratedBox(
       decoration: const BoxDecoration(
@@ -155,51 +145,33 @@ class _ShellHeader extends ConsumerWidget implements PreferredSizeWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
+            SizedBox(
               height: headerHeight,
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-              child: Row(
-                children: [
-                  const BrandMark(),
-                  if (showSwitcher) ...[
-                    const SizedBox(width: AppSpacing.sm),
-                    const Flexible(child: _VenueSwitcher()),
-                  ],
-                  const SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (overline != null)
-                          Text(
-                            overline,
-                            style: AppTextStyles.overline.copyWith(
-                              color: AppColors.textTertiary,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        Text(
-                          title,
-                          style: AppTextStyles.titleMedium.copyWith(
-                            color: AppColors.textPrimary,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.sm,
+                  0,
+                  AppSpacing.xs,
+                  0,
+                ),
+                child: Row(
+                  children: [
+                    BrandMark(compact: compactMark),
+                    const SizedBox(width: AppSpacing.sm + 2),
+                    Expanded(
+                      child: _RestaurantName(name: selected?.name ?? ''),
                     ),
-                  ),
-                  if (actions.isNotEmpty) ...[
-                    if (tight)
-                      _OverflowActions(actions: actions)
-                    else
-                      for (final action in actions) _ActionButton(action: action),
+                    if (actions.isNotEmpty) ...[
+                      if (tight)
+                        _OverflowActions(actions: actions)
+                      else
+                        for (final action in actions)
+                          _ActionButton(action: action),
+                    ],
+                    const _NotificationBell(),
+                    const _AccountMenu(),
                   ],
-                  const _NotificationBell(),
-                  const _AccountMenu(),
-                ],
+                ),
               ),
             ),
             // Premium gold gradient accent line.
@@ -286,121 +258,68 @@ class _OverflowActions extends StatelessWidget {
   }
 }
 
-/// Venue picker: the account's operated venues plus its role, switching which
-/// rebuilds every venue-scoped provider.
+/// The restaurant this workspace belongs to, named once on one line.
 ///
-/// Only a multi-venue account gets a menu. A single venue renders as a plain
-/// label, because a chevron that opens nothing reads as a broken control.
-class _VenueSwitcher extends ConsumerWidget {
-  const _VenueSwitcher();
+/// A partner operates a single venue, so the bar states the name instead of
+/// offering a switcher: no chevron, no selector container, nothing that reads
+/// as a control. A long name ellipsises, and the tooltip keeps the full string
+/// reachable on a long press (and to assistive tech) when it is cut.
+class _RestaurantName extends StatelessWidget {
+  const _RestaurantName({required this.name});
+
+  final String name;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final scope = ref.watch(venueScopeProvider).valueOrNull;
-    final selected = scope?.selected;
-    final venues = scope?.venues ?? const [];
-    if (selected == null) return const SizedBox.shrink();
+  Widget build(BuildContext context) {
+    final label = name.trim();
+    if (label.isEmpty) return const _RestaurantNameSkeleton();
 
-    final label = _VenueLabel(
-      name: selected.name,
-      expandable: venues.length > 1,
-    );
-    if (venues.length < 2) {
-      return KeyedSubtree(
-        key: const ValueKey('shell-venue-label'),
-        child: label,
-      );
-    }
-
-    return PopupMenuButton<String>(
-      key: const ValueKey('shell-venue-switcher'),
-      tooltip: 'Switch venue',
-      offset: const Offset(0, 52),
-      onSelected: (id) =>
-          ref.read(venueScopeProvider.notifier).select(id),
-      itemBuilder: (context) => [
-        for (final venue in venues)
-          PopupMenuItem<String>(
-            value: venue.id,
-            enabled: venue.id != selected.id,
-            child: Row(
-              children: [
-                Icon(
-                  venue.id == selected.id
-                      ? Icons.radio_button_checked
-                      : Icons.radio_button_unchecked,
-                  size: 18,
-                  color: venue.id == selected.id
-                      ? AppColors.primary
-                      : AppColors.textTertiary,
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(venue.name, style: AppTextStyles.bodyMedium),
-                      Text(
-                        '${venue.myRole.label} · ${venue.city}',
-                        style: AppTextStyles.bodySmall,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+    return Semantics(
+      header: true,
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Tooltip(
+          message: label,
+          // The visible text already names the venue; a second announcement of
+          // the same string is noise for a screen reader.
+          excludeFromSemantics: true,
+          waitDuration: const Duration(milliseconds: 600),
+          child: Text(
+            label,
+            key: const ValueKey('shell-restaurant-name'),
+            maxLines: 1,
+            softWrap: false,
+            overflow: TextOverflow.ellipsis,
+            style: AppTextStyles.titleMedium.copyWith(
+              fontSize: 17,
+              fontWeight: FontWeight.w700,
+              letterSpacing: -0.3,
+              height: 1.2,
+              color: AppColors.textPrimary,
             ),
           ),
-      ],
-      child: label,
+        ),
+      ),
     );
   }
 }
 
-/// The name of the venue the desk is currently operating.
-class _VenueLabel extends StatelessWidget {
-  const _VenueLabel({required this.name, required this.expandable});
-
-  final String name;
-
-  /// Whether tapping this opens a venue menu (draws the chevron).
-  final bool expandable;
+/// Holds the name's line while the venue scope is still loading, so the bar
+/// does not reflow when the name arrives.
+class _RestaurantNameSkeleton extends StatelessWidget {
+  const _RestaurantNameSkeleton();
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-        border: Border.all(
-          color: AppColors.primary.withValues(alpha: 0.15),
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Container(
+        width: 128,
+        height: 12,
+        decoration: BoxDecoration(
+          color: AppColors.surfaceElevated,
+          borderRadius: BorderRadius.circular(4),
         ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.storefront_rounded, size: 16, color: AppColors.primary),
-          const SizedBox(width: 6),
-          Flexible(
-            child: Text(
-              name,
-              style: AppTextStyles.titleSmall.copyWith(
-                color: AppColors.textPrimary,
-                fontWeight: FontWeight.w600,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-          if (expandable) ...[
-            const SizedBox(width: 4),
-            Icon(
-              Icons.expand_more,
-              size: 16,
-              color: AppColors.textTertiary,
-            ),
-          ],
-        ],
       ),
     );
   }

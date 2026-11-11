@@ -17,6 +17,13 @@ import '../../widgets/premium_cards.dart';
 /// There is no push channel, so the list polls and refreshes on pull; the same
 /// read drives the shell badge. Tapping an item marks it read and jumps to the
 /// surface that category points at, so the inbox is a dispatcher, not a dead end.
+///
+/// The routing table lives on `PartnerNotification.deepLink`, and every target is
+/// a registered section root with a `?tab=` key: a proposal about an experience
+/// (`category='event'`) opens the proposals tab, an approval request opens the
+/// requests tab, and a booking-side notice opens the service tab. Routes that are
+/// not registered silently land on Home, which is why no category points at a
+/// nested path.
 class NotificationsScreen extends ConsumerStatefulWidget {
   const NotificationsScreen({super.key});
 

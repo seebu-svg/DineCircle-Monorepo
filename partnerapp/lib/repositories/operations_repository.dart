@@ -169,6 +169,51 @@ class OperationsRepository {
     return envelope.list('reservations', Reservation.fromJson);
   }
 
+  /// Every reservation in one window, for the Insights chart.
+  ///
+  /// The route already takes `from`/`to` instants and pages its answer, so the
+  /// range is resolved on the server rather than by filtering a page of the
+  /// oldest rows on the device (which is what made the previous chart wrong).
+  /// Two pages are fetched at most: a full quarter of daily service fits well
+  /// inside 400 rows for a single venue, and beyond that the caller is told the
+  /// window was cut instead of being handed a silently short series.
+  ///
+  /// The answer is trimmed to `[from, to)` before it is returned: the route
+  /// compares `to` inclusively, so a booking made for exactly the midnight the
+  /// window ends at would otherwise reach a chart that cannot place it.
+  Future<ReservationWindow> reservationWindow(
+    String venueId, {
+    required DateTime from,
+    required DateTime to,
+    int pageLimit = 200,
+    int maxPages = 2,
+  }) async {
+    final rows = <Reservation>[];
+    var total = 0;
+    for (var page = 1; page <= maxPages; page++) {
+      final envelope = await _api.envelopeGet(
+        '${base(venueId)}/reservations',
+        query: ReservationQuery(
+          from: from.toUtc().toIso8601String(),
+          to: to.toUtc().toIso8601String(),
+          page: page,
+          limit: pageLimit,
+        ).toQuery(),
+      );
+      rows.addAll(envelope.list('reservations', Reservation.fromJson));
+      // An older server sends no `meta`; then the page itself is the whole
+      // answer and there is nothing to page through.
+      if (!envelope.meta.hasMeta) {
+        return ReservationWindow(reservations: rows, total: rows.length)
+            .clampedTo(from, to);
+      }
+      total = envelope.meta.total;
+      if (!envelope.meta.hasMore || rows.length >= total) break;
+    }
+    return ReservationWindow(reservations: rows, total: total)
+        .clampedTo(from, to);
+  }
+
   Future<Reservation> reservation(String venueId, String reservationId) async {
     final envelope = await _api.envelopeGet(
       '${base(venueId)}/reservations/$reservationId',
